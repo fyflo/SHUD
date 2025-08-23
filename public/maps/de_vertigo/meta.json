@@ -1,0 +1,43 @@
+{
+	"version": {
+		"radar": 3,
+		"format": 3
+	},
+
+
+	"resolution": 4.96,
+
+	"offset": {
+		"x": 3730,
+		"y": 3910
+	},
+
+
+	"splits": [
+		{
+			"bounds": {
+				"top": 11680,
+				"bottom": 0
+			},
+			"offset": {
+				"x": -1.3,
+				"y": -15.6
+			},
+
+			"zRange": {
+				"min": 10090,
+				"max": 11680
+			}
+		}
+	],
+
+	"advisoryPosition": {
+		"x": 68,
+		"y": 84
+	},
+
+	"zRange": {
+		"min": 11680,
+		"max": 11920
+	}
+}

@@ -1,0 +1,23 @@
+{
+  "COLOR_CT": "rgba(40, 120, 240, 1)",
+  "COLOR_T": "rgba(229, 11, 11, 1)",
+  "COLOR_NEW_CT": "rgba(40, 120, 240, 1)",
+  "COLOR_NEW_T": "rgba(229, 11, 11, 1)",
+  "COLOR_RED": "rgba(229, 11, 11, 1.0)",
+  "COLOR_CT_SPECTATOR": "linear-gradient(0deg, rgba(40, 120, 240,1) 0%, rgba(40, 120, 240,0.623) 100%)",
+  "COLOR_T_SPECTATOR": "linear-gradient(0deg, rgba(229, 11, 11,1) 0%, rgba(229, 11, 11, 0.623) 100%)",
+  "COLOR_MAIN_PANEL": "rgba(12, 15, 18, 0.75)",
+  "COLOR_SUB_PANEL": "rgba(12, 15, 18, 0.6)",
+  "COLOR_GRAY": "rgba(191, 191, 191, 1.0)",
+  "COLOR_WHITE": "rgba(250, 250, 250, 1.0)",
+  "COLOR_WHITE_HALF": "rgba(250, 250, 250, 0.5)",
+  "COLOR_WHITE_DULL": "rgba(250, 250, 250, 0.25)",
+  "PLAYER_ORANGE": "rgba(237, 163, 56, 1.0)",
+  "PLAYER_GREEN": "rgba(16, 152, 86, 1.0)",
+  "PLAYER_BLUE": "rgba(104, 163, 229, 1.0)",
+  "PLAYER_YELLOW": "rgba(230, 241, 61, 1.0)",
+  "PLAYER_PURPLE": "rgba(128, 60, 161, 1.0)",
+  "DEV_PURPLE": "rgba(200, 0, 255, 1.0)",
+  "BG_DEAD_CT": "rgba(107, 105, 254, 0.6)",
+  "BG_DEAD_T": "rgba(254, 97, 0, 0.6)"
+}

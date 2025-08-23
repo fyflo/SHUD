@@ -1,0 +1,60 @@
+doctype html
+html
+    head
+        title DOTA2 HUD
+        link(rel='stylesheet', href=`/hud/${hudId}/style.css`)
+        link(rel='stylesheet', href=`/hud/${hudId}/animate.css`)
+        script(src="/js/jquery-3.7.1.min.js")
+        script(src='/socket.io/socket.io.js')
+        script(src='/js/gsiManager.js')
+        script(src=`/hud/${hudId}/index.js`)
+    body
+    section
+      #live_page
+        #top_panel
+          #left_team
+            #main TEAM NAME
+            #logo
+              img#team_logo
+          #right_team
+            #main TEAM NAME
+            #logo
+              img#team_logo
+          #left_team_ult
+            #ultimate_image
+              img#ultimate_image_1
+              img#ultimate_image_2
+              img#ultimate_image_3
+              img#ultimate_image_4
+              img#ultimate_image_5
+            #ultimate_cooldown
+              #ultimate_cooldown_1
+              #ultimate_cooldown_2
+              #ultimate_cooldown_3
+              #ultimate_cooldown_4
+              #ultimate_cooldown_5
+          #right_team_ult
+            #ultimate_image
+              img#ultimate_image_6
+              img#ultimate_image_7
+              img#ultimate_image_8
+              img#ultimate_image_9
+              img#ultimate_image_10
+            #ultimate_cooldown
+              #ultimate_cooldown_6
+              #ultimate_cooldown_7
+              #ultimate_cooldown_8
+              #ultimate_cooldown_9
+              #ultimate_cooldown_10
+        
+        #observed
+            #obs_alias
+              #obs_alias_text
+            #obs_avatar
+              img#obs_avatar_img
+        
+                
+        
+
+
+

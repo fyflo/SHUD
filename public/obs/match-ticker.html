@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OBS Match Ticker</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: transparent;
+        overflow: hidden;
+        color: white;
+      }
+
+      .matches-container {
+        width: 100%;
+        background-color: rgba(20, 20, 20, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 8px;
+      }
+
+      .matches-list {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 8px;
+      }
+
+      .match-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background-color: rgba(30, 30, 30, 0.9);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+      }
+
+      .match-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 120px;
+      }
+
+      .match-time {
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffb300;
+        padding: 4px 8px;
+        background-color: rgba(255, 179, 0, 0.1);
+        border-radius: 4px;
+        border: 1px solid rgba(255, 179, 0, 0.3);
+      }
+
+      .match-time.live {
+        color: #28a745;
+        background-color: rgba(40, 167, 69, 0.1);
+        border: 1px solid rgba(40, 167, 69, 0.3);
+      }
+
+      .match-format {
+        font-size: 12px;
+        font-weight: 500;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 2px 6px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+      }
+
+      .teams-container {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        gap: 16px;
+      }
+
+      .team {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        max-width: 250px;
+      }
+
+      .team1 {
+        justify-content: flex-end;
+        text-align: right;
+      }
+
+      .team2 {
+        justify-content: flex-start;
+        text-align: left;
+        align-items: center;
+      }
+
+      .team-logo {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+
+      .team-name {
+        font-weight: 600;
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: visible;
+        color: #fff;
+        min-width: 120px;
+        max-width: 180px;
+        text-align: center;
+      }
+
+      .score-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 80px;
+        padding: 8px 16px;
+        background-color: rgba(255, 179, 0, 0.1);
+        border-radius: 6px;
+        border: 1px solid rgba(255, 179, 0, 0.2);
+        margin: 0 12px;
+      }
+
+      .score {
+        font-weight: 700;
+        font-size: 20px;
+        color: #ffb300;
+        min-width: 20px;
+        text-align: center;
+      }
+
+      .score-separator {
+        margin: 0 8px;
+        color: #666;
+        font-weight: 600;
+        font-size: 16px;
+      }
+
+      .map-info {
+        font-size: 11px;
+        color: #aaa;
+        font-style: italic;
+        margin-left: 12px;
+        padding: 4px 8px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .match-status {
+        position: static;
+        font-size: 10px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 2px 6px;
+        border-radius: 3px;
+        margin-left: 8px;
+      }
+
+      .status-pending {
+        background-color: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+      }
+
+      .status-active {
+        background-color: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+      }
+
+      .loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        color: #888;
+        font-style: italic;
+      }
+
+      .error {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        color: #dc3545;
+        background-color: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        border-radius: 6px;
+        margin: 8px;
+      }
+
+      /* Адаптивность */
+      @media (max-width: 768px) {
+        .match-item {
+          padding: 8px 12px;
+        }
+        
+        .team-name {
+          font-size: 12px;
+        }
+        
+        .score {
+          font-size: 16px;
+        }
+        
+      .match-time {
+          font-size: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="matches-container">
+      <div class="matches-list" id="matches-list">
+        <div class="loading">Загрузка матчей...</div>
+      </div>
+    </div>
+
+    <script>
+      // Глобальное хранилище для команд
+      let teamsCache = {};
+      let currentMatchesData = null;
+
+      // Функция форматирования пути к логотипу
+      const formatLogoPath = (logo) => {
+        if (!logo) return "/images/default-team-logo.png";
+        if (logo.startsWith("http") || logo.startsWith("/uploads/"))
+          return logo;
+        return `/uploads/${logo}`;
+      };
+
+      // Функция для получения информации о команде по ID
+      async function getTeamInfo(teamId) {
+        if (teamsCache[teamId]) {
+          return teamsCache[teamId];
+        }
+
+        try {
+          const response = await fetch(`/api/teams/${teamId}`);
+          if (!response.ok) {
+            throw new Error(`Ошибка получения информации о команде: ${response.status}`);
+          }
+
+          const teamData = await response.json();
+          teamsCache[teamId] = teamData;
+          return teamData;
+        } catch (error) {
+          console.error(`Ошибка при загрузке команды ID=${teamId}:`, error);
+          return null;
+        }
+      }
+
+      // Функция для загрузки списка всех команд
+      async function loadAllTeams() {
+        try {
+          const response = await fetch("/api/teams");
+          if (!response.ok) {
+            throw new Error(`Ошибка получения списка команд: ${response.status}`);
+          }
+
+          const teams = await response.json();
+          teams.forEach((team) => {
+            teamsCache[team.id] = team;
+          });
+
+          return teams;
+        } catch (error) {
+          console.error("Ошибка при загрузке команд:", error);
+          return [];
+        }
+      }
+
+      // Функция форматирования времени
+      function formatMatchTime(timeString, status) {
+        // Если матч активный, показываем LIVE
+        if (status === 'active') {
+          return 'LIVE';
+        }
+        
+        if (!timeString || timeString.trim() === '') {
+          return 'TBA';
+        }
+        
+        // Если это только время (например, "18:00")
+        if (/^\d{1,2}:\d{2}$/.test(timeString)) {
+          return timeString;
+        }
+        
+        // Если это полная дата и время
+        try {
+          const date = new Date(timeString);
+          if (!isNaN(date.getTime())) {
+            return date.toLocaleTimeString('ru-RU', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: false 
+            });
+          }
+        } catch (e) {
+          // Если не удалось распарсить, возвращаем как есть
+        }
+        
+        return timeString;
+      }
+
+      // Функция для загрузки матчей
+      async function loadMatches() {
+        try {
+          console.log("Загрузка матчей...");
+
+          await loadAllTeams();
+
+          const response = await fetch("/api/matches");
+          const matches = await response.json();
+          console.log("Получены матчи:", matches);
+
+          // Проверяем, изменились ли данные
+          const matchesString = JSON.stringify(matches);
+          if (currentMatchesData === matchesString) {
+            console.log("Данные не изменились, пропускаем обновление");
+            return;
+          }
+          currentMatchesData = matchesString;
+
+          const matchesList = document.getElementById("matches-list");
+
+          if (matches.length === 0) {
+            matchesList.innerHTML = '<div class="loading">Нет активных матчей</div>';
+            return;
+          }
+
+          // Очищаем текущее содержимое
+          matchesList.innerHTML = "";
+
+          // Добавляем матчи в вертикальный список
+          for (const match of matches) {
+            console.log("Обработка матча:", match);
+
+            const team1 = teamsCache[match.team1_id] || (await getTeamInfo(match.team1_id));
+            const team2 = teamsCache[match.team2_id] || (await getTeamInfo(match.team2_id));
+
+            console.log("Данные команд:", { team1, team2 });
+
+            const matchElement = document.createElement("div");
+            matchElement.className = "match-item";
+
+            const team1Logo = team1 && formatLogoPath(team1.logo);
+            const team2Logo = team2 && formatLogoPath(team2.logo);
+
+            const team1Name = team1 ? team1.name : match.team1_name || "Команда 1";
+            const team2Name = team2 ? team2.name : match.team2_name || "Команда 2";
+
+            const mapInfo = match.maps && Array.isArray(match.maps) && match.maps.length > 0
+                ? match.maps
+                    .map((m) => (m.mapId ? m.mapId.split("_")[1] : ""))
+                    .filter(Boolean)
+                    .join(", ")
+              : match.map || "";
+
+            const formattedTime = formatMatchTime(match.match_time, match.status);
+            const isLive = match.status === 'active';
+
+            matchElement.innerHTML = `
+              <div class="match-header">
+                <div class="match-time ${isLive ? 'live' : ''}">${formattedTime}</div>
+                <div class="match-format">${match.format?.toUpperCase() || 'BO1'}</div>
+              </div>
+              
+              <div class="teams-container">
+            <div class="team team1">
+              <span class="team-name">${team1Name}</span>
+              <img src="${team1Logo}" class="team-logo" alt="${team1Name}" 
+                       onerror="this.onerror=null; this.src='/images/default-team-logo.png';">
+            </div>
+                
+            <div class="score-container">
+              <span class="score">${match.score_team1 || "0"}</span>
+                  <span class="score-separator">:</span>
+              <span class="score">${match.score_team2 || "0"}</span>
+            </div>
+                
+            <div class="team team2">
+              <img src="${team2Logo}" class="team-logo" alt="${team2Name}" 
+                       onerror="this.onerror=null; this.src='/images/default-team-logo.png';">
+              <span class="team-name">${team2Name}</span>
+            </div>
+              </div>
+              
+              ${mapInfo ? `<div class="map-info">${mapInfo}</div>` : ""}
+          `;
+
+            matchesList.appendChild(matchElement);
+          }
+        } catch (error) {
+          console.error("Ошибка при загрузке матчей:", error);
+          document.getElementById("matches-list").innerHTML =
+            '<div class="error">Ошибка при загрузке матчей</div>';
+        }
+      }
+
+      // Загружаем матчи при загрузке страницы
+      document.addEventListener("DOMContentLoaded", loadMatches);
+
+      // Обновляем данные каждые 5 секунд
+      setInterval(loadMatches, 5000);
+    </script>
+  </body>
+</html>

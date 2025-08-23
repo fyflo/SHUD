@@ -1,0 +1,31 @@
+{
+    "name": "cs2-team-manager",
+    "version": "1.0.10",
+    "main": "server/server.js",
+    "scripts": {
+        "desktop": "electron ./electron/main.js"
+    },
+    "dependencies": {
+        "axios": "^1.11.0",
+        "compression": "^1.8.1",
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.5",
+        "exceljs": "^4.4.0",
+        "express": "^5.1.0",
+        "ip": "^2.0.1",
+        "lodash.throttle": "^4.1.1",
+        "multer": "^2.0.0",
+        "node-cache": "^5.1.2",
+        "pug": "^3.0.3",
+        "quill": "^2.0.3",
+        "selfsigned": "^3.0.1",
+        "socket.io": "^4.8.1",
+        "socket.io-client": "^4.8.1",
+        "sqlite3": "^5.1.7",
+        "ws": "^8.18.3",
+        "xlsx": "^0.18.5"
+    },
+    "devDependencies": {
+        "electron": "^31.2.0"
+    }
+}

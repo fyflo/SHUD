@@ -1,0 +1,85 @@
+{
+  "name": "cs2-hud-manager",
+  "version": "1.0.1",
+  "description": "CS2 HUD Manager",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "author": "fyflo",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "@electron/remote": "^2.0.11",
+    "better-sqlite3": "^12.2.0",
+    "cors": "^2.8.5",
+    "electron-log": "^5.0.1",
+    "express": "^4.18.2",
+    "fs-extra": "^11.1.1",
+    "http-proxy": "^1.18.1",
+    "node-fetch": "^2.7.0",
+    "selfsigned": "^2.1.1",
+    "sqlite3": "^5.1.7"
+  },
+  "build": {
+    "appId": "com.fyflo.cs2hudmanager",
+    "productName": "CS2 HUD Manager",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!node_modules/.bin",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!.editorconfig",
+      "!**/._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,__pycache__,thumbs.db,.gitignore,.gitattributes,.flowconfig,.yarn-metadata.json,.idea,appveyor.yml,.travis.yml,circle.yml,npm-debug.log,.nyc_output,yarn.lock,.yarn-integrity}"
+    ],
+    "extraResources": [
+      {
+        "from": "../server",
+        "to": "server",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../public",
+        "to": "public",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../database.db",
+        "to": "database.db"
+      },
+      {
+        "from": "../cfg",
+        "to": "cfg",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "CS2 HUD Manager"
+    }
+  }
+}

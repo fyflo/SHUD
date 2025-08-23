@@ -1,0 +1,324 @@
+/* ========================================
+   ИСПРАВЛЕНИЯ ДЛЯ ОВЕРЛЕЯ SHUD
+   ======================================== */
+
+/* 1. ИСПРАВЛЕНИЕ СКРОЛЛБАРОВ */
+html, body {
+    overflow: hidden !important;
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE/Edge */
+}
+
+/* Скрываем скроллбары в WebKit браузерах */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* 2. ИСПРАВЛЕНИЕ РАЗРЕШЕНИЯ МОНИТОРА */
+/* Принудительно устанавливаем размеры для оверлея */
+.overlay-container {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    z-index: 9999 !important;
+}
+
+/* 3. ИСПРАВЛЕНИЕ РАЗМЕРОВ ДЛЯ РАЗНЫХ РАЗРЕШЕНИЙ */
+/* 1920x1080 (Full HD) */
+@media screen and (width: 1920px) and (height: 1080px) {
+    .overlay-container {
+        width: 1920px !important;
+        height: 1080px !important;
+    }
+}
+
+/* 2560x1440 (2K) */
+@media screen and (width: 2560px) and (height: 1440px) {
+    .overlay-container {
+        width: 2560px !important;
+        height: 1440px !important;
+    }
+}
+
+/* 3840x2160 (4K) */
+@media screen and (width: 3840px) and (height: 2160px) {
+    .overlay-container {
+        width: 3840px !important;
+        height: 2160px !important;
+    }
+}
+
+/* 1366x768 (HD) */
+@media screen and (width: 1366px) and (height: 768px) {
+    .overlay-container {
+        width: 1366px !important;
+        height: 768px !important;
+    }
+}
+
+/* 4. ИСПРАВЛЕНИЕ ДЛЯ HUD ЭЛЕМЕНТОВ */
+#top_panel,
+#left_team,
+#right_team,
+#center_section,
+#radar-container,
+#players_alive,
+#timers {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+#top_panel::-webkit-scrollbar,
+#left_team::-webkit-scrollbar,
+#right_team::-webkit-scrollbar,
+#center_section::-webkit-scrollbar,
+#radar-container::-webkit-scrollbar,
+#players_alive::-webkit-scrollbar,
+#timers::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 5. ИСПРАВЛЕНИЕ ДЛЯ АДАПТИВНОСТИ */
+/* Убираем фиксированные размеры для HUD элементов */
+#top_panel {
+    width: 100% !important;
+    max-width: 1600px !important;
+    min-width: 800px !important;
+}
+
+#left_team,
+#right_team {
+    width: auto !important;
+    min-width: 200px !important;
+    max-width: 400px !important;
+}
+
+/* 6. ИСПРАВЛЕНИЕ ДЛЯ РАДАРА */
+#radar-container {
+    position: fixed !important;
+    bottom: 20px !important;
+    left: 20px !important;
+    width: 200px !important;
+    height: 200px !important;
+    overflow: hidden !important;
+}
+
+/* 7. ИСПРАВЛЕНИЕ ДЛЯ ТАБЛИЦ ИГРОКОВ */
+.players-table,
+.player-stats-table {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+.players-table::-webkit-scrollbar,
+.player-stats-table::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 8. ИСПРАВЛЕНИЕ ДЛЯ ФОРМ */
+form {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+form::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 9. ИСПРАВЛЕНИЕ ДЛЯ МОДАЛЬНЫХ ОКОН */
+.modal,
+.popup,
+.overlay {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+.modal::-webkit-scrollbar,
+.popup::-webkit-scrollbar,
+.overlay::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 10. ИСПРАВЛЕНИЕ ДЛЯ СПИСКОВ */
+ul, ol {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+ul::-webkit-scrollbar,
+ol::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 11. ИСПРАВЛЕНИЕ ДЛЯ КОНТЕЙНЕРОВ */
+.container,
+.content,
+.wrapper {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+.container::-webkit-scrollbar,
+.content::-webkit-scrollbar,
+.wrapper::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 12. ИСПРАВЛЕНИЕ ДЛЯ САЙДБАРА */
+.sidebar {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+.sidebar::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 13. ИСПРАВЛЕНИЕ ДЛЯ ОСНОВНОГО КОНТЕНТА */
+.main-content {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+.main-content::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 14. ИСПРАВЛЕНИЕ ДЛЯ АПП КОНТЕЙНЕРА */
+.app-container {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+.app-container::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 15. ИСПРАВЛЕНИЕ ДЛЯ НАВИГАЦИИ */
+.nav-menu {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+.nav-menu::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 16. ИСПРАВЛЕНИЕ ДЛЯ СЕКЦИЙ */
+.content-section {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+.content-section::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 17. ИСПРАВЛЕНИЕ ДЛЯ КАРТОЧЕК */
+.hud-card,
+.match-card,
+.player-card {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+.hud-card::-webkit-scrollbar,
+.match-card::-webkit-scrollbar,
+.player-card::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 18. ИСПРАВЛЕНИЕ ДЛЯ ТАБЛИЦ */
+table {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+table::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 19. ИСПРАВЛЕНИЕ ДЛЯ ДИВОВ */
+div {
+    scrollbar-width: none !important;
+}
+
+div::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 20. ИСПРАВЛЕНИЕ ДЛЯ ВСЕХ ЭЛЕМЕНТОВ */
+* {
+    scrollbar-width: none !important;
+}
+
+*::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 21. ПРИНУДИТЕЛЬНОЕ СКРЫТИЕ СКРОЛЛБАРОВ */
+/* Для всех элементов, которые могут иметь скролл */
+[class*="scroll"],
+[class*="overflow"],
+[style*="overflow"] {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+[class*="scroll"]::-webkit-scrollbar,
+[class*="overflow"]::-webkit-scrollbar,
+[style*="overflow"]::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 22. ИСПРАВЛЕНИЕ ДЛЯ IFRAME */
+iframe {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+iframe::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 23. ИСПРАВЛЕНИЕ ДЛЯ EMBED */
+embed {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+embed::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 24. ИСПРАВЛЕНИЕ ДЛЯ OBJECT */
+object {
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+}
+
+object::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 25. ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ */
+/* Принудительно убираем все скроллбары */
+html, body, * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+}

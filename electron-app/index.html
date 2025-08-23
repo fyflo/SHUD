@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>CS2 HUD Manager</title>
+  <link rel="stylesheet" href="style.css">
+  <script>
+    // Функция для проверки доступности API матчей
+    async function checkMatchesAPI() {
+      try {
+        console.log('Проверка API матчей...');
+        // Пробуем сначала основной порт
+        let response;
+        try {
+          response = await fetch('http://localhost:2626/api/matches');
+        } catch (err) {
+          console.log('Ошибка при подключении к порту 2626, пробуем порт 2628...');
+          // Если основной порт недоступен, пробуем прокси-порт
+          response = await fetch('http://localhost:2628/api/matches');
+        }
+        
+        if (!response.ok) {
+          console.error('API матчей недоступен:', response.status, response.statusText);
+          document.getElementById('error-message').textContent = 
+            `Ошибка API матчей: ${response.status} ${response.statusText}`;
+          return false;
+        }
+        
+        const data = await response.json();
+        console.log('API матчей доступен, получено матчей:', data.length);
+        return true;
+      } catch (error) {
+        console.error('Ошибка при проверке API матчей:', error);
+        document.getElementById('error-message').textContent = 
+          `Ошибка при проверке API матчей: ${error.message}`;
+        return false;
+      }
+    }
+    
+    // Функция для загрузки фрейма с основным приложением
+    function loadMainApp() {
+      const iframe = document.getElementById('main-frame');
+      // Пробуем загрузить через прокси-порт, если он доступен
+      iframe.src = 'http://localhost:2626';
+      
+      iframe.onload = function() {
+        // Скрываем индикатор загрузки после загрузки фрейма
+        document.getElementById('loading').style.display = 'none';
+        iframe.style.display = 'block';
+      };
+      
+      iframe.onerror = function() {
+        document.getElementById('error-message').textContent = 
+          'Ошибка при загрузке основного приложения';
+        document.getElementById('loading').style.display = 'none';
+      };
+    }
+    
+    // При загрузке страницы
+    window.onload = async function() {
+      // Ждем 5 секунд для запуска сервера
+      setTimeout(async function() {
+        // Проверяем доступность API матчей
+        const apiAvailable = await checkMatchesAPI();
+        
+        if (apiAvailable) {
+          // Если API доступен, загружаем основное приложение
+          loadMainApp();
+        } else {
+          // Если API недоступен, пытаемся еще раз через 5 секунд
+          setTimeout(async function() {
+            const retryResult = await checkMatchesAPI();
+            if (retryResult) {
+              loadMainApp();
+            } else {
+              // Последняя попытка через 5 секунд
+              setTimeout(async function() {
+                const finalRetry = await checkMatchesAPI();
+                if (finalRetry) {
+                  loadMainApp();
+                } else {
+                  document.getElementById('loading').style.display = 'none';
+                  document.getElementById('error-container').style.display = 'block';
+                }
+              }, 5000);
+            }
+          }, 5000);
+        }
+      }, 5000);
+    };
+  </script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background-color: #1e1e1e;
+      font-family: Arial, sans-serif;
+    }
+    
+    #main-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+    }
+    
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: white;
+    }
+    
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 4px solid white;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    #error-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: white;
+      background-color: #333;
+      padding: 20px;
+      border-radius: 5px;
+      display: none;
+    }
+    
+    #error-message {
+      color: #ff6b6b;
+      margin-bottom: 15px;
+    }
+    
+    #retry-button {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <iframe id="main-frame" src="about:blank"></iframe>
+  
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Загрузка CS2 HUD Manager...</p>
+  </div>
+  
+  <div id="error-container">
+    <h2>Ошибка подключения</h2>
+    <p id="error-message">Не удалось загрузить приложение</p>
+    <button id="retry-button" onclick="window.location.reload()">Повторить попытку</button>
+  </div>
+</body>
+</html>

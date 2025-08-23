@@ -1,0 +1,923 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="changelog.xsl"?>
+
+<changelog>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.36.10</version>
+<time>2025-08-19T13:00Z</time>
+<changes>
+<change type="fixed">Adjusted to CS2 update / fixed mirv_input camera FOV related problems, thanks to @1mpulse</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.36.9</version>
+<time>2025-08-17T12:30Z</time>
+<changes>
+<change type="fixed">Fixed mirv_colors teamid not updating like before when toggling sv_teamid_overhead false/true.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.36.8</version>
+<time>2025-08-15T23:00Z</time>
+<changes>
+<change type="fixed">Fixed vtable offsets for render eye origin and angles (also affects e.g. mirv_deathmsg localPlayer xTrace) and offets for origin.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.36.7</version>
+<time>2025-08-15T20:00Z</time>
+<changes>
+<change type="fixed">Fixed bug in player pawn and player controller detection / vtable offset affecting multiple features.</change>
+<change type="fixed">Fixed crash bug in mirv_replace_name.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.36.5</version>
+<time>2025-08-15T16:00Z</time>
+<changes>
+<change type="fixed">Adjusted to latest CS2 update, thanks to @1mpulse for helping.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.36.4</version>
+<time>2025-08-12T17:00Z</time>
+<changes>
+<change type="fixed">Fixed reported / used demo tick and time (e.g. in mirv_campath print / mirv_skip). HLAE now assumes a hard-coded interval per tick of 1s/64, since for some new demos the ticks per second reported seem bogus.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.36.3</version>
+<time>2025-08-01T07:00Z</time>
+<changes>
+<change type="fixed">Fixed mirv.script Entity.getClientClassName thanks to @ChetdeJong</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.36.2</version>
+<time>2025-07-31T11:00Z</time>
+<changes>
+<change type="fixed">Adjusted mirv_replace_name to CS2 update.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.36.1</version>
+<time>2025-07-30T14:00Z</time>
+<changes>
+<change type="fixed">Adjusted to CS2 update, with lots of support by @ChetdeJong</change>
+<change type="updated">Attention mirv-script users: breaking change in mirv.onClientFrameStageNotify: Valve changed e.curStage value 9 to value 8. We updated the example script accordingly. Also we temporarily hardcoded the highest entity index reported to 2048 (there are even higher numbers), will probably need an API change here in the future.</change>
+</changes>
+<comments>
+This release is best effort, there might still be (new) problems, please report them in issue tracker (or Discord).
+</comments>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.35.3</version>
+<time>2025-07-03T07:30Z</time>
+<changes>
+<change type="fixed">Adjusted to CS2 update, #1065 by @ChetdeJong</change>
+<change type="updated">Improved mirv_replace_name a bit. (Does not replace chat messages, use tv_nochat true)</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.35.2</version>
+<time>2025-06-18T15:00Z</time>
+<changes>
+<change type="fixed">Fixed #1059 CS2: issue with animations fix by @ChetdeJong</change>
+<change type="fixed">Fixed #1060 CS2: Crashes when trying to add a non-existing stream template</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.35.1</version>
+<time>2025-06-16T06:00Z</time>
+<changes>
+<change type="fixed">Fixed bug introduced in mirv_deathmsg name replacement feature (would always use attacker name).</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.35.0</version>
+<time>2025-06-14T16:45Z</time>
+<changes>
+<change type="added">Added #1057, team effort with @ChetdeJong: mirv_fix animations 0|1 - Enable/disable fix for smooth animations (Default: 0).</change>
+<change type="fixed">Attention mirv-script users, we made updates / corrections you might want to apply to your own project: https://github.com/advancedfx/advancedfx/commit/eb9111185d48d21bdb1144c2ba301bf0c6332220</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.34.0</version>
+<time>2025-06-11T15:00Z</time>
+<changes>
+<change type="added">Added #1049 mirv_replace_name</change>
+<change type="updated">Added #1052 / improved mirv-script examples (https://github.com/advancedfx/advancedfx/tree/main/misc/mirv-script) by @ChetdeJong</change>
+<change type="fixed">Fixed #1053 mirv-script examples bug: wsConnection wsInBuffer should be FIFO instead of LIFO, thanks @ChetdeJong</change>
+<change type="fixed">Fixed #1051 mirv_script_load for .mjs should follow import rules and thus cache the entry module.</change>
+<change type="fixed">Fixed #1054 CS2: mirv_input fov 0 crashes.</change>
+</changes>
+<comments>
+mirv-script users:<br />
+1. Carefully evaluate your existing projects, that fix of #1051 (mirv_script_load for .mjs should follow import rules and thus cache the entry module), doesn't break your projects before updating.<br />
+2. We recommend to apply fix #1053 (mirv-script examples bug: wsConnection wsInBuffer should be FIFO instead of LIFO) to your existing projects.
+</comments>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.33.0</version>
+<time>2025-05-16T16:30Z</time>
+<changes>
+<change type="added">Add to mirv-script: mirv.getCurTime, mirv.getDemoTick, mirv.getDemoTime by @ChetdeJong</change>
+<change type="fixed">Fixed mirv_streams frames dropped / missing.</change>
+<change type="fixed">Fixed mirv_streams depth stream not properly working due to missing shader input layout (AMD), thanks to ghettoboi for testing.</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.32.3</version>
+<time>2025-05-08T11:45Z</time>
+<changes>
+<change type="fixed">Adjust to latest CS2 update by @ChetdeJong</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.32.2</version>
+<time>2025-05-03T16:15Z</time>
+<changes>
+<change type="fixed">Fix captureType rgba and clearBeforeUi options in mirv_streams.</change>
+<change type="fixed">Fix globally shared mirv_streams settings not applying correctly on newly added streams.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.32.1</version>
+<time>2025-04-29T13:15Z</time>
+<changes>
+<change type="updated">Updated depth stream defaults.</change>
+<change type="fixed">Fixed smoke depth composition bugs.</change>
+<change type="fixed">Fixed mirv_streams captureType depth24 / depthF not working (OpenEXR).</change>
+<change type="fixed">Fixed crashes with ReShade (6.4.1).</change>
+</changes>
+<comments>When using ReShade, then ReShade 6.4.1 and ReShade_advancedfx.addon 1.4.1 are tested with and recommended for this version.</comments>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.32.0</version>
+<time>2025-04-27T15:10Z</time>
+<changes>
+<change type="added">Added fake mirv_streams, so you can capture depth and e.g. colors before Panorama UI at same time. Adds mirv_streams add, mirv_streams edit, mirv_streams print, mirv_streams remove. Each stream has a number of options that we will try to describe in the Manual / WIKI with a few examples.</change>
+<change type="added">Added better depth for ReShade and mirv_streams.</change>
+<change type="added">Added (optional, default on) smoke depth compositing for mirv-streams and ReShade. For this to work well a smoke full-res pass is forced in default settings when using ReShade or when recording a stream with depth.</change>
+</changes>
+<comments>Thanks to Rikki 'eirisocherry' for input and helping with testing in the early stages.</comments>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.31.0</version>
+<time>2025-03-24T18:18Z</time>
+<changes>
+<change type="added">Added mirv_endofmatch by @ChetdeJong - default is 1 (enabled), set to 0 to disable the scene in the end of match/demo.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.30.2</version>
+<time>2025-03-07T07:30Z</time>
+<changes>
+<change type="fixed">mirv-script: fixed #1032 mirv.onAddEntity and mirv.onRemoveEntity.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.30.1</version>
+<time>2025-01-19T22:06Z</time>
+<changes>
+<change type="updated">Updated mirv-script engine to Boa JS 0.20, exposed console object, internal changes.</change>
+<change type="fixed">Minor fixes changes in mirv_campath help text.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.30.0</version>
+<time>2024-12-23T06:45Z</time>
+<changes>
+<change type="added">Added mirv_colors by / thanks to @ChetdeJong to complement mirv_deathmsg colors: set custom colors to glow, teamid_overhead (player info over heads), smokes and grenades trails (also allows to set width of trails). The game doesn't update these values instantly: Glow updates when switching spectate mode or when changing spectated player. Same applies to teamid_overhead, but it can also be updated by switching sv_teamid_overhead off/on. Trails color applies only on it's creation, same for smokes.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.29.0</version>
+<time>2024-11-19T06:40Z</time>
+<changes>
+<change type="fixed">Fixed mirv_fix time.</change>
+<change type="fixed">mirv-script changes / fixes, thanks @ChetdeJong</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.28.1</version>
+<time>2024-11-15T15:20Z</time>
+<changes>
+<change type="fixed">Fixed #1009 CS2: mirv-script crashes game when loading modules.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.28.0</version>
+<time>2024-11-12T18:00Z</time>
+<changes>
+<change type="added">Added mirv_loadlibrary DLL loading command.</change>
+<change type="updated">mirv-script updates in repositiory, thanks @ChetdeJong</change>
+<change type="added">Added mirv_script_point snippet, thanks @ChetdeJong</change>
+<change type="added">Added mirv_fix time (auto enabled) to CS2. (Fixes Panorma UI and Scene System (e.g. water shader) time when recording with mirv_streams.) Thanks @ChetdeJong</change>
+<change type="added">Added mirv_noflash, thanks @ChetdeJong</change>
+<change type="added">Added mirv_fov.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.27.0</version>
+<time>2024-10-30T07:28Z</time>
+<changes>
+<change type="fixed">Adjust to latest CS2 update, thanks @ChetdeJong</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.26.0</version>
+<time>2024-10-16T06:17Z</time>
+<changes>
+<change type="fixed">Adjust to latest CS2 update, thanks @ChetdeJong</change>
+<change type="fixed">BREAKING CHANGE: Changed / fixed D3D11 context hooking. This will require updating ReShade_advancedfx to 1.3.0 or newer (only if you use ReShade_advancedfx), otherwise the ReShade_advancedfx.addon will cause a crash!</change>
+<change type="fixed">Fix a few reshade bugs - depth stencil with smokes, capture fx, thanks @Markxy and @allstar-gaming-llc - The skybox will disappear from depth stencil if smoke is in view. After Oct 2 "Armory" patch, smokes will disappear from depthStencil if too far with default cvars. Use mirv_cvar_unhide_all; smoke_volume_lod_ratio_change 0 to have them in depth stencil from afar.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.25.1</version>
+<time>2024-10-08T11:13Z</time>
+<changes>
+<change type="fixed">Fix another bug with localplayer.</change>
+<change type="fixed">Fix wrong spec keys.</change>
+</changes>
+<comments>
+Thanks @ChetdeJong
+</comments>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.25.0</version>
+<time>2024-10-07T16:10Z</time>
+<changes>
+<change type="added">Added -afxFixNetCon command-line parameter: Thanks to @dumbasPL (https://github.com/ValveSoftware/csgo-osx-linux/issues/3603#issuecomment-2163695087)</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.24.2</version>
+<time>2024-10-05T12:45Z</time>
+<changes>
+<change type="fixed">Adjusted to Oct 4 2024 CS2 update.</change>
+<change type="fixed">Added fix #993 for bug with local player in mirv_deathmsg in AfxHookSource2, thanks @ChetdeJong</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.24.1</version>
+<time>2024-10-03T14:00Z</time>
+<changes>
+<change type="fixed">Fixed engine to client interface again (affecing e.g. mirv_cmd or script mirv.exec) (thanks @akiver).</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.24.0</version>
+<time>2024-10-03T13:00Z</time>
+<changes>
+<change type="fixed">Fixed #989 mirv_viewmodel doesnt work on latest HLAE/CS2 (thanks @ChetdeJong).</change>
+<change type="fixed">Fixed #988 Movie recording failed - Missing expected pixels error.</change>
+<change type="fixed">Fixed #990 no audio file when recording with mirv_streams in CS2.</change>
+<change type="fixed">Fixed #991 ticks / DemoIsPaused not detected properly in CS2.</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.23.0</version>
+<time>2024-10-03T10:00Z</time>
+<changes>
+<change type="fixed">Adjusted to Oct 2 2024 CS2 update.</change>
+<change type="added">Added mirv_streams record campath 0|1. Set to 1 to save current campath to take folder (if not empty).</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.22.1</version>
+<time>2024-08-30T20:50Z</time>
+<changes>
+<change type="fixed">Fixed bug in mirv_streams record that would lead to missing frames.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.22.0</version>
+<time>2024-08-21T17:20Z</time>
+<changes>
+<change type="updated">Updated and fixed things in mirv-script.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.21.0</version>
+<time>2024-08-15T19:15Z</time>
+<changes>
+<change type="added">Adjusted to CS2 update, by @ChetdeJong.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.20.0</version>
+<time>2024-08-07T09:00Z</time>
+<changes>
+<change type="added">Added mirv_deathmsg, by @ChetdeJong. For details see https://github.com/advancedfx/advancedfx/wiki/Source2%3Amirv_deathmsg</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.19.2</version>
+<time>2024-07-06T10:45Z</time>
+<changes>
+<change type="fixed">Fixed mirv_input camera not working when using demoui in in-eye mode.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.19.1</version>
+<time>2024-06-27T19:32Z</time>
+<changes>
+<change type="fixed">Fixed mirv_campath draw not working under some conditions.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.19.0</version>
+<time>2024-06-26T09:07Z</time>
+<changes>
+<change type="fixed">Adjusted to CS2 update, with help by @ChetdeJong.</change>
+<change type="updated">Updated mirv_viewmodel (* is now a true passthrough setting), by @ChetdeJong.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.18.0</version>
+<time>2024-06-21T13:04Z</time>
+<changes>
+<change type="fixed">Fixed viewmodel for AMD graphics when using ReShade_advancedfx ReShade addon.</change>
+<change type="added">Added #952 mirv_streams record cam, by @ChetdeJong.</change>
+<change type="added">Added #955 mirv_viewmodel, by @ChetdeJong.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.17.1</version>
+<time>2024-06-11T12:55Z</time>
+<changes>
+<change type="fixed">Fixed mirv_campath draw enabled 1 not working anymore.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.17.0</version>
+<time>2024-06-09T19:50Z</time>
+<changes>
+<change type="added">Added mirv_reshade command for https://github.com/advancedfx/ReShade_advancedfx (enabled by default when present).</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.16.0</version>
+<time>2024-05-31T09:20Z</time>
+<changes>
+<change type="fixed">Adjustes to CS2 update.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.15.4</version>
+<time>2024-05-27T04:00Z</time>
+<changes>
+<change type="fixed">Fixed mirv_input raw input mouse wheel handling.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.15.3</version>
+<time>2024-05-25T20:30Z</time>
+<changes>
+<change type="fixed">Fixed mirv_input iteration of raw input buffer, causing troubles e.g. when using AutoHokey.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.15.2</version>
+<time>2024-05-25T14:10Z</time>
+<changes>
+<change type="fixed">Fixed unwanted VK_ADD / VK_SUBSTRACT passthroughs in mirv_input.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.15.1</version>
+<time>2024-05-24T21:00Z</time>
+<changes>
+<change type="fixed">Added raw keyboard handling to mirv_input. Fixes #946 CS2: issue with binds in mirv_input camera.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.15.0</version>
+<time>2024-05-24T09:00Z</time>
+<changes>
+<change type="fixed">Adjusted to CS2 update.</change>
+<change type="added">Added new features to mirv-script.</change>
+<change type="fixed">Fixed a few things in mirv-script.</change>
+<change type="updated">Improved parameters in HLAE interfaces advancedfx/advancedfx#944</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.14.0</version>
+<time>2024-05-11T17:15Z</time>
+<changes>
+<change type="added">Added mirv_script_exec, mirv_script_load - interface to first version mirv-script features (currently mostly only useful for maybe feeding additional data to HUDs over a websocket). Huge thanks to @ChetdeJong for helping with the mirv-script example. The example can currently be found in misc/mirv-script folder of advancedfx/advancedfx repositiory.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.13.0</version>
+<time>2024-05-03T17:45Z</time>
+<changes>
+<change type="added">Added mirv_campath hold.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.12.0</version>
+<time>2024-05-01T08:19Z</time>
+<changes>
+<change type="added">Adjusted to CS2 update.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.11.0</version>
+<time>2024-04-27T16:43Z</time>
+<changes>
+<change type="added">Adjusted to CS2 update: Fixes #932 Camera Swapped when adding new one.</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.10.0</version>
+<time>2024-04-04T17:02Z</time>
+<changes>
+<change type="added">Added #926 command line launch option -afxDisableSteamStorage for disabling Steam cloud syncing (useful to be combined with USRLOCALCSGO environment variable).</change>
+<change type="fixed">Fixed #925 Unicode HLAE print bug in CS2.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.9.1</version>
+<time>2024-02-27T19:57Z</time>
+<changes>
+<change type="updated">mirv_streams record now detects the host_framerate or sets it if mirv_streams record fps is set accordingly.</change>
+<change type="updated">mirv_streams record now sets engine_no_focus_sleep 0 during recording.</change>
+<change type="updated">mirv_streams record now sets r_always_render_all_windows true during recording.</change>
+<change type="fixed">Tried to fix HLAE crashing e.g. when FACEIT is not disabled; Pleae note, we strongly recommend to instead disable FACEIT anti cheat by clicking the tray icon and selecting disable service (newer versions have that option) instead.</change>
+</changes>
+<comments>
+Don't forget: mirv_streams record screen enabled 1 - before recording, otherwise you will only get audio.
+</comments>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.9.0</version>
+<time>2024-02-23T18:32Z</time>
+<changes>
+<change type="added">Added mirv_streams record, mirv_streams settings for simple screen-recordings. Set mirv_streams record fps - before starting to record, it will be used to set the host_framerate for the recording. The output is in the folder where cs2.exe is located.<br />
+Front-ends startmovie for audio. This feature is still experimental, e.g. if the device is reset / resolution changed during recording there will be problems, also if game is quit while recording, there will be problems.</change>
+<change type="added">Added: mirv_input cfg stepFactor - to set the speed multiplier.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.8.3</version>
+<time>2024-02-10T13:28Z</time>
+<changes>
+<change type="fixed">Fixed #906 CS2 update: mirv_campath draw broken. The 3rd attempt.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.8.2</version>
+<time>2024-02-07T17:16Z</time>
+<changes>
+<change type="fixed">Fixed #906 CS2 update: mirv_campath draw broken. Again.</change>
+<change type="fixed">Fixed wrong ticks e.g. in mirv_campath print etc.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.8.1</version>
+<time>2024-02-07T10:00Z</time>
+<changes>
+<change type="fixed">Fixed #905 CS2 update: mirv_input camera mouse (rawinput) broken.</change>
+<change type="fixed">Fixed #906 CS2 update: mirv_campath draw broken.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.8.0</version>
+<time>2024-01-05T13:20Z</time>
+<changes>
+<change type="fixed">Fixed #886 mouse3 mis-configured.</change>
+<change type="added">Added #817 mirv_input local axis movement.</change>
+<change type="fixed">Fixed #893 CS2 / CS:GO e.g. mirv_campath load takes a long time.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.7.2</version>
+<time>2023-12-08T10:58Z</time>
+<changes>
+<change type="fixed">Fixes #890 Flickering with mirv_campath draw in CS2 at high FPS.</change>
+<change type="fixed">Fixes #887 CS2: mirv_ commands do not work randomly.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.7.1</version>
+<time>2023-12-05T11:20Z</time>
+<changes>
+<change type="added">Added #880 CS2: mirv_campath draw.</change>
+<change type="fixed">Fixed #888 CS2: mirv_cmd will only work once (not detect level change).</change>
+</changes>
+</release>
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.6.4</version>
+<time>2023-11-17T08:46Z</time>
+<changes>
+<change type="fixed">Adjusted to latest CS2 update.</change>
+</changes>
+<comments>
+While we believe that Valve addressed the issue of -insecure not working in CS2 in some circumstances, we are not sure, so please make sure to not connect to live CSTV servers or game servers in order to avoid a VAC ban! Watching demos is fine.
+</comments>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.6.3</version>
+<time>2023-09-11T18:30Z</time>
+<changes>
+<change type="fixed">Fixes #884 OBS studio crashing.</change>
+</changes>
+<comments>
+While we believe that Valve addressed the issue of -insecure not working in CS2 in some circumstances, we are not sure, so please make sure to not connect to live CSTV servers or game servers in order to avoid a VAC ban! Watching demos is fine.
+</comments>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.6.2</version>
+<time>2023-09-11T13:46Z</time>
+<changes>
+<change type="fixed">Adjusted to latest CS2 update.</change>
+</changes>
+<comments>
+While we believe that Valve addressed the issue of -insecure not working in CS2 in some circumstances, we are not sure, so please make sure to not connect to live CSTV servers or game servers in order to avoid a VAC ban! Watching demos is fine.
+</comments>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.6.1</version>
+<time>2023-10-18T06:47Z</time>
+<changes>
+<change type="fixed">Fixed mirv_input cfg smooth start position.</change>
+<change type="updated">Removed commas in mirv_campath print to make copy and paste easier.</change>
+<change type="updated">Renamed DLL back from AfxHookSource2_IF_YOU_USE_THIS_TO_JOIN_GOTV_OR_VAC_SERVERS_YOU_WILL_GET_VAC_BANNED.dll to AfxHookSource2.dll, since Valve seems to have addressed the issue.</change>
+</changes>
+<comments>
+While we believe that Valve addressed the issue of -insecure not working in CS2 in some circumstances, we are not sure, so please make sure to not connect to live CSTV servers or game servers in order to avoid a VAC ban! Watching demos is fine.
+</comments>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.6.0</version>
+<time>2023-10-08T16:44Z</time>
+<changes>
+<change type="added">Added mirv_input cfg smooth.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.5.2</version>
+<time>2023-10-05T13:44Z</time>
+<changes>
+<change type="updated">Renamed DLL to inject, to make it clear that you can get VAC banned if you join servers despite -insecure mode (probably new CS2 bug).</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.5.1</version>
+<time>2023-10-03T05:04Z</time>
+<changes>
+<change type="fixed">Adjusted to CS2 updated. PS: they broke old demos again.</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.5.0</version>
+<time>2023-10-02T04:54Z</time>
+<changes>
+<change type="added">Added mirv_skip (thanks @ficcialfaint).</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.4.1</version>
+<time>2023-09-29T10:14Z</time>
+<changes>
+<change type="fixed">
+Fixed mirv_cmd, mirv_campath ticks / demo time being broken / wrong.
+</change>
+<change type="updated">
+Updated mirv_cmd to support sub-tick in CS2 too.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.4.0</version>
+<time>2023-09-25T10:50Z</time>
+<changes>
+<change type="added">
+Added mirv_camio.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.3.0</version>
+<time>2023-09-24T14:39Z</time>
+<changes>
+<change type="added">
+Added mirv_cmd.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.2.2</version>
+<time>2023-09-06T19:00Z</time>
+<changes>
+<change type="fixed">
+Fixed mirv_campath using real time instead of game time.
+</change>
+<change type="updated">
+Updated mirv_campath to recognize demo time and tick.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.2.1</version>
+<time>2023-09-01T18:13Z</time>
+<changes>
+<change type="fixed">
+Adjusted to CS2 update.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.2.0</version>
+<time>2023-08-26T19:11Z</time>
+<changes>
+<change type="added">
+Added mirv_input.
+</change>
+<change type="fixed">
+Fixed mirv_campath not working with latest CS2 update.
+</change>
+</changes>
+</release>
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.1.0</version>
+<time>2023-07-24T15:50Z</time>
+<changes>
+<change type="added">
+Added mirv_campath. There's currently no mirv_input camera, so you can only make campaths on a map or in a HLTV demo I think. You could work around mirv_input missing for POV demos using mirv_cvar_unhide_all, cl_demoviewoverride 1, and setang / setang_exact (because you can't rotate the view otherwise) or similar tricks maybe.
+</change>
+</changes>
+</release>
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.0.2</version>
+<time>2023-07-19T15:30Z</time>
+<changes>
+<change type="removed">
+Removed auto cvar / cmd unlock.
+</change>
+<change type="added">
+Added mirv_cvar_unhide_all.
+</change>
+<change type="added">
+Added mirv_suppress_disconnects.
+</change>
+</changes>
+</release>
+
+<release>
+<name>AfxHookSource2</name>
+<version>0.0.1</version>
+<time>2023-07-14T18:50Z</time>
+<changes>
+<change type="added">
+First version. Can not do much, all it currently does is unlock hidden / protected cvars and cmds in CS2 when used with custom loader:<br />
+ProgramPath: C:\Program Files (x86)\Steam\steamapps\common\Counter-Strike Global Offensive\game\bin\win64\cs2.exe<br />
+CommandLine: -steam -insecure +sv_lan 1 -console -novid -window -w 1920 -h 1080<br />
+DLLs to inject: hlae-folder\x64\AfxHookSource2.dll
+</change>
+</changes>
+</release>
+
+</changelog>

@@ -1,0 +1,16 @@
+{
+  "name": "cs2-hud-overlay",
+  "version": "1.0.0",
+  "description": "CS2 HUD Overlay",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "electron": "^25.9.8"
+  },
+  "devDependencies": {
+    "electron-builder": "^26.0.12"
+  }
+}

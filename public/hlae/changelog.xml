@@ -1,0 +1,8934 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="changelog.xsl"?>
+
+<changelog>
+
+
+<release>
+<name>HLAE</name>
+<version>2.186.11</version>
+<time>2025-08-19T13:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.36.10 (2025-08-19T13:00Z)</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.186.10</version>
+<time>2025-08-17T12:30Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.36.9 (2025-08-17T12:30Z)</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.186.9</version>
+<time>2025-08-15T23:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.36.8 (2025-08-15T23:00Z)</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.186.8</version>
+<time>2025-08-15T20:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.36.7 (2025-08-15T20:00Z)</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.186.6</version>
+<time>2025-08-15T16:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.36.5 (2025-08-15T16:00Z)</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.186.5</version>
+<time>2025-08-12T17:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.36.4 (2025-08-12T17:00Z)</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.186.4</version>
+<time>2025-08-03T15:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.32.1 (2025-08-03T15:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.186.3</version>
+<time>2025-08-01T07:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.36.3 (2025-08-01T07:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.186.2</version>
+<time>2025-07-30T14:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.36.2 (2025-07-31T11:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.186.1</version>
+<time>2025-07-30T14:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.36.1 (2025-07-30T14:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.185.3</version>
+<time>2025-07-03T07:30Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.35.3 (2025-07-03T07:30Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.185.2</version>
+<time>2025-06-18T15:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.35.2 (2025-06-18T15:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.185.1</version>
+<time>2025-06-16T08:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.35.1 (2025-06-16T08:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.185.0</version>
+<time>2025-06-14T16:45Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.35.0 (2025-06-14T16:45Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.184.0</version>
+<time>2025-06-11T15:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.132.0 (2025-06-11T15:00Z).</change>
+<change type="updated">Included AfxHookSource2 0.34.0 (2025-06-11T15:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.183.1</version>
+<time>2025-05-19T12:45Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.131.1 (2025-05-19T12:45Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.183.0</version>
+<time>2025-05-16T16:30Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.33.0 (2025-05-16T16:30Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.182.6</version>
+<time>2025-05-08T11:45Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.32.3 (2025-05-08T11:45Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.182.5</version>
+<time>2025-05-03T16:15Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.32.2 (2025-05-03T16:15Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.182.4</version>
+<time>2025-04-30T12:15Z</time>
+<changes>
+<change type="fixed">Fixed HLAE Setup not uinstalling old HLAE properly and getting stuck. Otherwise this is the same as 2.182.3.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.182.3</version>
+<time>2025-04-29T13:15Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.32.1 (2025-04-29T13:15Z).</change>
+<change type="fixed">Fixed HLAE Setup upgrade uninstalls HLAE due to wrong HlaeCore version number.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.182.0</version>
+<time>2025-04-27T15:10Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.32.0 (2025-04-27T15:10Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.181.1</version>
+<time>2025-03-24T18:18Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.31.0 (2025-03-24T18:18Z).</change>
+<change type="updated">Updated installer (HLAE_Setup.exe) to WiX toolset v5.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.180.1</version>
+<time>2025-03-07T07:30Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.30.2 (2025-03-07T07:30Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.180.0</version>
+<time>2025-03-03T20:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.131.0 (2025-03-03T20:00Z).</change>
+<change type="updated">Updated HLAE installer FFMPEG version, see comments below regarding bug workaround.</change>
+<change type="updated">Added FAQ link in help menu and re-ordered the menu.</change>
+<change type="updated">Added dismissible warnings from download page to GUI.</change>
+</changes>
+<comments>
+There's a known bug with HLAE_Setup.exe when upgrading from an older HLAE version to a newer one and reinstalling the newer FFMPEG:
+It will install the newer FFMPEG and then install over that the older one again.
+This issue can be worked around by doing a repair install (run newest HLAE_Setup.exe one more time and chose repair).
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.179.0</version>
+<time>2025-01-19T22:06Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.24.1 (2025-01-19T22:06Z).</change>
+<change type="updated">Included AfxHookSource 1.130.0 (2025-01-19T22:06Z).</change>
+<change type="updated">Included AfxHookSource2 0.30.1 (2025-01-19T22:06Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.178.0</version>
+<time>2024-12-23T06:45Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.30.0 (2024-12-23T06:45Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.177.0</version>
+<time>2024-11-19T06:40Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.29.0 (2024-11-19T06:40Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.176.1</version>
+<time>2024-11-16T15:20Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.28.1 (2024-11-15T15:20Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.176.0</version>
+<time>2024-11-12T18:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.28.0 (2024-11-12T18:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.175.0</version>
+<time>2024-10-30T07:28Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.27.0 (2024-10-30T07:28Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.174.0</version>
+<time>2024-10-16T06:17Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.26.0 (2024-10-16T06:17Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.173.1</version>
+<time>2024-10-08T11:13Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.25.1 (2024-10-08T11:13Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.173.0</version>
+<time>2024-10-07T16:10Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.25.0 (2024-10-07T16:10Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.172.3</version>
+<time>2024-10-05T12:45Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.24.2 (2024-10-05T12:45Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.172.2</version>
+<time>2024-10-03T14:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.24.1 (2024-10-03T14:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.172.1</version>
+<time>2024-10-03T13:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.24.0 (2024-10-03T13:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.172.0</version>
+<time>2024-10-03T10:00Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.24.0 (2024-10-03T10:00Z).</change>
+<change type="updated">Included AfxHookSource 1.129.0 (2024-10-03T10:00Z).</change>
+<change type="updated">Included AfxHookSource2 0.23.0 (2024-10-03T10:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.171.1</version>
+<time>2024-08-30T20:50Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.22.1 (2024-08-30T20:50Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.171.0</version>
+<time>2024-08-21T17:20Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.22.0 (2024-08-21T17:20Z).</change>
+<change type="updated">Installer: updated ffmpeg download.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.170.0</version>
+<time>2024-08-15T19:15Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.21.0 (2024-08-15T19:15Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.169.0</version>
+<time>2024-08-07T09:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.128.3 (2024-08-07T09:00Z).</change>
+<change type="updated">Included AfxHookSource2 0.20.0 (2024-08-07T09:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.168.2</version>
+<time>2024-07-06T10:45Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.23.5 (2024-07-06T10:45Z).</change>
+<change type="updated">Included AfxHookSource 1.128.2 (2024-07-06T10:45Z).</change>
+<change type="updated">Included AfxHookSource2 0.19.2 (2024-07-06T10:45Z).</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.168.1</version>
+<time>2024-07-02T05:16Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.128.1 (2024-07-02T05:16Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.168.0</version>
+<time>2024-07-01T14:45Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.128.0 (2024-07-01T14:45Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.167.1</version>
+<time>2024-06-27T19:32Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.19.1 (2024-06-27T19:32Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.167.0</version>
+<time>2024-06-26T09:07Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.19.0 (2024-06-26T09:07Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.167.0</version>
+<time>2024-06-26T09:07Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.19.0 (2024-06-26T09:07Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.166.0</version>
+<time>2024-06-21T13:04Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.18.0 (2024-06-21T13:04Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.165.1</version>
+<time>2024-06-11T12:54Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.17.1 (2024-06-11T12:54Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.165.0</version>
+<time>2024-06-09T19:50Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.17.0 (2024-06-09T19:50Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.164.0</version>
+<time>2024-05-31T09:20Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.16.0 (2024-05-31T09:20Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.163.4</version>
+<time>2024-05-27T04:00Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.23.4 (2024-05-27T04:00Z).</change>
+<change type="updated">Included AfxHookSource 1.127.4 (2024-05-27T04:00Z).</change>
+<change type="updated">Included AfxHookSource2 0.15.4 (2024-05-27T04:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.163.3</version>
+<time>2024-05-25T20:30Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.23.3 (2024-05-25T20:30Z).</change>
+<change type="updated">Included AfxHookSource 1.127.3 (2024-05-25T20:30Z).</change>
+<change type="updated">Included AfxHookSource2 0.15.3 (2024-05-25T20:30Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.163.2</version>
+<time>2024-05-25T14:10Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.23.2 (2024-05-25T14:10Z).</change>
+<change type="updated">Included AfxHookSource 1.127.2 (2024-05-25T14:10Z).</change>
+<change type="updated">Included AfxHookSource2 0.15.2 (2024-05-25T14:10Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.163.1</version>
+<time>2024-05-24T21:00Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.23.1 (2024-05-24T21:00Z).</change>
+<change type="updated">Included AfxHookSource 1.127.1 (2024-05-24T21:00Z).</change>
+<change type="updated">Included AfxHookSource2 0.15.1 (2024-05-24T21:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.163.0</version>
+<time>2024-05-24T09:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.15.0 (2024-05-24T09:00Z).</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.162.0</version>
+<time>2024-05-11T17:15Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.14.0 (2024-05-11T17:15Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.161.0</version>
+<time>2024-05-03T17:45Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.23.0 (2024-05-03T17:45Z).</change>
+<change type="updated">Included AfxHookSource 1.127.0 (2024-05-03T17:45Z).</change>
+<change type="updated">Included AfxHookSource2 0.13.0 (2024-05-03T17:45Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.160.0</version>
+<time>2024-05-01T08:19Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.12.0 (2024-05-01T08:19Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.159.0</version>
+<time>2024-04-27T16:43Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.11.0 (2024-04-27T16:43Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.158.0</version>
+<time>2024-04-22T12:46Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.126.0 (2024-02-22T12:46Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.157.0</version>
+<time>2024-04-04T17:02Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.10.0 (2024-04-04T17:02Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.156.1</version>
+<time>2024-02-25T17:17</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.125.1 (2024-02-25T17:17Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.156.0</version>
+<time>2024-02-25T12:35Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.125.0 (2024-02-25T12:35Z).</change>
+<change type="updated">Updated HLAE Installer (HLAE_Setup.exe) to WiX Toolset v3.14.1. Older WiX Toolset versions released have a vulnerability that can be used for privelege escalation by a malicious user on your system: https://wixtoolset.org/news/2024/03/22/wix-security-releases-available/</change>
+<change type="updated">Updated installer FFMPEG version to 6.1 of https://github.com/BtbN/FFmpeg-Builds/releases/tag/autobuild-2024-02-29-13-02</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.155.1</version>
+<time>2024-02-27T19:57Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.9.1 (2024-02-27T19:57Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.155.0</version>
+<time>2024-02-23T18:32Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.22.0 (2024-02-23T18:32Z).</change>
+<change type="updated">Included AfxHookSource 1.124.0 (2024-02-23T18:32Z).</change>
+<change type="updated">Included AfxHookSource2 0.9.0 (2024-02-23T18:32Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.154.3</version>
+<time>2024-02-10T13:28Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.8.3 (2024-02-10T13:28Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.154.2</version>
+<time>2024-02-07T17:16Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.8.2 (2024-02-07T17:16Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.154.1</version>
+<time>2024-02-07T10:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.8.1 (2024-02-07T10:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.154.0</version>
+<time>2024-02-04T09:11Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.21.0 (2024-02-04T09:11Z).</change>
+<change type="fixed">Fixed some typos, thanks @Dechno1337</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.153.1</version>
+<time>2024-01-05T19:45Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.123.1 (2024-01-05T19:45Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.153.0</version>
+<time>2024-01-05T13:20Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.20.0 (2024-01-05T13:20Z).</change>
+<change type="updated">Included AfxHookSource 1.123.0 (2024-01-05T13:20Z).</change>
+<change type="updated">Included AfxHookSource2 0.8.0 (2024-01-05T13:20Z).</change>
+<change type="fixed">Fixed #891 HLAE Installer lately always reinstalls FFMPEG.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.152.2</version>
+<time>2023-12-08T10:58Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.7.2 (2023-12-08T10:58Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.152.1</version>
+<time>2023-12-05T11:20Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.7.1 (2023-12-05T11:20Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.151.3</version>
+<time>2023-11-17T08:46Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.122.2 (2023-11-17T08:46Z).</change>
+<change type="updated">Included AfxHookSource2 0.6.4 (2023-11-17T08:46Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.151.2</version>
+<time>2023-09-11T18:30Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.6.3 (2023-09-11T18:30Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.151.1</version>
+<time>2023-09-11T13:46Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.6.2 (2023-09-11T13:46Z).</change>
+</changes>
+<comments>
+Added CI (build) pipeline on GitHub, thanks to https://github.com/ficcialfaint
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.151.0</version>
+<time>2023-10-18T06:47Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.19.0 (2023-10-08T06:44Z).</change>
+<change type="updated">Included AfxHookSource 1.122.1 (2023-10-08T06:44Z).</change>
+<change type="updated">Included AfxHookSource2 0.6.1 (2023-10-18T06:47Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.150.0</version>
+<time>2023-10-08T16:44Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.6.0 (2023-10-08T16:44Z).</change>
+<change type="updated">Included AfxHookSource 1.122.0 (2023-10-08T16:44Z).</change>
+</changes>
+<comments>
+// Example for mirv_input smooth:<br />
+// For key assignment see: https://github.com/advancedfx/advancedfx/wiki/Source%3Amirv_input#mirv_input-camera (New mouse buttons (left / right) + mousemove and mousewheel are not documented there yet.)<br />
+<br />
+mirv_input cfg ksens 1<br />
+mirv_input cfg msens 0.05<br />
+<br />
+mirv_input cfg smooth halfTime 0.5 // sets all half life time for vec (position), and (rotation), fov (field of view) to same value in seconds.<br />
+<br />
+// Uncomment to set independently:<br />
+//mirv_input cfg smooth halfTimeVec 0.5<br />
+//mirv_input cfg smooth halfTimeAng 0.5 // Tip: Use 0 value to disable smoothing, or use e.g. 0.1 value for lower delay and less smoothing.<br />
+//mirv_input cfg smooth halfTimeFov 0.5<br />
+<br />
+//mirv_input cfg smooth rotShortestPath 0 // Uncomment / try this on 0 when bored, default 1 is cooler, but already snaps at 180°.<br />
+<br />
+alias "afx_smooth_on" "mirv_input cfg smooth enabled 1; mirv_input cfg offsetMode ownLast; mirv_input cfg mouseMoveSupport 1; mirv_input camera"<br />
+alias "afx_smooth_off" "mirv_input end; mirv_input cfg offsetMode last; mirv_input cfg mouseMoveSupport 0; mirv_input cfg smooth enabled 0"<br />
+<br />
+afx_smooth_on<br />
+<br />
+echo "enter afx_smooth_off to turn smooth off"<br />
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.149.2</version>
+<time>2023-10-05T13:44Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.5.2 (2023-10-05T13:44Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.149.1.1</version>
+<time>2023-10-03T05:04Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.5.1 (2023-10-03T05:04Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.149.0</version>
+<time>2023-10-02T04:54Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.5.0 (2023-10-02T04:54Z).</change>
+<change type="updated">Included AfxHookSource 1.121.7 (2023-10-02T04:54Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.148.6</version>
+<time>2023-09-29T10:14Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.4.1 (2023-09-29T10:14Z).</change>
+<change type="updated">Included AfxHookSource 1.121.6 (2023-09-29T10:14Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.148.5</version>
+<time>2023-09-25T10:50Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.4.0 (2023-09-25T10:50Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.148.4</version>
+<time>2023-09-24T14:39Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.3.0 (2023-09-24T14:39Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.148.3.2</version>
+<time>2023-09-19T15:15Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 2.121.5.1 (2023-09-19T15:15Z).</change>
+<change type="updated">Updated zlib dependency.</change>
+<change type="updated">Updated Visual Studio / did a full rebuild of binaries.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.148.2</version>
+<time>2023-09-06T19:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.2.2 (2023-09-06T19:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.148.1</version>
+<time>2023-09-01T18:13Z</time>
+<changes>
+<change type="updated">Included AfxHookSource2 0.2.1 (2023-09-01T18:13Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.148.0</version>
+<time>2023-08-26T19:11Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.121.4 (2023-08-26T19:11Z).</change>
+<change type="updated">Included AfxHookSource2 0.2.0 (2023-08-26T19:11Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.147.0</version>
+<time>2023-07-24T15:50Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.121.3 (2023-07-24T15:50Z).</change>
+<change type="updated">Included AfxHookSource2 0.1.0 (2023-07-24T15:50Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.146.2</version>
+<time>2023-07-19T15:30Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.121.2 (2023-07-19T15:30Z).</change>
+<change type="updated">Included AfxHookSource2 0.0.2 (2023-07-19T15:30Z).</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.146.1</version>
+<time>2023-07-14T18:50Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.121.1 (2023-07-14T18:50Z).</change>
+<change type="added">Added AfxHookSource2 0.0.1 (2023-07-14T18:50Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.146.0</version>
+<time>2023-06-17T11:38Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.121.0 (2023-06-17T11:38Z).</change>
+<change type="fixed">Fixed default FFMPEG download URL in installer (usually not used).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.145.7</version>
+<time>2023-05-27T17:43Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.120.6 (2023-05-27T17:43Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.145.6</version>
+<time>2023-05-02T20:10Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.120.5 (2023-05-02T20:10Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.145.5</version>
+<time>2023-04-30Z17:12Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.18.3 (2023-04-30Z17:12Z).</change>
+<change type="updated">Updated installer FFMPEG version to 6.0 of https://github.com/BtbN/FFmpeg-Builds/releases/tag/autobuild-2023-04-30-12-46.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.145.4</version>
+<time>2023-04-04T08:31Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.120.4 (2023-04-04T08:31Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.145.3</version>
+<time>2023-04-02T10:35Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.120.3 (2023-04-02T10:35Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.145.2</version>
+<time>2023-03-24T19:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.120.2 (2023-03-24T19:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.145.1</version>
+<time>2023-03-24T15:20Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.120.1 (2023-03-24T15:20Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.145.0</version>
+<time>2023-03-10T12:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.120.0 (2023-03-10T12:00Z).</change>
+<change type="updated">Updated translations(thanks yovaN).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.144.4</version>
+<time>2023-02-24T14:28Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.119.4 (2023-02-24T14:28Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.144.3</version>
+<time>2023-02-20T15:32Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.119.3 (2023-02-20T15:32Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.144.2</version>
+<time>2023-02-12Z11:40Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.119.2 (2023-02-12Z11:40Z).</change>
+<change type="updated">Included AfxHookGoldSrc 2.18.2 (2023-02-12Z11:40Z).</change>
+</changes>
+<comments>
+The AfxHookSource contains a breaking change for people using vflip video filter in custom ffmpeg settings, the filter needs to be removed.
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.142.1</version>
+<time>2022-12-06T16:12Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.117.1 (2022-12-06T16:12Z).</change>
+<change type="updated">Included AfxHookGoldSrc 2.17.1 (2022-12-06T16:12Z).</change>
+<change type="updated">Updated FFMPEG build used in installer.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.141.2</version>
+<time>2022-10-26T16:28Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.116.2 (2022-10-26T16:28Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.141.1</version>
+<time>2022-10-22T16:46Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.116.1 (2022-10-22T14:46Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.141.0</version>
+<time>2022-10-22T14:01Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.116.0 (2022-10-22T14:01Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.140.0</version>
+<time>2022-10-07T18:28Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.17.0 (2022-10-07T18:28Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.139.2</version>
+<time>2022-10-04T12:50Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 2.115.21 (2022-10-04T12:50Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.138.2</version>
+<time>2022-09-17T15:34Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 2.114.1 (2022-09-17T15:34Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.138.1</version>
+<time>2022-09-17T08:57Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 2.114.0 (2022-09-17T08:57Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.137.3</version>
+<time>2022-09-02T19:39Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.16.1 (2022-09-02T19:39Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.137.2</version>
+<time>2022-08-19T16:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 2.113.2 (2022-08-19T16:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.136.0</version>
+<time>2022-08-16T08:37Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.16.0 (2022-08-16T08:37Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.135.0</version>
+<time>2022-08-12T09:21</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.15.0 (2022-08-12T09:21).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.134.1</version>
+<time>2022-08-07T20:33Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 2.112.1 (2022-08-07T20:33Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.134.0</version>
+<time>2022-08-07T19:00Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.14.0 (2022-08-07T19:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.133.0</version>
+<time>2022-08-04T16:45Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.112.0 (2022-08-04T16:45Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.132.5</version>
+<time>2022-07-22T06:23Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.111.4 (2022-07-22T06:23Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.132.4</version>
+<time>2022-07-19T15:40Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.111.3 (2022-07-19T15:40Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.132.3</version>
+<time>2022-07-08T07:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.111.2 (2022-07-08T07:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.132.2</version>
+<time>2022-07-06T19:33Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.13.5 (2022-07-06T19:33Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.132.1</version>
+<time>2022-07-06T13:37Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.111.1 (2022-07-06T13:37Z).</change>
+<change type="updated">Included AfxHookGoldSrc 2.13.4 (2022-07-06T13:37Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.132.0</version>
+<time>2022-06-26T00:19Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.111.0 (2022-06-26T00:19Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.131.3</version>
+<time>2022-06-24T13:50Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.110.3 (2022-06-24T13:50Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.131.2</version>
+<time>2022-06-24T09:22Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.110.2 (2022-06-24T09:22Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.131.1</version>
+<time>2022-06-12T13:05Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.110.1 (2022-06-12T13:05Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.131.0</version>
+<time>2022-06-10T14:41Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.110.0 (2022-06-10T14:41Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.130.5</version>
+<time>2022-05-16T04:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.109.5 (2022-05-16T04:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.130.4</version>
+<time>2022-05-14T09:15Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.109.4 (2022-05-14T09:15Z).</change>
+<change type="updated">Included AfxHookGoldSrc 2.13.3 (2022-05-14T09:15Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.130.3</version>
+<time>2022-05-14T08:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.109.3 (2022-05-14T08:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.130.2</version>
+<time>2022-04-23T16:30Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.109.2 (2022-04-23T16:30Z).</change>
+</changes>
+<comments>Since apart from minor typo fixes this release is functionally the same as the last one, people on 2.130.1 won't be notified of the update.</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.130.1</version>
+<time>2022-04-21T18:40Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.109.1 (2022-04-21T18:40Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.128.3</version>
+<time>2022-04-20T14:42Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.107.2 (2022-04-20T14:42Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.128.2</version>
+<time>2022-04-17T18:16Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.107.1 (2022-04-17T18:16Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.128.1</version>
+<time>2022-04-15T13:44Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.107.0 (2022-04-15T13:44Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.127.2</version>
+<time>2022-04-12T20:47Z</time>
+<changes>
+<change type="updated">Updated build and HLAE_Setup.exe to .NET 4.6.2.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.127.1</version>
+<time>2022-03-14T09:03Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.106.1 (2022-03-14T09:03Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.127.0</version>
+<time>2022-03-14T05:48Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.106.0 (2022-03-14T05:48Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.126.0</version>
+<time>2022-03-11T22:36Z</time>
+<changes>
+<change type="fixed">Fixed #637 Parallely opening HLAE can cause HLAE settings loss.</change>
+<change type="updated">Included AfxHookGoldSrc 2.13.2 (2022-03-11T22:36Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.125.2</version>
+<time>2022-02-02T13:17Z</time>
+<changes>
+<change type="fixed">Fixed HLAE version number.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.125.0</version>
+<time>2022-02-01T11:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.105.0 (2022-02-01T11:00Z).</change>
+<change type="fixed">Custom loader will not have AppIDs by default, so games like TF2 will not crash.</change>
+<change type="added">Added pt-BR language to translations (thanks Rillet).</change>
+<change type="updated">Updated translations(thanks yovaN, Twissen).</change>
+<change type="updated">Updated FFMPEG downloadd in installer to https://github.com/BtbN/FFmpeg-Builds/releases/tag/autobuild-2022-01-31-12-27, removed other downloads.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.124.6</version>
+<time>2021-12-11T21:41Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.104.3 (2021-12-11T21:41Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.124.5</version>
+<time>2021-12-11T20:20Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.104.2 (2021-12-11T20:20Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.124.4</version>
+<time>2021-12-11T17:06Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.104.1 (2021-12-11T17:06Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.124.3</version>
+<time>2021-11-29T09:13Z</time>
+<changes>
+<change type="fixed">Fixed missing DLL files causing hooks to not work.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.124.2</version>
+<time>2021-11-28T09:04Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.104.0 (2021-11-28T09:04Z).</change>
+<change type="fixed">Fixed the HLAE project to support Debug builds again, see how_to_build.txt for instructions.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.124.1</version>
+<time>2021-11-24T09:49Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.12.2 (2021-11-24T09:49Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.124.0</version>
+<time>2021-11-11T07:15Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.103.0 (2021-11-11T07:15Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.123.0</version>
+<time>2021-10-26T07:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.102.0 (2021-10-26T07:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.122.0</version>
+<time>2021-10-23T16:24Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.101.0 (2021-10-23T16:24Z).</change>
+<change type="updated">Updated translations, thank you translators!</change>
+<change type="updated">Updated installer FFMPEG latest download (https://github.com/BtbN/FFmpeg-Builds/releases/tag/autobuild-2021-09-30-12-28).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.121.1</version>
+<time>2021-09-22T06:47Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.100.1 (2021-09-22T06:47Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.121.0</version>
+<time>2021-09-17T06:32Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.100.0 (2021-09-17T06:32Z).</change>
+<change type="updated">Updated translations, thanks to the translators!</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.120.1</version>
+<time>2021-09-07T15:40Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.12.1 (2021-09-07T15:40Z).</change>
+<change type="updated">Included AfxHookSource 1.99.1 (2021-09-07T15:40Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.120.0</version>
+<time>2021-08-23T17:42Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.99.0 (2021-08-23T17:42Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.119.1</version>
+<time>2021-08-18T12:14Z</time>
+<changes>
+<change type="updated">This is probably only relevant for the no-insecure special release for observers. Fixed default SteamPath environment variable value and auto detection not working. If you use custom loader you will need to fix the value for SteamPath in the second box yourself (there's a space missing, should be e.g. SteamPath=C:\Program Files (x86)\Steam instead of WRONG C:\Program Files(x86)\Steam).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.119.0</version>
+<time>2021-07-24T13:20Z</time>
+<changes>
+<change type="updated">Reverted fix for double opening settings loss, since it causes more problems (random settings loss) than it actually solves.</change>
+<change type="updated">Included AfxHookSource 1.98.0 (2021-07-24T13:20Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.118.0</version>
+<time>2021-07-03T06:50Z</time>
+<changes>
+<change type="fixed">Fixed saving / updating of HLAE config.</change>
+<change type="updated">Installer: Updated latest FFMPEG version.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.117.1</version>
+<time>2021-06-26T15:04Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.97.0 (2021-06-26T15:04Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.117.0</version>
+<time>2021-06-20T12:52Z</time>
+<changes>
+<change type="updated">Updated hlae.exe from .NET 4.0 Client to .NET 4.5.</change>
+<change type="updated">Fixed config lock not working as intended after saving.</change>
+<change type="updated">Included AfxHookGoldSrc 2.12.0 (2021-06-20T12:52Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.116.0</version>
+<time>2021-06-04T09:39Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.96.0 (2021-06-04T09:39Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.115.0</version>
+<time>2021-05-29T22:00Z</time>
+<changes>
+<change type="updated">Updated HLAE loader error messages a bit.</change>
+<change type="fixed">Installer: Fixed missing injector merge package.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.114.0</version>
+<time>2021-05-21T07:16Z</time>
+<changes>
+<change type="fixed">Fixed #637 Parallely opening HLAE can cause HLAE settings loss.</change>
+<change type="fixed">Did #650 Make injector own project and installer package to avoid frequent AV false-positives due to rebuilds.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.113.9</version>
+<time>2021-05-04T15:14Z</time>
+<changes>
+<change type="fixed">Fixed default checksum for FFMPEG.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.113.8</version>
+<time>2021-05-03T14:50Z</time>
+<changes>
+<change type="fixed">Fixed update check GUIDs and version number.</change>
+<change type="fixed">Fixed Ffmpeg dialog not showing upon minor update or repair.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.113.6</version>
+<time>2021-05-03T07:39Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.95.2 (2021-03-05T07:39).</change>
+<change type="fixed">Fixed #644 not updating / re-installing FFMPEG component causes the files to be wrongly removed.</change>
+<change type="updated">Updated ffmpeg download #636.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.113.5</version>
+<time>2021-04-28T16:59Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.95.1 (2021-04-28T16:59Z).</change>
+<change type="fixed">Fixed some English error messages strings.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.113.4</version>
+<time>2021-04-12T06:47Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.11.6 (2021-04-12T06:47Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.113.3</version>
+<time>2021-04-11T04:49Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.11.5 (2021-04-11T04:49Z).</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.113.2</version>
+<time>2021-04-10T04:47Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.11.4 (2021-04-10T04:47Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.113.1</version>
+<time>2021-04-09T05:05Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.11.3 (2021-04-09T05:05Z).</change>
+</changes>
+<comments>Since the binaries are fully rebuilt it might temporarily trigger your anti virus with a false positive on injector.exe, please either add an exception or use the previous version until this issue is resolved.</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.113.0</version>
+<time>2021-03-24T06:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.95.0 (2021-03-24T6:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.112.0</version>
+<time>2021-03-22T07:11Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.94.0 (2021-03-22T07:11Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.111.0</version>
+<time>2021-03-13T13:03Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.11.0 (2021-03-13T13:03Z).</change>
+<change type="updated">Included AfxHookSource 1.93.1 (2021-03-13T13:03Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.110.0</version>
+<time>2021-03-05T12:02Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.93.0 (2021-03-05T12:02Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.109.9</version>
+<time>2021-02-24T22:03Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.10.2 (2021-02-24T22:03Z).</change>
+<change type="updated">Included AfxHookSource 1.92.6 (2021-02-24T22:03Z).</change>
+<change type="updated">Updated installer FFMPEG download latest to https://github.com/BtbN/FFmpeg-Builds/releases/tag/autobuild-2021-01-31-12-37.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.109.8</version>
+<time>2021-01-25T13:23Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.10.1 (2021-01-25T13:23Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.109.7</version>
+<time>2021-01-01T19:32Z</time>
+<changes>
+<change type="fixed">Fixed installer failing due to downloading removed BtbN FFmpeg-Builds release by default, switched it to release being available approximately 2 years, fixes #415.</change>
+<change type="updated">Updated translations, thanks to the translators!</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.109.6</version>
+<time>2020-12-21T08:09Z</time>
+<changes>
+<change type="fixed">Fixed UI Language detection in installer.</change>
+<change type="fixed">Added newer FFMPEG from https://github.com/BtbN/FFmpeg-Builds/releases to installer, removed some older ones from the selection.</change>
+<change type="updated">Included AfxHookSource 1.92.5 (2020-12-21T08:09Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.109.4</version>
+<time>2020-12-04T10:46Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.92.4 (2020-12-04T10:46Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.109.3</version>
+<time>2020-12-01T18:39Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.92.3 (2020-12-01T18:39Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.109.2</version>
+<time>2020-11-03T16:48Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.92.2 (2020-11-03T16:48Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.109.1</version>
+<time>2020-10-20T12:04Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.92.1 (2020-10-20T12:04Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.109.0</version>
+<time>2020-10-08T17:53Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.92.0 (2020-10-08T17:53Z).</change>
+<change type="added">Added check if HLAE is manually installed in unsuitable folder #398</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.108.4</version>
+<time>2020-09-24T05:31Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.91.4 (2020-09-24T05:31Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.108.3</version>
+<time>2020-09-22T07:22Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.91.3 (2020-09-22T07:22Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.108.2</version>
+<time>2020-09-21T19:09Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.91.2 (2020-09-21T19:09Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.108.0</version>
+<time>2020-09-21T08:15Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.91.0 (2020-09-21T08:15Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.107.2</version>
+<time>2020-09-16T20:43Z</time>
+<changes>
+<change type="updated">Changed FFMPEG URLs in HLAE_Setup.exe to https://github.com/advancedfx/ffmpeg.zeranoe.com-builds-mirror because https://ffmpeg.zeranoe.com/builds/ is closing down, see https://twitter.com/Zeranoe/status/1300596971934224385 - thanks to https://github.com/wordlesswind for informing us about the issue.</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.107.1</version>
+<time>2020-09-10T10:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.90.1 (2020-09-10T10:00Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.104.0</version>
+<time>2020-08-12T07:27Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.88.0 (2020-08-12T07:27Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.103.1</version>
+<time>2020-08-05T19:45Z</time>
+<changes>
+<change type="removed">Removed VERSION file.</change>
+<change type="fixed">Fixed version number / HLAE.exe packaging in installer.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.103.0</version>
+<time>2020-08-05T05:00Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.87.0 (2020-08-05T05:00Z).</change>
+<change type="added">Added version number in title and VERSION file.</change>
+<change type="added">Changes / updates in HLAE build process.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.102.0</version>
+<time>2020-07-19T16:04Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.86.0 (2020-07-19T16:04Z).</change>
+<change type="updated">Updated translations, thank you translators!</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.101.0</version>
+<time>2020-07-10T12:04Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.85.0 (2020-07-10T12:04Z).</change>
+<change type="fixed">Adjusted to 7/9/2020 CS:GO update: File - Lauch CS:GO will work automatically now.<br />
+People using custom loader will need to add the following lines in environment variables section (and might need to adjust the path to the Steam folder):<br />
+SteamPath=C:\Program Files (x86)\Steam<br />
+SteamClientLaunch=1<br />
+SteamGameId=730<br />
+SteamAppId=730<br />
+SteamOverlayGameId=730</change>
+<change type="added">Installer improvements:<br />
+- Closes #351 HLAE_Setup.exe / Installer:<br />
+  - Easier to find option to change folder<br />
+  - License conditions removed, since there are none<br />
+  - Option to remove APPDATA folder<br />
+- Closes #356 (ffmpeg / installer related):<br />
+  - Repeated installations don't need to reinstall FFMPEG if not wanted.<br />
+  - Allows selecting existing FFMPEG installation<br />
+  - Allows to select different builds.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.100.3</version>
+<time>2020-07-01T06:50Z</time>
+<changes>
+<change type="fixed">Fixed installer to use system web proxy settings for downloading FFMPEG.</change>
+<change type="updated">Updated translations (thank you!).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.100.2</version>
+<time>2020-06-16T08:03Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.84.4 (2020-06-16T08:03Z).</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.100.1</version>
+<time>2020-06-16T06:52Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.84.3 (2020-06-16T06:52Z).</change>
+<change type="updated">Updated translations from l10n.advancedfx.org (thanks).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.100.0</version>
+<time>2020-06-11T10:40Z</time>
+<changes>
+<change type="added">Add it translations to Release.</change>
+<change type="fixed">Fixed hu installer translations not being used.</change>
+<change type="fixed">Fixed Voronoi color table generator:<br />
+- Fixed some bugs.<br />
+- Weights are now used to weight the region size / shape, instead of the interpolation.<br />
+- Default example weights are now 1 / 2 (old 1 / 128) in order to make sense with new usage.</change>
+<change type="updated">Included AfxHookSource 1.84.2 (2020-06-11T10:40Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.99.0</version>
+<time>2020-06-05T07:06Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.84.1 (2020-06-05T07:06Z).</change>
+<change type="updated">Included AfxHookGoldSrc 2.9.0 (2020-06-05T07:06Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.98.0</version>
+<time>2020-06-04T10:50Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.84.0 (2020-06-04T10:50Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.97.0</version>
+<time>2020-06-03T11:46Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.83.0 (2020-06-03T11:46Z).</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.96.0</version>
+<time>2020-05-29T20:22Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.82.0 (2020-05-29T20:22Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.95.1</version>
+<time>2020-05-28T06:48Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.81.1 (2020-05-28T06:48Z).</change>
+<change type="updated">Updated translations, thanks to translators!</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.95.0</version>
+<time>2020-05-23T12:21Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.81.0 (2020-05-23T12:21Z).</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.94.2</version>
+<time>2020-05-12T14:58Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.80.2 (2020-05-12T14:58Z).</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.94.0</version>
+<time>2020-05-09T06:54Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.80.0 (2020-05-09T06:54Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.93.1</version>
+<time>2020-04-29T16:58Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.79.5 (2020-04-29T16:58Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.93.0</version>
+<time>2020-04-29T08:34Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.8.0 (2020-04-29T08:34Z).</change>
+<change type="updated">Included AfxHookSource 1.79.4 (2020-04-29T08:34Z).</change>
+<change type="updated">Updated translations. Thank you.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.92.0</version>
+<time>2020-04-07T10:19Z</time>
+<changes>
+<change type="updated">Included AfxHookGoldSrc 2.8.0 (2020-04-07T10:19Z).</change>
+<change type="updated">Included AfxHookSource 1.79.3 (2020-04-07T10:19Z).</change>
+<change type="updated">Updated translations. Thank you.</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.91.3</version>
+<time>2020-03-27T11:03Z</time>
+<changes>
+<change type="fixed">Fixed #301 CS:GO Steam overlay screenshot (F12) does not work anymore when game is not launched from official Steam Library entry (CS:GO 2020-03-26 pre-release / silent update) by adding SteamOverlayGameId=730 to environment variables for launching CS:GO.</change>
+<change type="added">Custom loader now has an option to set additional environment variables.</change>
+<change type="added">-addEnv option for custom loader HLAE command line options (can be used multiple times to add multiple vars).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.91.2</version>
+<time>2020-03-25T12:03Z</time>
+<changes>
+<change type="updated">Included AfxHookSource 1.79.2 (2020-03-25T12:03Z).</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.91.1</version>
+<time>2020-03-18T06:20Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.79.1 (2020-03-18T06:20Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.91.0</version>
+<time>2020-03-17T20:20Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.7.0 (2020-03-17T20:20Z).
+</change>
+<change type="updated">
+Included AfxHookSource 1.79.0 (2020-03-17T20:20Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.90.1</version>
+<time>2020-03-09T18:18Z</time>
+<changes>
+<change type="added">
+Added Polish language.
+</change>
+<change type="added">
+Added Contact / Policy menu item.
+</change>
+<change type="fixed">
+Fixed a few typos.
+</change>
+<change type="updated">
+Included AfxHookSource 1.78.1 (2020-03-09T18:18Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.90.0</version>
+<time>2020-03-04T09:45Z</time>
+<changes>
+<change type="fixed">
+Fixed support page language selection.
+</change>
+<change type="updated">
+Included AfxHookSource 1.78.0 (2020-03-04T09:45Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.89.0</version>
+<time>2020-03-03T07:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.77.0 (2020-03-03T07:00Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.86.0</version>
+<time>2020-02-28T08:45Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.75.0 (2020-02-28T08:45Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.85.0</version>
+<time>2020-02-18T18:18Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.74.0 (2020-02-18T18:18Z).
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.6.6 (2020-02-18T18:18Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.84.3</version>
+<time>2020-02-01T21:17Z</time>
+<changes>
+<change type="fixed">
+Fixed installer failing for non-translated languages.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.84.1</version>
+<time>2020-01-30T19:55Z</time>
+<changes>
+<change type="fixed">
+Fixed injector popping up unwanted developer test messages.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.84.0</version>
+<time>2020-01-30T15:45Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.73.0 (2020-01-30T15:45Z).
+</change>
+<change type="added">
+Added translations of installer and most of HLAE.exe GUI by the generous translators: https://l10n.advancedfx.org/projects/l10n/contributors/
+</change>
+<change type="added">
+Added a help / guide button at the bottom of the GUI.
+</change>
+<change type="added">
+Added possible solutions to more error codes.
+</change>
+<change type="updated">
+Other: https://github.com/advancedfx/advancedfx/milestone/14?closed=1
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.83.1</version>
+<time>2020-01-06T18:43Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.72.1 (2020-01-06T18:43Z).
+</change>
+<change type="updated">
+Improve zh-CN translation (by Purple-CSGO).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.83.0</version>
+<time>2019-12-30T18:34Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.72.0 (2019-12-30T18:34Z).
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.6.5 (2019-12-30T17:57Z).
+</change>
+<change type="updated">
+Recompiled with latest Visual Studio 16.4.2 and packaged with latest CRT - now requires at least Windows 7. (Windows XP is not supported anymore.)
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.82.0</version>
+<time>2019-11-19T04:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.71.0 (2019-11-19T04:00Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.81.7</version>
+<time>2019-11-01T16:40Z</time>
+<changes>
+<change type="fixed">
+Fixed wrong content of ffmpeg/readme.advancedfx.txt. Thanks https://steamcommunity.com/id/lasamlg/
+</change>
+<change type="updated">
+Included AfxHookSource 1.70.6 (2019-11-01T16:40Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.81.6</version>
+<time>2019-10-28T11:51Z</time>
+<changes>
+<change type="updated">
+Changed Installer (HLAE_Setup.exe) to address #241 Installer improvement.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.81.5</version>
+<time>2019-10-13T06:04Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.70.5 (2019-10-13T06:04Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.81.4</version>
+<time>2019-10-10T07:21Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.70.4 (2019-10-10T07:21Z).
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.6.4 (2019-10-10T07:21Z).
+</change>
+<changed type="added">
+Added pt-pt translation by https://github.com/DMTWENTYTHREE to core installer.
+</changed>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.81.3</version>
+<time>2019-09-26T08:30Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.70.3 (2019-09-26T08:30Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.81.2</version>
+<time>2019-09-24T18:53Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.70.2 (2019-09-24T18:53Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.81.1</version>
+<time>2019-09-20T07:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.70.1 (2019-09-20T07:00Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.81.0</version>
+<time>2019-09-17T13:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.70.0 (2019-09-17T13:00Z).
+</change>
+<change type="added">
+Added #224 fi-FI translation for installer, thanks https://github.com/markusforss
+</change>
+<change type="added">
+Added #221 partial pt-PT translation for installer, thanks https://github.com/DMTWENTYTHREE
+</change>
+<change type="added">
+Added Donate-button to menu.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.80.1</version>
+<time>2019-08-30T16:21Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.69.1 (2019-08-30T16:21Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.80.0</version>
+<time>2019-08-29T06:32Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.69.0 (2019-08-29T06:32Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.79.0</version>
+<time>2019-08-17T20:06Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.68.0 (2019-08-17T20:06Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.78.0</version>
+<time>2019-08-09T06:58Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.67.0 (2019-08-09T06:58Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.77.0</version>
+<time>2019-08-08T19:19Z</time>
+<changes>
+<change type="fixed">
+Fixed missing and mixed up files in HLAE_Setup.exe (installer version).
+</change>
+<change type="updated">
+Included AfxHookSource 1.66.0 (2019-08-08T19:19Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.76.2.1</version>
+<time>2019-08-05T20:29Z</time>
+<changes>
+<change type="fixed">
+Fixed HLAE_Setup.exe loading in wrong language.
+</change>
+<change type="added">
+Added zn-CH translations to installer. (Thanks to Purple-CSGO and tediorelee!)
+</change>
+<change type="updated">
+Included AfxHookSource 1.65.1 (2019-08-05T20:29Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.76.0.1</version>
+<time>2019-08-03T10:56Z</time>
+<changes>
+<change type="updated">
+Changed config load/save behavior: hlaeconfig.xml in HLAE application folder will have priority, otherwise the one in %APPDATA%\HLAE is used.
+</change>
+<change type="added">
+Custom loader now detects if paths are relative to HLAE folder and stores them accordingly, so that moving the folder doesn't break it (#200).
+</change>
+<change type="updated">
+Included AfxHookSource 1.65.0 (2019-08-03T10:56).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.75.7-installer</version>
+<time>2019-06-23T06:39Z</time>
+<changes>
+<change type="added">
+Added installer (based on https://wixtoolset.org) in order to solve issue #65 (Non-ASCII chracters in HLAE install location can cause problems).
+</change>
+<change type="updated">
+Changed config loading and saving behaviour:<br />
+First tries to load %APPDATA%\HLAE\hlaeconfig.xml, if that is not possible will try to load it from HLAE.exe folder.<br />
+Config will be saved to %APPDATA%\HLAE\hlaeconfig.xml.
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.74.1</version>
+<time>2019-06-23T06:39Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.64.1 (2019-06-23T06:39Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.74.0</version>
+<time>2019-06-21T18:35Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.64.0 (2019-06-21T18:35Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.73.1</version>
+<time>2019-06-16T05:39Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.63.1 (2019-06-16T05:39Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.73.0</version>
+<time>2019-06-15T19:03Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.63.0 (2019-06-15T19:03Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.72.0</version>
+<time>2019-06-14T10:12Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.62.0 (2019-06-14T10:12Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.71.0</version>
+<time>2019-06-08T12:48Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.61.0 (2019-06-08T12:48Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.70.2</version>
+<time>2019-05-26T16:11Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.60.1 (2019-05-26T16:11Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.70.1</version>
+<time>2019-05-24T04:49Z</time>
+<changes>
+<change type="fixed">
+Fixed HLAE.exe not opening due to a typo in the update check GUID.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.70.0</version>
+<time>2019-05-23T17:40Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.60.0 (2019-05-23T17:40Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.65.1</version>
+<time>2019-05-18T11:20Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.55.1 (2019-05-18T11:20Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.65.0</version>
+<time>2019-05-10T17:00</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.55.0 (2019-05-10T17:00Z).
+</change>
+<change type="removed">
+Removed AfxHookUnity: This is now included as DLL in the Unity project and doesn't need to be injected anymore.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.64.5</version>
+<time>2019-05-01T18:30</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.52.5 (2019-05-01T18:30).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.64.4</version>
+<time>2019-04-30T09:23Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.52.4 (2019-04-30T09:23Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.64.3</version>
+<time>2019-04-28T06:18Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.52.3 (2019-04-28T06:18Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.64.2</version>
+<time>2019-04-26T06:48Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.52.2 (2019-04-26T06:48Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.64.1</version>
+<time>2019-04-18T13:57Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.52.1 (2019-04-18T13:57Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.64.0</version>
+<time>2019-04-14T18:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.52.0 (2019-04-14T18:00Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.63.6</version>
+<time>2019-04-13T05:09Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.51.6 (2019-04-13T05:09Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.63.5</version>
+<time>2019-04-12T16:30Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.51.5 (2019-04-12T16:30Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.63.4</version>
+<time>2019-04-03T05:51Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.51.4 (2019-04-03T05:51Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.63.3</version>
+<time>2019-03-20T13:13Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.51.3 (2019-03-20T13:13Z).
+</change>
+<change type="updated">
+Fixes #144: Remove hl process check from AfxHookGoldSrc Launcher.cs in HLAE.exe.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.63.2</version>
+<time>2019-03-07T06:29Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.51.2 (2019-03-07T06:29Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.63.1</version>
+<time>2019-02-28T12:07Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.51.1 (2019-02-28T12:07Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.63.0</version>
+<time>2019-02-27T15:57Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.51.0 (2019-02-27T15:57Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.62.2</version>
+<time>2019-02-20T09:42Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.50.2 (2019-02-20T09:42Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.62.1</version>
+<time>2019-02-13T06:16Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.50.1 (2019-02-13T06:16Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.62.0</version>
+<time>2019-02-12T21:43Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.50.0 (2019-02-12T21:43Z).
+</change>
+<change type="updated">
+Included AfxHookUnity 0.1.1 (2019-02-12T21:43Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.60.0</version>
+<time>2019-02-03T05:59Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.49.0 (2019-02-03T05:59Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.59.2</version>
+<time>2019-02-02T22:18Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.48.2 (2019-02-02T22:18Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.59.1</version>
+<time>2019-02-02T21:18Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.48.1 (2019-02-02T21:18Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.59.0</version>
+<time>2019-01-25T19:18Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.48.0 (2019-01-25T19:18Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.58.5</version>
+<time>2019-01-18T19:26Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.47.5 (2019-01-18T19:26Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.58.4</version>
+<time>2019-01-08T04:49Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.47.4 (2019-01-08T04:49Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.58.2</version>
+<time>2018-12-28T09:58Z</time>
+<changes>
+<change type="fixed">
+Fixed update check GUIDs.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.58.1</version>
+<time>2018-12-26T10:32Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.47.1 (2018-12-26T10:32Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.58.0</version>
+<time>2018-12-25T08:04Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.47.0 (2018-12-25T08:04Z).
+</change>
+</changes>
+<comments>Thanks for the Christmas greetings and Merry Christmas to you too (unless it would offend you).</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.57.5</version>
+<time>2018-12-12T18:35Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.46.5 (2018-12-12T18:35Z).
+</change>
+<change type="updated">
+Included AfxHookUnity 0.1.1 (2018-12-12T18:35Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.57.4</version>
+<time>2018-12-08T12:48Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.46.4 (2018-12-08T12:48Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.57.3</version>
+<time>2018-12-08T10:44Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.46.3 (2018-12-08T10:44Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.57.2</version>
+<time>2018-12-07T15:33Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.46.2 (2018-12-07T15:33Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.57.1</version>
+<time>2018-12-04T13:55Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.46.1 (2018-12-03T13:55Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.57.0</version>
+<time>2018-12-03T16:24Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.46.0 (2018-12-03T16:24Z).
+</change>
+<change type="added">
+Included AfxHookUnity 0.1.0 (2018-12-03T16:24Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.56.4</version>
+<time>2018-11-02T11:37Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.45.3 (2018-11-02T11:37Z).
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 1.6.3 (2018-11-02T11:37Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.56.3</version>
+<time>2018-10-30T05:39Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.45.2 (2018-10-30T05:39Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.56.2</version>
+<time>2018-10-24T20:28Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.45.1 (2018-10-24T20:28Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.56.1</version>
+<time>2018-10-10T07:52Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.6.2 (2018-10-10T07:52Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.56.0</version>
+<time>2018-10-09T20:36Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.45.0 (2018-10-09T20:36Z).
+</change>
+<change type="fixed">
+Fixed unable to disable the GoldSrc optimize visibility feature bug. Thanks to https://github.com/juicejuicejuice for pull request #105
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.55.1</version>
+<time>2018-10-08T16:34Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.6.1 (2018-10-08T16:34Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.55.0</version>
+<time>2018-10-06T20:18Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.6.0 (2018-10-06T20:18Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.54.6</version>
+<time>2018-10-01T11:11Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.44.6 (2018-10-01T11:11Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.54.5</version>
+<time>2018-09-13T09:17Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.44.5 (2018-09-13T09:17Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.54.4</version>
+<time>2018-09-01T06:55Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.44.4 (2018-09-01T06:55Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.54.3</version>
+<time>2018-08-30T05:57Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.44.3 (2018-08-30T05:57Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.54.2</version>
+<time>2018-08-24T16:45Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.44.2 (2018-08-24T16:45).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.54.1</version>
+<time>2018-08-18T07:10Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.44.1 (2018-08-18T07:10Z).
+</change>
+</changes>
+<comments>
+Since we did at full rebuild at HLAE 2.54.0 (including the injector.exe and x64/injector.exe), several anti-virus programs might report false positives!<br />
+If this is a problem for you, or you are unsure, you can use the previous HLAE 2.53.1 (2018-08-07T06:15Z) until the situation calms down.<br />
+<br />
+If you are using Windows Defender and run into problems:<br />
+1) Make sure to install the latest definitions: https://www.microsoft.com/en-us/wdsi/definitions<br />
+2) Reboot.<br />
+3) Re-download and re-extract HLAE in your HLAE folder.
+</comments>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.54.0</version>
+<time>2018-08-17T20:06Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.44.0 (2018-08-17T20:06Z).
+</change>
+</changes>
+<comments>
+Since this is a full rebuild (including the injector.exe and x64/injector.exe), several anti-virus programs might report false positives!<br />
+If this is a problem for you, or you are unsure, you can use the previous HLAE 2.53.1 (2018-08-07T06:15Z) until the situation calms down.<br />
+<br />
+If you are using Windows Defender and run into problems:<br />
+1) Make sure to install the latest definitions: https://www.microsoft.com/en-us/wdsi/definitions<br />
+2) Reboot.<br />
+3) Re-download and re-extract HLAE in your HLAE folder.
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.53.1</version>
+<time>2018-08-07T06:15Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.43.1 (2018-08-07T06:15Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.52.9</version>
+<time>2018-07-26T07:25Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.42.9 (2018-07-25T19:21Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.52.8</version>
+<time>2018-07-25T19:21Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.42.8 (2018-07-25T19:21Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.52.7</version>
+<time>2018-07-19T05:52Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.42.7 (2018-07-19T05:52Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.52.6</version>
+<time>2018-07-14T14:24Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.42.6 (2018-07-14T14:24Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.52.5</version>
+<time>2018-07-14T08:48Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.42.5 (2018-07-14T08:48Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.52.4</version>
+<time>2018-07-14T06:31Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.42.4 (2018-07-14T06:31Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.52.4</version>
+<time>2018-07-14T06:31Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.42.4 (2018-07-14T06:31Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.52.3</version>
+<time>2018-07-12T06:26Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.42.3 (2018-07-12T06:26Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.52.0</version>
+<time>2018-07-11T16:48Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.42.0 (2018-07-11T16:48Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.51.1</version>
+<time>2018-07-10T09:44Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.41.1 (2018-07-10T09:44Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.51.0</version>
+<time>2018-07-07T12:44Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.41.0 (2018-07-07T12:44Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.50.7-panoramaui</version>
+<time>2018-06-30T06:52Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.40.7-panoramaui (2018-06-30T06:52Z).
+</change>
+</changes>
+<comments>
+This release is for the #PanoramaUI CS:GO branch .<br />
+<br />
+Please help testing it and report (new) issues not known yet on GitHub:<br />
+https://github.com/advancedfx/advancedfx/issues<br />
+https://github.com/advancedfx/advancedfx/projects/1
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.50.6-panoramaui</version>
+<time>2018-06-24T14:30Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.40.6-panoramaui (2018-06-24T14:30Z).
+</change>
+</changes>
+<comments>
+This release is for the #PanoramaUI CS:GO branch.<br />
+<br />
+Please help testing it and report (new) issues not known yet on GitHub:<br />
+https://github.com/advancedfx/advancedfx/issues<br />
+https://github.com/advancedfx/advancedfx/projects/1
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.50.5-panoramaui</version>
+<time>2018-06-20T09:12Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.40.4-panoramaui (2018-06-20T09:12Z).
+</change>
+<change type="fixed">
+Fixed mistake in x64/AfxHook.dat preventing injection to work on 64 bit processes.
+</change>
+</changes>
+<comments>
+This release is for the #PanoramaUI branch.<br />
+<br />
+Please help testing it and report (new) issues not known yet on GitHub:<br />
+https://github.com/advancedfx/advancedfx/issues<br />
+(The mirv_deathmsg features have been temporarily disabled until we manage to fix them.)
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.50.3</version>
+<time>2018-06-09T13:51Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.40.3 (2018-06-09T13:51Z).
+</change>
+<change type="updated">
+Updated to Microsoft Visual Studio 2017 version 15.7.3. Rebuild.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.50.2</version>
+<time>2018-05-28T19:21Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.40.2 (2018-05-28T19:21Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.50.1</version>
+<time>2018-05-22T03:57Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.40.1 (2018-05-22T03:57Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.50.0</version>
+<time>2018-05-15T11:14Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.40.0 (2018-05-15T11:14Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.49.6</version>
+<time>2018-05-07T14:35Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.39.6 (2018-05-07T14:35Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.49.5</version>
+<time>2018-05-04T13:38Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.39.5 (2018-05-04T13:38Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.49.4</version>
+<time>2018-05-01T06:31Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.39.4 (2018-05-01T06:31Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.49.3</version>
+<time>2018-04-28T10:40Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.39.3 (2018-04-28T10:40Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.49.2</version>
+<time>2018-04-21T09:29Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.39.2 (2018-04-21T09:29Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.49.1</version>
+<time>2018-04-18T10:34Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.39.1 (2018-04-18T10:34Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.49.0</version>
+<time>2018-04-16T22:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.39.0 (2018-04-16T22:00Z).
+</change>
+<change type="updated">
+Updated HLAE.exe to have a (hopefully) better error dialogue.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.48.2</version>
+<time>2018-03-30T11:30Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.38.2 (2018-03-30T11:30Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.48.1</version>
+<time>2018-03-29T09:41Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.38.1 (2018-03-29T09:41Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.48.0</version>
+<time>2018-03-28T20:25Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.38.0 (2018-03-28T20:25Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.47.5</version>
+<time>2018-03-23T05:35Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.37.5 (2018-03-23T05:35Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.47.4</version>
+<time>2018-03-01T07:30Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.37.4 (2018-03-01T07:30Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.47.3</version>
+<time>2018-02-25T15:32Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.37.3 (2018-02-25T15:32Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.47.1</version>
+<time>2018-02-20T17:10Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.37.1 (2018-02-20T17:10Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.47.0</version>
+<time>2018-02-16T17:54Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.37.0 (2018-02-16T17:54Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.46.1</version>
+<time>2018-02-16T08:50Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.36.1 (2018-02-16T08:50Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.46.0</version>
+<time>2018-02-08T13:37Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.36.0 (2018-02-08T13:37Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.45.5</version>
+<time>2018-02-03T15:32Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.35.5 (2018-02-03T15:32Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.45.4</version>
+<time>2018-01-30T09:17Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.35.4 (2018-01-30T09:17Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.45.3</version>
+<time>2018-01-22T17:47Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.35.3 (2018-01-22T17:47Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.45.2</version>
+<time>2018-01-21T19:55Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.35.2 (2018-01-21T19:55Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.45.1</version>
+<time>2018-01-20T08:31Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.35.1 (2018-01-20T08:31Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.45.0</version>
+<time>2018-01-11T16:16Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.35.0 (2018-01-11T16:16Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.44.2</version>
+<time>2018-01-04T17:39Z</time>
+<changes>
+<change type="fixed">
+Fixed cosmetic problem of auto update check not being ticked accordingly in menu, when user answers the question if to enable auto updates.
+</change>
+<change type="updated">
+Included AfxHookSource 1.34.2 (2018-01-04T17:39Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.44.0</version>
+<time>2017-11-19T15:45Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.34.0 (2017-11-19T15:45Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.43.6</version>
+<time>2017-11-09T06:15Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.33.6 (2017-11-09T06:15Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.43.5</version>
+<time>2017-11-01T08:48Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.33.5 (2017-11-01T08:48Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.43.4</version>
+<time>2017-10-31T10:37Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.33.4 (2017-10-31T10:37Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.43.3</version>
+<time>2017-10-30T08:25Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.33.3 (2017-10-30T08:25Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.43.2</version>
+<time>2017-10-28T16:20Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.33.2 (2017-10-28T16:20Z).
+</change>
+<change type="updated">
+Updated the build with the latest Visual Studio 2017 version / UCRT / ....
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.43.1</version>
+<time>2017-10-28T08:37Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.33.1 (2017-10-28T08:37Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.43.0</version>
+<time>2017-10-24T09:04Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.33.0 (2017-10-24T09:04Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.42.0</version>
+<time>2017-10-23T19:32Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.32.0 (2017-10-23T19:32Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.41.2</version>
+<time>2017-10-04T14:57Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.31.2 (2017-10-04T14:57Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.41.1</version>
+<time>2017-09-25T17:55Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.31.1 (2017-09-25T17:55Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.41.0</version>
+<time>2017-09-21T16:30Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.31.0 (2017-09-21T16:30Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.40.0</version>
+<time>2017-09-16T22:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.30.0 (2017-09-16T22:00Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.39.0</version>
+<time>2017-09-15T18:25Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.29.0 (2017-09-15T18:25Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.38.0</version>
+<time>2017-09-15T10:26Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.28.0 (2017-09-15T10:26Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.37.0</version>
+<time>2017-08-18T17:50Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.27.0 (2017-08-18T17:50Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.36.2</version>
+<time>2017-08-08T13:23Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.26.2 (2017-08-08T13:23Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.36.1</version>
+<time>2017-08-04T15:32Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.26.1 (2017-08-04T15:32Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.35.2</version>
+<time>2017-07-25T16:01Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.25.2 (2017-07-25T16:01Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.35.1</version>
+<time>2017-07-18T09:46Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.25.1 (2017-07-18T09:46Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.35.0</version>
+<time>2017-07-18T09:29Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.25.0 (2017-07-18T09:29Z).
+</change>
+<change type="removed">
+Removed AfxHookGoldSrc and all related tools: https://twitter.com/dtugend/status/884780856929341442<br />
+The code and downloads of the last version with AfxHookGoldSrc support can be found here: https://github.com/ripieces/advancedfx/tree/v2.34.5
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.34.5</version>
+<time>2017-07-08T14:48Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.24.5 (2017-07-08T14:48Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.34.4</version>
+<time>2017-07-08T08:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.24.4 (2017-07-08T08:00Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.34.3</version>
+<time>2017-07-06T16:30Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.24.3 (2017-07-06T16:30Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.34.2</version>
+<time>2017-06-27T17:20Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.24.2 (2017-06-27T17:20Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.34.1</version>
+<time>2017-06-26T12:15Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.24.1 (2017-06-26T12:15Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.34.0</version>
+<time>2017-06-23T09:04Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.24.0 (2017-06-25T17:26Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.33.0</version>
+<time>2017-06-23T09:04Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.23.0 (2017-06-23T09:04Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.32.0</version>
+<time>2017-06-19T19:11Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.22.0 (2017-06-19T19:11Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.31.0</version>
+<time>2017-06-18T15:37Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.21.0 (2017-06-18T15:37Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.30.4</version>
+<time>2017-06-17T18:26Z</time>
+<changes>
+<change type="fixed">
+Fixed mistake in 2.30.3 that would cause HLAE launching not to work at all. Sorry for this embarrassing mistake. Thanks to those that notified me early, so the malfunctioning version could be retracted quickly.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.30.3</version>
+<time>2017-06-17T13:47Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.20.2 (2017-06-17T13:37Z).
+</change>
+<change type="fixed">
+Updated injector.exe, x64\injector.exe and HLAE.exe to have more helpful error information for users (hopefully).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.30.1</version>
+<time>2017-06-02T20:28Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.20.1 (2017-06-02T20:28Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.30.0</version>
+<time>2017-06-01T14:30Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.5.1 (2017-06-01T14:30Z).
+</change>
+<change type="updated">
+Included AfxHookSource 1.20.0 (2017-06-01T14:30Z).
+</change>
+<change type="updated">
+Updated build environment to Visual Studio 2017.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.29.0</version>
+<time>2017-05-30T17:38Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.19.0 (2017-05-30T17:38Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.27.0</version>
+<time>2017-05-26T11:39Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.17.0 (2017-05-26T11:39Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.26.8</version>
+<time>2017-05-19T13:07Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.16.8 (2017-05-19T13:07Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.26.7</version>
+<time>2017-05-14T09:45Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.16.7 (2017-05-14T09:45Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.26.6</version>
+<time>2017-05-13T20:45Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.16.6 (2017-05-13T20:45Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.26.3</version>
+<time>2017-05-09T18:43Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.16.5 (2017-05-09T13:22Z).
+</change>
+<change type="added">
+Added capability to inject multiple DLLs with Custom Loader.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.26.2</version>
+<time>2017-05-04T08:25Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.16.4 (2017-05-04T08:25Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.26.1</version>
+<time>2017-04-13T09:01Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.16.3 (2017-04-13T09:01Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.26.0</version>
+<time>2017-04-08T18:40Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.5.0(2017-04-08T18:40Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.25.2</version>
+<time>2017-03-28T16:32Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.16.2 (2017-03-28T16:32Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.25.1</version>
+<time>2017-03-17T16:30Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.16.1 (2017-03-17T16:30Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.25.0</version>
+<time>2017-03-15T08:12Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.16.0 (2017-03-15T08:12Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.23.0</version>
+<time>2017-01-22T18:21Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.14.0 (2017-01-22T18:21Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.22.0</version>
+<time>2017-01-07T15:47Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.13 (2017-01-07T15:47Z).
+</change>
+<change type="updated">
+Included AfxHookSource 1.13.2 (2017-01-07T15:47Z).
+</change>
+<change type="added">
+Added -noGui option for -csgoLauncher, -afxHookGoldSrc and -customLoader command line options:<br />
+When specified the HLAE.exe GUI won't be started at all - since HLAE exits as soon as the requested operations have been carried out, it's not possible to tell errors that might happen later on in the game / target process being launched.
+You can check the HLAE.exe process ExitCode to determine if the requested operations are being carried out successful so far (0) or failed for sure (1).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.21.1</version>
+<time>2016-12-18T19:13Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.13.1 (2016-12-18T19:13Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.21.0</version>
+<time>2016-12-18T16:32Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.13.0 (2016-12-18T16:32Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.20.1</version>
+<time>2016-12-08T15:17Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.12.1 (2016-12-08T15:17Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.20.0</version>
+<time>2016-11-30T21:21Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.12.0 (2016-11-30T21:21Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.19.1</version>
+<time>2016-11-29T06:54Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.11.1 (2016-11-29T06:54Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.19.0</version>
+<time>2016-11-16T17:57Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.11.0 (2016-11-16T17:57Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.18.0</version>
+<time>2016-11-06T19:21Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.10.0 (2016-11-06T19:21Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.17.0</version>
+<time>2016-11-05T20:30Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.9.0 (2016-11-05T20:30Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.16.0</version>
+<time>2016-11-04T11:19Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.8.0 (2016-11-04T11:19Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.15.5</version>
+<time>2016-11-01T16:31Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.7.5 (2016-11-01T16:31Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.15.4</version>
+<time>2016-10-30T08:12Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.7.4 (2016-10-30T08:12Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.15.3</version>
+<time>2016-10-29T12:16Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.7.3 (2016-10-29T12:16Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.15.2</version>
+<time>2016-10-29T06:51Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.7.2 (2016-10-29T06:51Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.15.1</version>
+<time>2016-10-12T08:10Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.7.1 (2016-10-12T08:10Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.15.0</version>
+<time>2016-10-09T16:54Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.7.0 (2016-10-09T16:54Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.14.8</version>
+<time>2016-10-07T08:50Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.6.6 (2016-10-07T08:50Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.14.7</version>
+<time>2016-08-25T15:50Z</time>
+<changes>
+<change type="fixed">
+Reverted to old injection method, since otherwise there will be even more trouble with the UCRT again (on systems where it is not present, basically several UCRT DLLs ignore the alternate DLL search order).
+Combined it partially with new method, so we hopefully get the best result possible.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.14.6</version>
+<time>2016-08-24T17:30Z</time>
+<changes>
+<change type="fixed">
+Fixed HLAE injection method causing Windows to load potentially incompatible DLLs from the system folders
+(i.e. vcruntime140.dll) instead of those supplied in the HLAE folder.
+Please note: We cannot do much about ucrtbase.dll and similar DLLs being loaded from the Windows folder if present there at the moment:
+https://connect.microsoft.com/VisualStudio/feedback/details/2725185/ucrt-function-forwarders-ignore-setdlldirectory-and-make-it-unsuitable-for-side-by-side-deployment
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.14.5</version>
+<time>2016-08-08T13:37Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.12 (2016-08-08T13:37Z).
+</change>
+<change type="updated">
+Included AfxHookSource 1.6.5 (2016-08-08T13:37Z).
+</change>
+<change type="fixed">
+Fixed HLAE not working on Windows XP.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.14.4</version>
+<time>2016-08-06T18:50Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.6.4 (2016-08-06T18:50Z).
+</change>
+</changes>
+<comments>
+We are aware that HLAE currently doesn't work on Windows XP anymore lately, we'll try to release another update that addresses that.
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.14.3</version>
+<time>2016-08-06T08:08Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.6.3 (2016-08-06T08:08Z).
+</change>
+</changes>
+<comments>
+We are aware that HLAE currently doesn't work on Windows XP anymore lately, we'll try to release another update that addresses that.
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.14.2</version>
+<time>2016-08-04T08:45Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.6.2 (2016-08-04T08:45Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.14.1</version>
+<time>2016-07-18T18:07Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.6.1 (2016-07-18T18:07Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.14.0</version>
+<time>2016-07-15T19:56Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.6.0 (2016-07-15T19:56Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.13.0</version>
+<time>2016-07-15T13:20Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.5.0 (2016-07-15T13:20Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.12.0</version>
+<time>2016-06-26T18:06Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.4.0 (2016-06-26T18:05Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.11.2</version>
+<time>2016-06-12T12:08Z</time>
+<changes>
+<change type="updated">
+Testing workaround for UCRT problems with SetDllDirectory (using SetCurrentDirectory instead).
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.11.0 (2016-06-12T12:08Z).
+</change>
+<change type="updated">
+Included AfxHookSource 1.3.2.0 (2016-06-12T12:08Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.11.1.0</version>
+<time>2016-05-15T17:28Z</time>
+<changes>
+<change type="updated">
+Updated build environment to Visual Studio 2015, should still run on Windows XP (target is v140_xp).
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.10.0 (2016-05-15T17:28Z).
+</change>
+<change type="updated">
+Included AfxHookSource lite 1.3.1.0 (2016-05-15T17:28Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.11.0.0</version>
+<time>2016-05-02T17:51Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource lite 1.3.0.0 (2016-05-02T17:51Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.10.0.0</version>
+<time>2016-04-15T17:39Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource lite 1.2.0.0 (2016-04-15T17:39Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.9.5.0</version>
+<time>2016-03-23T18:47Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource lite 1.1.5.0 (2016-03-23T18:47Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.9.4.0</version>
+<time>2016-03-13T20:18Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource lite 1.1.4.0 (2016-03-13T20:18Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.9.3.0</version>
+<time>2016-03-13T19:13Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource lite 1.1.3.0 (2016-03-13T19:13Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.9.2.1</version>
+<time>2016-02-28T16:51Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource lite 1.1.2.1 (2016-02-28T16:51Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.9.2.0</version>
+<time>2016-02-27T15:46Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource lite 1.1.2.0 (2016-02-27T15:46Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.9.1.0</version>
+<time>2016-02-18T15:35Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource lite 1.1.1.0 (2016-02-18T15:35Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.9.0.0</version>
+<time>2016-02-16T18:43Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.1.0.0 (2016-02-16T18:43Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.8.0.3</version>
+<time>2016-02-14T11:52Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.0.0.3 (2016-02-14T11:52Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.8.0.2</version>
+<time>2016-02-14T07:34Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.0.0.2 (2016-02-14T07:34Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.8.0.1</version>
+<time>2016-02-13T21:15Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.0.0.1 (2016-02-13T21:15Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.8.0.0</version>
+<time>2016-02-13T13:21Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 1.0.0.0 (2016-02-13T13:21Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.7.8.0</version>
+<time>2016-02-06T09:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.16.0 (2016-02-06T09:00Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.7.7.0</version>
+<time>2016-02-06T03:50Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.15.0 (2016-02-06T03:50Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.7.6.0</version>
+<time>2016-02-05T17:41Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.14.0 (2016-02-05T17:41Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.7.4.0</version>
+<time>2016-01-28T18:33Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.11.0 (2016-01-28T18:33Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.7.3.0</version>
+<time>2016-01-20T11:30Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.10.0 (2016-01-20T11:30Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.7.2.0</version>
+<time>2016-01-17T19:22Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.9.0 (2016-01-17T16:38Z).
+</change>
+<change type="updated">
+Included AfxHookSource 0.2.9.0 (2016-01-17T19:22Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.7.1.1</version>
+<time>2016-01-15T14:44Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.8.1 (2016-01-15T14:44Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.7.1.0</version>
+<time>2016-01-12T13:53Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.8.0 (2016-01-12T13:53Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.8.2</version>
+<time>2015-12-26T18:13Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.7.3 (2015-12-26T18:13Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.8.1</version>
+<time>2015-12-23T07:49Z</time>
+<changes>
+<change type="fixed">
+Fixed specific launcher dialog for CS:GO in File menu not working! Sorry about this.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.8.0</version>
+<time>2015-12-22T21:36Z</time>
+<changes>
+<change type="added">
+Added specific launcher dialog for CS:GO in File menu! This allows to set a movie making config parent folder. The launcher will also be exposed to the HLAE command line options, which will be documented in the HLAE manual.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.7.2</version>
+<time>2015-12-21T03:10Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.7.2 (2015-12-21T03:10Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.7.1</version>
+<time>2015-12-20T16:43Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.7.1 (2015-12-20T16:42Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.7.0</version>
+<time>2015-12-10T05:25Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.7.0 (2015-12-10T05:24Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.6.10</version>
+<time>2015-11-11T16:45Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.6.10 (2015-11-11T16:45Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.6.9</version>
+<time>2015-11-03T17:55Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.6.9 (2015-11-03T17:31Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.6.8</version>
+<time>2015-10-21T07:42Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.6.8 (2015-10-21T07:42Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.6.7</version>
+<time>2015-10-14T11:09Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.6.7 (2015-10-14T10:58Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.6.6</version>
+<time>2015-10-13T18:02Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.6.6 (2015-10-13T18:02Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.6.5</version>
+<time>2015-10-12T19:50Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.6.5 (2015-10-12T19:50Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.6.4</version>
+<time>2015-10-11T18:39Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.6.4 (2015-10-11T18:35Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.6.3</version>
+<time>2015-10-07T12:30Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.6.3 (2015-10-07T12:30Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.6.2</version>
+<time>2015-10-05T18:41Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.6.2 (2015-10-05T18:41Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.6.1</version>
+<time>2015-10-04T19:17Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.6.1 (2015-10-04T19:17Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.6.0</version>
+<time>2015-10-01T14:15Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.6.0 (2015-10-01T14:15Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.5.1</version>
+<time>2015-09-29T14:19Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.5.1 (2015-09-29T14:19Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.5.0</version>
+<time>2015-09-29T06:32Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.5.0 (2015-09-29T06:32Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.4.7</version>
+<time>2015-09-25T12:55Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.4.7 (2015-09-25T12:55Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.4.6</version>
+<time>2015-09-20T20:09Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.4.6 (2015-09-20T20:09Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.4.5</version>
+<time>2015-09-20T16:47Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.8.1 (2015-09-20T16:47Z).
+</change>
+<change type="updated">
+Included AfxHookSource 0.2.4.5 (2015-09-20T16:47Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.4.4</version>
+<time>2015-09-20T13:06Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.4.4 (2015-09-20T13:06Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.4.3</version>
+<time>2015-09-20T10:36Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.4.3 (2015-09-20T10:36Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.4.2</version>
+<time>2015-09-20T09:02Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.4.2 (2015-09-20T09:02Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.4.1</version>
+<time>2015-09-19T15:18Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.4.1 (2015-09-19T15:18Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.4.0</version>
+<time>2015-09-19T04:32Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.4.0 (2015-09-19T04:32Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.3.5</version>
+<time>2015-09-16T10:34Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.3.5 (2015-09-16T10:31Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.3.4</version>
+<time>2015-09-13T19:49Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.3.4 (2015-09-13T19:49Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.3.3</version>
+<time>2015-09-13T18:18Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.3.3 (2015-09-13T18:18Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.3.2</version>
+<time>2015-09-11T15:03Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.3.2 (2015-09-11T15:03Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.3.1</version>
+<time>2015-09-06T13:54Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.3.1 (2015-09-06T13:54Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.3.0</version>
+<time>2015-08-29T10:32Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.8.0 (2015-08-29T10:32Z).
+</change>
+<change type="updated">
+Included AfxHookSource 0.2.3.0 (2015-08-29T10:32Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.2.6</version>
+<time>2015-08-19T19:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.2.6 (2015-08-19T19:00Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.2.5</version>
+<time>2015-08-17T15:40Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.2.5 (2015-08-17T15:40Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.2.4</version>
+<time>2015-08-17T13:08Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.2.4 (2015-08-17T13:08Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.2.3</version>
+<time>2015-08-17T12:51Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.2.3 (2015-08-17T12:46Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.2.2</version>
+<time>2015-08-15T13:50Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.2.2 (2015-08-15T13:49Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.2.1</version>
+<time>2015-08-15T07:57Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.2.1 (2015-08-15T08:56Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.2.0</version>
+<time>2015-08-14T17:28Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.2.0 (2015-08-14T17:28Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.1.0</version>
+<time>2015-08-13T15:19Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.1.0 (2015-08-13T15:17Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.0.3</version>
+<time>2015-08-13T06:36Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.0.3 (2015-08-13T06:34Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.0.2</version>
+<time>2015-08-12T10:22Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.0.2 (2015-08-12T10:20Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.0.1</version>
+<time>2015-08-11T15:15Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.0.1 (2015-08-11T17:31Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.6.0.0</version>
+<time>2015-08-11T15:15Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.2.0.0 (2015-08-11T15:12Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.5.0.1</version>
+<time>2015-07-29T17:02Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.7.2 (2015-07-29T17:00Z).
+</change>
+<change type="fixed">
+Fixed command line option for -afxHookGoldSrc, renamed -foreceAlpha to -forceAlpha, this is a breaking change, -foreceAlpha is deprecated and will trigger a warning message box.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.5.0.0</version>
+<time>2015-07-27T09:10Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.7.1 (2015-07-26T18:10Z).
+</change>
+<change type="updated">
+Included AfxHookSource 0.1.0.0 (2015-07-27T09:07Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.10.0</version>
+<time>2015-07-24T17:30Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.13.7 (2015-07-24T17:30Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.9.0</version>
+<time>2015-07-23T16:00Z</time>
+<changes>
+<change type="fixed">
+Fixed 64 bit versions of msvcp100.dll, msvcr100.dll being packaged instead of 32 bit versions.
+</change>
+<change type="updated">
+Updated launcher for GoldSrc games (AfxHookGoldSrc) to display a warning icon and information if game resolution height is bellow 480 pixels,
+since then the Half-Life's TrackerScheme.res would need to be adjusted aka an EngineFont for bellow 480 pixels would need to be added, otherwise
+text (i.e. death notice text) will be missing in-game.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.8.6</version>
+<time>2015-07-17T18:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.13.6 (2015-07-17T18:00Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.8.5</version>
+<time>2015-07-16T17:33Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.13.5 (2015-07-16T17:33Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.8.4</version>
+<time>2015-07-14T12:02Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.13.4 (2015-07-14T12:02Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.8.3</version>
+<time>2015-07-13T18:17Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.13.3 (2015-07-13T18:17Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.8.1</version>
+<time>2015-07-01T17:13Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.13.1 (2015-07-01T17:13Z).
+</change>
+</changes>
+</release>´
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.8.0</version>
+<time>2015-06-15T19:14Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.13.0 (2015-06-15T19:14Z).
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.7.0 (2015-06-15T19:14Z).
+</change>
+</changes>
+</release>´
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.7.1</version>
+<time>2015-06-09T12:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.12.1 (2015-06-09T11:59Z).
+</change>
+</changes>
+</release>´
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.7.0</version>
+<time>2015-06-09T07:47Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.12.0 (2015-06-09T07:45Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.6.5</version>
+<time>2015-05-27T14:05Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.11.3 (2015-05-27T14:05Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.6.3</version>
+<time>2015-05-14T17:54Z</time>
+<changes>
+<change type="fixed">
+Fixed writing of hlaeconfig.xml failing randomly, due to the file stream for reading it not being closed
+deterministically beforehand.
+</change>
+</changes>
+<comments>
+We are aware of a small number of Windows 8 / 8.1 users that have random crashes and freezes
+(i.e. when loading a demo) with HLAE / AfxHookSource.<br />
+If you are affected by it, consider contacting us in the appropriate forum thread:
+http://advancedfx.org/forum/viewtopic.php?f=6&amp;t=1666
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.6.2</version>
+<time>2015-05-08T20:10Z</time>
+<changes>
+<change type="updated">
+Turns out Visual Studio 2010 SP1 was not properly installed on the build computer, reinstalled it and updated or
+rebuild all files included in the HLAE download accordingly.
+Hopefully this fixes some problems on Windows 8 some users
+are experiencing i.e. with AfxHookSource (but maybe not).
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.6.2 (2015-05-08T20:10Z).
+</change>
+<change type="updated">
+Included AfxHookSource 0.0.11.2 (2015-05-08T20:10Z).
+</change>
+<change type="updated">
+Changelog entries specific to AfxHookGoldSrc has been separated from the HLAE changelog to avoid user confusion.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.6.1</version>
+<time>2015-04-13T19:24Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.6.1 (2015-04-13T19:24Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.6.0</version>
+<time>2015-04-13T07:27Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.6.0 (2015-04-13T07:27Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.5.2</version>
+<time>2015-04-12T16:48Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.5.2 (2015-04-12T16:48Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.5.1</version>
+<time>2015-04-07T17:53Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.11.1 (2015-04-07T17:53Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.4.3</version>
+<time>2015-04-01T18:39Z</time>
+<changes>
+<change type="added">
+Added several command line options to HLAE to allow automatic launching of the CustomLoader.
+The command line options will be documented in the HLAEwiki in the Interfaces section or s.th. alike.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.4.2</version>
+<time>2015-03-30T15:30Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.10.2 (2015-03-30T15:29Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.4.1</version>
+<time>2015-01-25T19:55Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.10.1 (2015-01-25T19:54Z).
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.4.1 (2015-01-25T19:55Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.4.0</version>
+<time>2015-01-24T15:50Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.10.0 (2015-01-24T15:49Z).
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.4.0 (2015-01-24T15:50Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.3.0</version>
+<time>2015-01-22T08:59Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.9.0 (2015-01-22T08:50Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.2.0</version>
+<time>2015-01-09T14:18Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.8.0 (2015-01-09T14:16Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.1.2</version>
+<time>2014-11-13T20:50Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.7.2 (2014-11-13T20:47Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.1.1</version>
+<time>2014-11-13T13:37Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.7.1 (2014-11-13T13:37Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.1.0</version>
+<time>2014-11-12T17:29Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.7.0 (2014-11-12T17:28Z).
+</change>
+</changes>
+<comments>
+AfxHookSource users: Please check that you are adding -insecure +sv_lan 1 to the launch options when launching, to avoid getting VAC banned! The defaults for HLAE have been changed accordingly, however if hlaeconfig.xml already exists default are overriden.
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.4.0.0</version>
+<time>2014-11-07T19:38Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.6.0 (2014-11-07T19:32Z).
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.4.0.0 (2014-11-07T19:38Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.20.2</version>
+<time>2014-10-28T21:14Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.5.1 (2014-10-28T21:10Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.20.1</version>
+<time>2014-10-22T12:16Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.5.0 (2014-10-22T12:06Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.19.1</version>
+<time>2014-10-19T16:04Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.19.1 (2014-10-19T16:04Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.19.0</version>
+<time>2014-09-22T15:55Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.19.0 (2014-09-22T15:55Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.18.3</version>
+<time>2014-09-21T16:39Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.18.3 (2014-09-21T16:39Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.18.1</version>
+<time>2014-08-27T18:33Z</time>
+<changes>
+<change type="added">
+Added promotion for the Creative Minds Editing Competition.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.18.0</version>
+<time>2014-08-15T19:53Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.18.0 (2014-08-15T19:53Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.17.0</version>
+<time>2014-07-20T17:28Z</time>
+<changes>
+<change type="added">
+Added several command line options to HLAE to allow automatic launching (of AfxHookGoldSrc) without having
+to use .NET remoting.
+The command line options will be documented in the HLAEwiki in the Interfaces section or s.th. alike.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.16.1</version>
+<time>2014-04-30T19:22Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.4.5 (2014-04-30T19:21Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.16.0</version>
+<time>2014-04-23T06:32Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.16.0 (2014-04-23T06:32Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.15.2</version>
+<time>2014-04-11T18:21Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.4.4 (2014-04-11T18:21Z).
+</change>
+</changes>
+</release>
+
+<release>
+<name>HLAE</name>
+<version>2.3.15.1</version>
+<time>2014-03-14T19:49Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.15.1 (2014-03-14T19:49Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.15.0</version>
+<time>2014-03-13T10:21Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.15.0 (2014-03-13T10:21Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.14.0</version>
+<time>2014-02-28T17:51Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.14.0 (2014-02-28T17:51Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.13.3</version>
+<time>2014-02-08T12:21Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.4.3 (2014-02-08T12:20Z).
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.13.3 (2014-02-08T12:21Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.13.2</version>
+<time>2014-01-03T11:38Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.4.2 (2014-01-03T11:37Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.13.1</version>
+<time>2013-12-15T09:09Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.13.1 (2013-12-15T09:09Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.13.0</version>
+<time>2013-12-02T20:47Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.13.0 (2013-12-02T20:47Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.12.2</version>
+<time>2013-11-30T13:44Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.12.2 (2013-11-30T13:44Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.12.0</version>
+<time>2013-09-14T19:58Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.12.0 (2013-09-14T19:58Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.11.1</version>
+<time>2013-09-13T19:15Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.11.1 (2013-09-13T19:15Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.11.0</version>
+<time>2013-09-04T17:33Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.11.0 (2013-09-04T17:33Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.10.0</version>
+<time>2013-08-30T08:10Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.10.0 (2013-08-30T08:10Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.8.2</version>
+<time>2013-06-29T09:37Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.8.2 (2013-06-29T09:37Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.8.1</version>
+<time>2013-06-26T05:17Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.8.1 (2013-06-26T05:17Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.8.0</version>
+<time>2013-06-18T17:42Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.8.0 (2013-06-18T17:42Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.7.1</version>
+<time>2013-06-12T17:40Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.4.1 (2013-06-12T17:40Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.7.0</version>
+<time>2013-06-11T19:15Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.4.0 (2013-06-11T19:15Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.6.2</version>
+<time>2013-06-04T19:58Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.6.2 (2013-06-04T19:58Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.6.1</version>
+<time>2013-05-26T14:35Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.34 (2013-05-26T14:34Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.6.0</version>
+<time>2013-05-19T18:25Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.6.0 (2013-05-19T18:25Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.5.1</version>
+<time>2013-05-14T17:25Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.33 (2013-05-14T17:23Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.4.3</version>
+<time>2013-04-30T17:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.4.3 (2013-04-30T17:00Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.4.2</version>
+<time>2013-04-10T16:20Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.4.2 (2013-04-10T16:20Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.4.1</version>
+<time>2013-04-03T17:51Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.4.1 (2013-04-03T17:51Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.3.1</version>
+<time>2013-03-23T19:50Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.32 (2013-03-23T19:48Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.3.0</version>
+<time>2013-03-17T13:30Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.3.0 (2013-03-17T13:30Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.2.0</version>
+<time>2013-03-13T19:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.2.0 (2013-03-13T19:00Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.1.0</version>
+<time>2013-03-08T17:24Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.1.0 (2013-03-08T17:24Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.0.3</version>
+<time>2013-03-02T12:27Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.0.3 (2013-03-02T12:27Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.0.2</version>
+<time>2013-03-01T21:23Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.0.2 (2013-03-01T21:23Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.0.1</version>
+<time>2013-03-01T18:55Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.0.1 (2013-03-01T18:55Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.3.0.0</version>
+<time>2013-02-28T18:44Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.3.0.0 (2013-02-28T18:44Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.21.14</version>
+<time>2013-02-09T14:16Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.31 (2013-02-09T14:14Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.21.13</version>
+<time>2012-10-13T17:49Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.30 (2012-10-13T17:48Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.21.12</version>
+<time>2012-09-14T18:29Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.29 (2012-09-14T18:28Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.21.11</version>
+<time>2012-08-25T18:25Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.28 (2012-08-25T18:24Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.21.10</version>
+<time>2012-08-20T18:09Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.21.10 (2012-08-20T18:09Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.21.9</version>
+<time>2012-07-04T16:44Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.27 (2012-07-04T16:43Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.21.8</version>
+<time>2012-05-27T17:12Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.26 (2012-05-27T17:11Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.21.7</version>
+<time>2012-02-12T14:52Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.25 (2012-02-12T14:51Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.21.6</version>
+<time>2011-12-24T16:38Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.24 (2011-12-24T16:36Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.21.5</version>
+<time>2011-12-21T14:29Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.23 (2011-12-21T14:29Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.21.4</version>
+<time>2011-11-15T17:25Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.22 (2011-11-15T17:24Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.21.3</version>
+<time>2011-10-30T18:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.21 (2011-10-30T17:59Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.21.2</version>
+<time>2011-09-29T13:43Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.20 (2011-09-29T13:38Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.21.1</version>
+<time>2011-08-26T13:33Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.19 (2011-08-26T13:31Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.21.0</version>
+<time>2011-07-12T13:37Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.21.0 (2011-07-12T13:37Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.20.13</version>
+<time>2011-07-08T17:32Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.18 (2011-07-08T17:31Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.20.12</version>
+<time>2011-07-02T15:52Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.20.12 (2011-07-02T15:52Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.20.11</version>
+<time>2011-06-28T19:02Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.17 (2011-06-28T19:02Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.20.10</version>
+<time>2011-05-10T21:49Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.16 (2011-05-10T21:46Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.20.9</version>
+<time>2011-04-24T18:51Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.15 (2011-04-24T18:50Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.20.8</version>
+<time>2011-04-18T18:47Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.14 (2011-04-18T18:44Z).
+</change>
+</changes>
+<comments>AfxHookSource users will notice a bink*.dll missing error, which has to be addressed in a further release.</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.20.7</version>
+<time>2011-03-05T19:34Z</time>
+<changes>
+<change type="fixed">
+Fixed update check behaviour.
+</change>
+<change type="updated">
+Included AfxHookSource 0.0.3.13 (2011-03-05T18:20Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.20.6</version>
+<time>2010-12-24T02:58Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.20.6 (2010-12-24T02:58Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.20.5</version>
+<time>2010-12-22T18:44Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.12 (2010-12-22T18:44Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.20.4</version>
+<time>2010-12-20T20:21Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.11 (2010-12-20T20:21Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.20.3</version>
+<time>2010-10-31T17:31Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.10 (2010-10-31T17:50Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.20.2</version>
+<time>2010-10-07T19:40Z</time>
+<changes>
+<change type="added">
+Added ignore update button for update check.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.20.1</version>
+<time>2010-10-07T17:31Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.9 (2010-10-07T17:30Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.20.0</version>
+<time>2010-10-02T11:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.20.0 (2010-10-02T11:00Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.19.7</version>
+<time>2010-10-01T20:20Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.19.7 (2010-10-01T20:20Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.19.6</version>
+<time>2010-09-29T13:23Z</time>
+<changes>
+<change type="updated">
+Internal changes.
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.19.6 (2010-09-29T13:23Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.19.3</version>
+<time>2010-09-18T06:41Z</time>
+<changes>
+<change type="updated">
+Minor change in DemoTools / DemoCleanupUp.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.19.2</version>
+<time>2010-09-10T09:56Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.8 (2010-09-10T09:56Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.19.1</version>
+<time>2010-09-01T15:49Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.7 (2010-09-01T15:49Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.19.0</version>
+<time>2010-08-31T12:37Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.6 (2010-08-31T12:37Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.18.6</version>
+<time>2010-08-20T18:20Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.18.6 (2010-08-20T18:20Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.18.4</version>
+<time>2010-08-07T08:25Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.18.4 (2010-08-07T08:25Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.18.3</version>
+<time>2010-08-01T19:50Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.18.3 (2010-08-01T19:50Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.18.2</version>
+<time>2010-07-26T10:09Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.18.2 (2010-07-26T10:09Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.18.1</version>
+<time>2010-07-24T12:47Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.18.1 (2010-07-24T12:47Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE venture</name>
+<version>2.2.18.0</version>
+<time>2010-07-19T09:55Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.18.0 (2010-07-19T09:55Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE venture</name>
+<version>2.2.17.5</version>
+<time>2010-07-09T12:34Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.17.5 (2010-07-09T12:34Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE venture</name>
+<version>2.2.17.1</version>
+<time>2010-07-05T22:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.17.1 (2010-07-05T22:00Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE venture</name>
+<version>2.2.17.0</version>
+<time>2010-07-04T19:50Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.17.0 (2010-07-04T19:50Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.16.5</version>
+<time>2010-07-04T10:10Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.16.5 (2010-07-04T10:10Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.16.0</version>
+<time>2010-06-28T13:30Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.5 (2010-06-28T08:50Z).
+</change>
+<change type="updated">
+Ported parts of the GUI to CSharp in order to make coding easier for other coders.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.15.2</version>
+<time>2010-06-24T22:43Z</time>
+<changes>
+<change type="updated">
+Included AfxHookSource 0.0.3.4 (2010-06-24T22:23Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.15.1</version>
+<time>2010-06-15T20:39Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.15.1 (2010-06-15T20:39Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.14.5</version>
+<time>2010-06-01T22:53Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.14.5 (2010-06-01T22:53Z).
+</change>
+<change type="updated">
+Included AfxHookSource 0.0.3.3 (2010-06-01T22:53Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.14.4</version>
+<time>2010-05-21T14:14Z</time>
+<changes>
+<change type="fixed">
+Fixed file names.
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.14.4 (2010-05-21T14:14Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.14.3</version>
+<time>2010-05-20T20:40Z</time>
+<changes>
+<change type="fixed">
+Set Logical Name properties of .resx resources to avoid clashes with VC100 resource naming convention
+(would cause the DemoTools dialog to fail with System.Resources.MissingManifestResourceException).
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.14.3 (2010-05-20T20:40Z).
+</change>
+</changes>
+</release>
+
+<release>
+<name>HLAE</name>
+<version>2.2.14.2</version>
+<time>2010-05-20T17:47Z</time>
+<changes>
+<change type="updated">
+Switched to .NET 4.0 framework / VC100.
+</change>
+<change type="updated">
+Changed injection process to cope with flat DLL deployment layout.
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.14.2 (2010-05-20T17:47Z).
+</change>
+<change type="added">
+Included AfxHookSource 0.0.3.2 (2010-05-20T17:32Z).
+</change>
+</changes>
+<comments>
+This release includes a compatible version of AfxHookSource (due to changed DLL dependencies).<br />
+Greetz and thanks to Martin Vassie.
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.14.1</version>
+<time>2010-05-02T09:10Z</time>
+<changes>
+<change type="fixed">
+Fixed hlae.exe and hl.exe processes not closing when closing the HLAE window.
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.14.1 (2010-05-02T09:10Z).
+</change>
+</changes>
+<comments>
+More bugs than features lately, eh? Good thing we count those as features too, meh. :|
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.14.0</version>
+<time>2010-05-01T15:40Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.14.0 (2010-05-01T15:40Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.13.7</version>
+<time>2010-04-22T13:18Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.13.7 (2010-04-22T13:18Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.13.6</version>
+<time>2010-04-12T18:58Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.13.6 (2010-04-12T18:58Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.13.5</version>
+<time>2010-03-26T21:17Z</time>
+<changes>
+<change type="fixed">
+Yet another bugfix.
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.13.5 (2010-03-26T21:17Z).
+</change>
+</changes>
+<comments>
+The release today went a bit unlucky. Sorry about that. This update is still not perfect, but okay for now.
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.13.4</version>
+<time>2010-03-26T13:14Z</time>
+<changes>
+<change type="fixed">
+Fixed GUI scroll sizing.
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.13.4 (2010-03-26T13:14Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.13.3</version>
+<time>2010-03-26T07:35Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.13.3 (2010-03-26T07:35Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.12.2</version>
+<time>2010-01-22T19:13Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.12.2 (2010-01-22T19:13Z).
+</change>
+</changes>
+<comments>
+*sigh*
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.12.0</version>
+<time>2010-01-17T18:22Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.12.0 (2010-01-17T18:22Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.10.4</version>
+<time>2010-01-04T22:22Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.10.4 (2010-01-04T22:22Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.10.3</version>
+<time>2010-01-02T15:26Z</time>
+<changes>
+<change type="fixed">
+Fixed GUI menu overlaying part of game window.
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.10.3 (2010-01-02T15:26Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.10.2</version>
+<time>2010-01-01T12:37Z</time>
+<changes>
+<change type="added">
+Added simple obligatory update check notification.
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.10.2 (2010-01-01T12:37Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.10.1</version>
+<time>2009-12-22T11:08Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.10.1 (2009-12-22T11:08Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.9.2</version>
+<time>2009-12-12T18:15Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.9.2 (2009-12-12T18:15Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.9.1</version>
+<time>2009-12-11T12:50Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.9.1 (2009-12-11T12:50Z).
+</change>
+</changes>
+<comments>
+Greetz to: msthavoc, xorN.<br />
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.8.0</version>
+<time>2009-11-27T15:37Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.8.0 (2009-11-27T15:37Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.7.0</version>
+<time>2009-10-21T19:48Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.7.0 (2009-10-21T19:48Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.6.1</version>
+<time>2009-10-19T22:45Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.6.1 (2009-10-19T22:45Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.6.0</version>
+<time>2009-10-17T18:25Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.6.0 (2009-10-17T18:25Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.5.17</version>
+<time>2009-10-11T21:49Z</time>
+<changes>
+<change type="updated">
+Minor DemoTools update: drag n drop, batch to folder.
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.5.17 (2009-10-11T21:49Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.5.16</version>
+<time>2009-10-06T13:37Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.5.16 (2009-10-06T13:37Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.5.15</version>
+<time>2009-09-25T11:11Z</time>
+<changes>
+<change type="removed">
+removed "-demoedit" from the default launch options
+since it may cause high memory usage, performance hits
+and instability, while only a share of HLAE users use it
+</change>
+<change type="updated">
+improved skymanager:
+now supports a few .tga formats (24/32bit color uncompressed),
+flat mode single click selects image / sky,
+flat mode double click imports image
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.5.15 (2009-09-25T11:11Z).
+</change>
+</changes>
+<comments>
+Thanks to: Joakim, juGGaKNot, msthavoc
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.5.14</version>
+<time>2009-09-01T07:26Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.5.14 (2009-09-01T07:26Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.5.12</version>
+<time>2009-07-17T06:22Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.5.12 (2009-07-17T06:22Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.5.11</version>
+<time>2009-07-16T18:18Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.5.11 (2009-07-16T18:18Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.5.10</version>
+<time>2009-07-11T16:00Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.5.10 (2009-07-11T16:00Z).
+</change>
+</changes>
+</release>
+
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.5.9</version>
+<time>2009-07-11T07:40Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.5.9 (2009-07-11T07:40Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.5.8</version>
+<time>2009-05-22T15:29Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.5.8 (2009-05-22T15:29Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.5.7</version>
+<time>2009-05-20T07:50Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.5.7 (2009-05-20T07:50Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.5.6</version>
+<time>2009-04-23T20:25Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.5.6 (2009-04-23T20:25Z).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.5.5</version>
+<time>2009-04-23T14:21Z</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.5.5 (2009-04-23T14:21Z).
+</change>
+</changes>
+</release>
+
+<release>
+<name>HLAE</name>
+<version>2.2.5.4</version>
+<time>2009-04-23</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.5.4 (2009-04-23).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.5.3</version>
+<time>2009-04-22</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.5.3 (2009-04-22).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.5.1</version>
+<time>2009-04-13</time>
+<changes>
+<change type="updated">
+polished Sky Manger
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.5.1 (2009-04-13).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.5.0</version>
+<time>2009-04-13</time>
+<changes>
+<change type="updated">
+added HLAE Sky Manager, located in Tools menu,
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.5.0 (2009-04-13).
+</change>
+</changes>
+<comments>
+Thx to msthavoc and juGGaKNot for testing.
+</comments>
+</release>
+
+  
+<release>
+<name>HLAE</name>
+<version>2.2.3.6</version>
+<time>2009-02-13</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.3.6 (2009-02-13).
+</change>
+<change type="updated">
+changed IDE to VC++ 2008 Express Ed.
+</change>
+<change type="fixed">
+fixed private side by side CRT assembly version mismatch
+</change>
+</changes>
+</release>
+  
+
+<release>
+<name>HLAE</name>
+<version>2.2.3.4</version>
+<time>2009-02-05</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.3.4 (2009-02-05).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.3.3</version>
+<time>2009-01-29</time>
+<changes>
+<change type="fixed">
+fixed bug with selection of custom mods (thx to Fana)
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.3.3 (2009-01-29).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.3.2</version>
+<time>2009-01-25</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.3.2 (2009-01-25).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.3.1</version>
+<time>2009-01-19</time>
+<changes>
+<change type="updated">
+changed launcher: made selection of custom mods more obvious again
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.3.1 (2009-01-19).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.2.0</version>
+<time>2009-01-04</time>
+<changes>
+<change type="added">
+added crappy calculator to the tools menu
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.2.0 (2009-01-04).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.2.1.0</version>
+<time>2008-11-15</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.2.1.0 (2008-11-15).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.1.6.0</version>
+<time>2008-11-10</time>
+<changes>
+<change type="added">
+added crappy check to the launcher if HL is already running
+</change>
+<change type="added">
+added possibility for other tools (i.e. demo players) to interface
+  with HLAE. This feature will be documented in the HLAEwiki
+  online manual in the appendix section (including source code)
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.1.6.0 (2008-11-10).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.1.5.13</version>
+<time>2008-11-02</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.1.5.13 (2008-11-02).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.1.5.12</version>
+<time>2008-10-29</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.1.5.12 (2008-10-29).
+</change>
+<change type="fixed">
+fixed bug that would invert the fullscreen checkbox behavior
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.1.5.11</version>
+<time>2008-10-28</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.1.5.11 (2008-10-28).
+</change>
+<change type="added">
+re-added temporary fullscreen option (use with care,
+  might go away in the future again)
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.1.5.10</version>
+<time>2008-10-27</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.1.5.10 (2008-10-27).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.1.5.9</version>
+<time>2008-10-26</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.1.5.9 (2008-10-26).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.1.5.8</version>
+<time>2008-10-25</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.1.5.8 (2008-10-25).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.1.5.6</version>
+<time>2008-10-25</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.1.5.6 (2008-10-25).
+</change>
+<change type="updated">
+rolls out the .NET 2.0 based launcher (former 2008-10-19 beta)
+  Thus Microsoft .NET 2.0 framework is required.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.1.0.1</version>
+<time>2008-10-14</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.1.0.1 (2008-10-14).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.1.0.0</version>
+<time>2008-09-28</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.1.0.0 (2008-09-28).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.0.3.0</version>
+<time>2008-09-18</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.3.0 (2008-09-18).
+</change>
+<change type="updated">
+appended historical changelogs to the changelog
+</change>
+</changes>
+<comments>
+CU in November or somewhen.<br />
+Thx to 'juggaknot' for having helped moderating the forum a bit.<br />
+PS: MIRVIN_Monkey rulz!
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.0.2.3</version>
+<time>2008-08-17</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.2.3 (2008-08-17).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.0.2.2</version>
+<time>2008-08-10</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.2.2 (2008-08-10).
+</change>
+</changes>
+</release>
+
+<release>
+<name>HLAE</name>
+<version>2.0.2.1</version>
+<time>2008-08-01</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.2.1 (2008-08-01).
+</change>
+<change type="removed">   
+removed unused output panel in old public gui
+</change>
+</changes>
+</release>
+
+<release>
+<name>HLAE</name>
+<version>2.0.2.0</version>
+<time>2008-07-25</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.2.0 (2008-07-25).
+</change>
+</changes>
+<comments>
+Greetz:
+  Martin Vaissie
+</comments>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.0.1.8</version>
+<time>2008-07-15</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.1.8 (2008-07-15).
+</change>  
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.0.1.7</version>
+<time>2008-05-05</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.1.7 (2008-05-05).
+</change> 
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.0.1.6</version>
+<time>2008-05-03</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.1.6 (2008-05-03).
+</change>
+<change type="fixed">  
+Fixed typo in launcher that would cause problems when launching TFC mod
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.0.1.5</version>
+<time>2008-04-29</time>
+<changes>
+<change type="fixed">  
+linked MS VC++ Runtime to the hlae.exe to avoid users being unable
+  to launch HLAE (They saw the error message "This application has failed
+  to start because the application configuration is incorrect. Reinstalling
+  the application may fix this problem.")
+  Not the nicest way to fix this, but does it for now.
+  Thx to azrazr for testing.
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.1.5 (2008-04-29).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.0.1.4</version>
+<time>2008-04-27</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.1.4 (2008-04-27).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.0.1.3</version>
+<time>2008-04-21</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.1.3 (2008-04-21).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.0.1.2</version>
+<time>2008-04-19</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.1.2 (2008-04-19).
+</change>
+</changes>
+</release>
+
+<release>
+<name>HLAE</name>
+<version>2.0.1.1</version>
+<time>2008-04-17</time>
+<changes>
+<change type="fixed">  
+Added missing file to download, in case you already downloaded 2.0.1
+please re-download!
+Sorry : )
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.1.1 (2008-04-17).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.0.1.0</version>
+<time>2008-04-17</time>
+<changes>
+<change type="added">  
+Added:
+  Icon (thx to guys that programed Inkscape and GIMP 2)
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.1.0 (2008-04-17).
+</change>
+</changes>
+<comments>
+This is release is mainly for making the HLAE Gui more reliable, thus we'll
+also stop offering two different versions (stable and pre-release).<br />
+<br />
+ Thanks to:
+   msthavoc and MN|vadoskin for testing,
+   neomic and ripieces for coding,
+   Valve for not suing us( yet).
+   The HLAE forum users for their creative input, we hope we'll
+   be able to add at least some of the things being suggested in the future,
+   but we won't promise anything (as always).
+</comments>
+</release>
+
+<release>
+<name>HLAE</name>
+<version>2.0.0.3</version>
+<time>2008-04-06</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.0.3 (2008-04-06).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE</name>
+<version>2.0.0.2</version>
+<time>2008-04-06</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.0.2 (2008-04-06).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>HLAE pre-release</name>
+<version>2.0.0.0</version>
+<time>2008-03-21</time>
+<changes>
+<change type="updated">  
+Changed: The MDT project has now been renamed to
+           Half-Life Advanced Effects (HLAE)
+</change>
+<change type="added">  
+Added: The HLAE Graphical User Interface, which will be extended in the
+         future. The GUI is based on wxWidgets ( http://www.wxwidgets.org/ ).
+</change>      
+<change type="updated">  
+Changed: The MDTloader has been integrated into the HLAE Gui.
+           Select File->Launch from the menu to bring it up.
+</change>
+<change type="added">  
+Added: DemoTools: select Tools->Demo Tool form the menu.<br />
+         This tool migrates 2 old tools into the GUI:<br />
+         DemoCleanup by MirvinMonkey:<br />
+           Remove scoreboard, commandmenu, ...<br />
+           Added ability to block other commands too.<br />
+         Half-Life Demo Fix by ripieces:<br />
+           Repair demos that were recorded while the game crashed.
+           Added ability to repair more than 2 segments.<br />
+         And adds a new one:<br />
+         dem_forcehltv 1 camera stuck fix:<br />
+           Tries to fix the camera being stuck when using dem_forcehltv 1
+           with some in-eye demos.<br />
+</change>
+<change type="updated">
+Included AfxHookGoldSrc 2.0.0.0 (2008-03-21).
+</change>
+</changes>
+<comments>
+As always the following text contains many mistakes (as most changelog
+entries) due to lack of time and dedication to writing changelogs.<br />
+<br />
+Thanks to:
+    Everyone (including you).
+    iD Software, matrixstorm, MetaMod, Microsoft, Valve Software, wxWidgets.
+    Uwe Gierlich for his informations about the Half-Life .dem file format.
+    Mirvin_Monkey for creating the former MDT.
+    neomic for his enormous work on the HLAE Gui.  
+	Myself (ripieces) for wasting so much time on this project.
+</comments>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.1.3.97</version>
+<time>2008-02-06</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.1.3.97 (2008-02-06).
+</change>
+</changes>
+</release>
+
+		   
+<release>
+<name>MDT</name>
+<version>1.1.3.95</version>
+<time>2008-02-06</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.1.3.95 (2008-02-06).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.1.3.93</version>
+<time>2008-02-05</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.1.3.93 (2008-02-05).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.1.3.46</version>
+<time>2008-02-01</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.1.3.46 (2008-02-01).
+</change>
+</changes>
+</release>
+
+		 
+<release>
+<name>MDT</name>
+<version>1.1.3.1</version>
+<time>2008-01-31</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.1.3.1 (2008-01-31).
+</change>
+<change type="updated">
+The MDT Loader.exe has been updated and will try to remember some of the
+settings made when launching a game with it in extended mode and will set
+them for the next time. Except the selection of the loader mode all loader
+settings should be remembered.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.1.3.0</version>
+<time>2008-01-26</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.1.3.0 (2008-01-26).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.1.2.21</version>
+<time>2008-01-10</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.1.2.21 (2008-01-10).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.1.2.20</version>
+<time>2008-01-10</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.1.2.20 (2008-01-10).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.1.2.0</version>
+<time>2008-01-10</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.1.2.0 (2008-01-10).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.1.1.96</version>
+<time>2008-01-05</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.1.1.96 (2008-01-05).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.1.1.87</version>
+<time>2007-12-30</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.1.1.87 (2007-12-30).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT XMAS 2007</name>
+<version>1.1.1.0</version>
+<time>2007-12-24</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.1.1.0 (2007-12-24).
+</change>
+</changes>
+<comments>
+Hello, this is a special Christmas release :D<br />
+<br />
+At first we want to hint you to the HLAEwiki*, which already contains the Mirv
+Demo Tool command reference and will be extended in the future:
+http://www.hhg-clan.de/hlae/wiki<br />
+<br />
+Along some bonus tools you normally have to download separately (check the bonus
+folder in the zip) we also added some sweet extra candy to MDT itself:<br />
+<br />
+A built-in WallHack system : P<br />
+<br />
+Thanks and greets too:<br />
+<br />
+C-M|s0nkite ( www.mattepainting.gr )<br />
+  for supplying the merry_xmas.jpg that is included in the download!<br />
+<br />
+msthavoc ( www.mst-gaming.de )<br />
+  for helping now and then with testing mdt and making tutorials :)<br />
+<br />
+<br />
+<br />
+Merry X-Mas to you guys then,<br />
+have fun, cya next year.<br />
+<br />
+* it's HLAEwiki, because MDT might get renamed in the far away future to
+  Half-Life Advanced Effects : )
+</comments>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.1.0.29</version>
+<time>2007-12-08</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.1.0.29 (2007-12-08).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.1.0.25</version>
+<time>2007-11-02</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.1.0.25 (2007-11-02).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.1.0.0</version>
+<time>2007-10-25</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.1.0.0 (2007-10-25).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.0.60.251</version>
+<time>2007-10-20</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.0.60.251 (2007-10-20).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.0.60.249</version>
+<time>2007-10-18</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.0.60.249 (2007-10-18).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.0.60.248</version>
+<time>2007-10-18</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.0.60.248 (2007-10-18).
+</change>
+<change type="updated">
+Changed: removed dependency on msvcp71.dll
+</change>
+</changes>
+</release>
+        
+
+<release>
+<name>MDT</name>
+<version>1.0.60.152</version>
+<time>2007-09-27</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.0.60.152 (2007-09-27).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.0.60.41</version>
+<time>2007-09-23</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.0.60.41 (2007-09-23).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.0.60.9</version>
+<time>2007-09-21</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.0.60.9 (2007-09-21).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>1.0.60.7</version>
+<time>2007-09-13</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.0.60.7 (2007-09-13).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT UNOFFICIAL</name>
+<version>1.0.60.0</version>
+<time>2007-09-11</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.0.60.0 (2007-09-11).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT UNOFFICIAL</name>
+<version>1.0.59.0</version>
+<time>2007-09-03</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.0.59.0 (2007-09-03).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT DLL UNOFFICIAL</name>
+<version>1.0.58.309</version>
+<time>2007-08-28</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.0.58.309 (2007-08-28).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT DLL UNOFFICIAL</name>
+<version>1.0.58.268</version>
+<time>2007-08-26</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.0.58.268 (2007-08-26).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT DLL UNOFFICIAL</name>
+<version>1.0.58.158</version>
+<time>2007-08-03</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.0.58.158 (2007-08-03).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT DLL UNOFFICIAL</name>
+<version>1.0.58.87</version>
+<time>2007-07-10</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.0.58.87 (2007-07-10).
+</change>
+</changes>
+</release>
+
+
+<h1>Historical changelogs bellow</h1>
+
+
+<release>
+<name>MDT</name>
+<version>1.0.57.0</version>
+<time>2007-05-30</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 1.0.57.0 (2007-05-30).
+</change>
+<change type="added">
+Added: A new loader! The old one is still available here:
+       http://www.madabouthats.org/downloads/mdt-old-loader.zip
+       Please email me if you have trouble with the new one.
+</change>
+</changes>
+</release>
+
+         
+<release>
+<name>MDT</name>
+<version>0.44</version>
+<time>2007-05-24</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 0.44 (2007-05-24).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>0.43</version>
+<time>2007-05-21</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 0.43 (2007-05-21).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>0.42</version>
+<time>2007-05-17</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 0.42 (2007-05-17).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>0.41</version>
+<time>2007-04-19</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 0.41 (2007-04-19).
+</change>
+</changes>
+</release>
+
+         
+<release>
+<name>MDT</name>
+<version>0.37</version>
+<time>2007-03-14</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 0.37 (2007-03-14).
+</change>
+<change type="updated">
+Have also un-UPX packed the loader, hopefully this will fix the false virus alarms.
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>0.36</version>
+<time>2006-10-30</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 0.36 (2006-10-30).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>0.35</version>
+<time>2006-07-14</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 0.35 (2006-07-14).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>0.34</version>
+<time>2006-03-19</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 0.34 (2006-03-19).
+</change>
+</changes>
+</release>
+
+<release>
+<name>MDT</name>
+<version>0.33</version>
+<time>2006-01-17</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 0.33 (2006-01-17).
+</change>
+</changes>
+</release>
+
+<release>
+<name>MDT</name>
+<version>0.32</version>
+<time>2005-12-05</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 0.32 (2005-12-05).
+</change>
+</changes>
+</release>
+
+<release>
+<name>MDT</name>
+<version>0.31</version>
+<time>2005-11-26</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 0.31 (2005-11-26).
+</change>
+</changes>
+</release>
+
+<release>
+<name>MDT</name>
+<version>0.3</version>
+<time>2005-09-24</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 0.3 (2005-09-24).
+</change>
+</changes>
+</release>
+
+<release>
+<name>MDT</name>
+<version>0.26</version>
+<time>2005-09-24</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 0.26 (2005-09-24).
+</change>
+</changes>
+</release>
+
+<release>
+<name>MDT</name>
+<version>0.25</version>
+<time>2005-08-30</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 0.25 (2005-08-30).
+</change>
+</changes>
+</release>
+
+<release>
+<name>MDT</name>
+<version>0.21</version>
+<time>2005-08-17</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 0.21 (2005-08-17).
+</change>
+</changes>
+</release>
+
+
+<release>
+<name>MDT</name>
+<version>0.2</version>
+<time>2005-06-11</time>
+<changes>
+<change type="updated">
+Included AfxHookGoldSrc 0.2 (2005-06-11).
+</change>
+</changes>
+</release>
+
+</changelog>
