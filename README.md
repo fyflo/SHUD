@@ -97,7 +97,7 @@ Dota 2 - интеграция с игровыми данными
 ## Системные требования
 
 - Windows 10/11
-- Node.js 16+ [(Скать и установить)](https://nodejs.org/en/download)
+- Node.js 16+ [(Скачать и установить)](https://nodejs.org/en/download)
 - Counter-Strike 2 & DOTA2
 - 3000 МБ свободного места на диске
 
