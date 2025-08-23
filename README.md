@@ -1,3 +1,5 @@
+[MY DISCORD](https://discord.gg/Kh5NMW3P ) We discuss, propose and try to implement together.
+
 #SHUD - StreamHUD
 
 Подзаголовок: Professional Gaming Overlay for Streamers
