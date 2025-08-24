@@ -3,7 +3,7 @@
 #SHUD - StreamHUD
 <img width="1000" height="367" alt="logo" src="https://github.com/user-attachments/assets/d984d9c2-645e-42a9-a0f7-a8786a00ca44" />
 
-Подзаголовок: Professional Gaming Overlay for Streamers
+#Professional Gaming Overlay for Streamers
 
 📝 Описание программы:
 SHUD - это бесплатная профессиональная система отображения игровой информации в реальном времени, 
