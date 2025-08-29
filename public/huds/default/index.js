@@ -81,9 +81,9 @@ function filterHiddenPlayers(allplayers) {
   });
 
   //console.log(
-    //`Отображаем ${Object.keys(filteredPlayers).length} из ${
-    //  Object.keys(allplayers).length
-    //} игроков`
+  //`Отображаем ${Object.keys(filteredPlayers).length} из ${
+  //  Object.keys(allplayers).length
+  //} игроков`
   //);
   return filteredPlayers;
 }
@@ -156,6 +156,42 @@ BG_DEAD_T = "rgba(254, 97, 0, 0.6)";
 //loadColorsConfig(() => {
 // Теперь вы можете вызывать функции, которые используют константы
 //});
+
+// Переопределение цветов из конфигурационного файла HUD (если есть)
+(function applyHudColorOverrides() {
+  try {
+    // Пытаемся определить имя HUD из URL: /hud/<hudId>/...
+    const fromUrl = (window.location.pathname.match(/^\/hud\/([^\/]+)/) ||
+      [])[1];
+    const hudName =
+      fromUrl || (typeof HUD_NAME === "string" && HUD_NAME) || "default";
+    const tryPaths = [
+      `/hud/${hudName}/colors.config.json`,
+      `/huds/${hudName}/colors.config.json`,
+    ];
+    const load = (i) => {
+      if (i >= tryPaths.length) return Promise.resolve(null);
+      return fetch(tryPaths[i], { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null)
+        .then((j) => (j ? j : load(i + 1)));
+    };
+    load(0)
+      .then((cfg) => {
+        if (!cfg || typeof cfg !== "object") return;
+        Object.keys(cfg).forEach((k) => {
+          const val = cfg[k];
+          if (typeof val === "string" && val.trim()) {
+            try {
+              // eslint-disable-next-line no-eval
+              eval(`${k} = ${JSON.stringify(val)}`);
+            } catch {}
+          }
+        });
+      })
+      .catch(() => {});
+  } catch {}
+})();
 
 // Подписываемся на события скрытия игроков
 document.addEventListener("DOMContentLoaded", function () {
@@ -480,13 +516,16 @@ function updateTopPanel(
     // Скрываем или очищаем элементы при отсутствии данных
     $(".team_left, .team_right, .score_left, .score_right").text("");
     $(".logo_left .logo, .logo_right .logo").attr("src", "");
-    $(".border_left, .border_right, .map_left, .map_right").css("background-color", "");
+    $(".border_left, .border_right, .map_left, .map_right").css(
+      "background-color",
+      ""
+    );
     $(
       "#left_team #best_of .block1, #left_team #best_of .block2, #left_team #best_of .block3, #right_team #best_of .block1, #right_team #best_of .block2, #right_team #best_of .block3"
     ).css("background-color", "");
     return; // Прерываем выполнение функции
   }
-      
+
   const currentRound = map.round || 0;
   const teamsSelected = left?.name && right?.name;
   const matchFormat = match?.format; // Получаем формат матча или используем bo1 по умолчанию
@@ -497,11 +536,23 @@ function updateTopPanel(
     "#left_team #main, .live_left, #left_team #score, #right_team #main, .live_right, #right_team #score"
   ).css("color", COLOR_WHITE);
 
+  // Цвета для верхних полос слева/справа из констант
+  try {
+    const leftSideTeam = (left && left[0] && left[0].team) || "CT";
+    const rightSideTeam = (right && right[0] && right[0].team) || "T";
+    const leftBarColor = leftSideTeam === "CT" ? COLOR_NEW_CT : COLOR_NEW_T;
+    const rightBarColor = rightSideTeam === "CT" ? COLOR_NEW_CT : COLOR_NEW_T;
+    $("#left_bar").css("background-color", leftBarColor);
+    $("#right_bar").css("background-color", rightBarColor);
+    $("#score_left").css("color", leftBarColor);
+    $("#score_right").css("color", rightBarColor);
+  } catch {}
+
   if (!teamsSelected) {
     // Используем имена команд напрямую из map объекта, с проверкой на существование
     $("#left_team #main").text(map.team_ct?.name || "");
     $("#right_team #main").text(map.team_t?.name || "");
-    
+
     // Обновляем счет с проверкой на существование
     $("#left_team #score").text(map.team_ct?.score || "0");
     $("#right_team #score").text(map.team_t?.score || "0");
@@ -519,8 +570,14 @@ function updateTopPanel(
     $("#left_team .bar").css("background-color", COLOR_NEW_CT);
     $("#right_team .bar").css("background-color", COLOR_NEW_T);
 
-    $("#left_team #alert #alert_pole_right").css("background-color", COLOR_NEW_CT);
-    $("#right_team #alert #alert_pole_left").css("background-color", COLOR_NEW_T);
+    $("#left_team #alert #alert_pole_right").css(
+      "background-color",
+      COLOR_NEW_CT
+    );
+    $("#right_team #alert #alert_pole_left").css(
+      "background-color",
+      COLOR_NEW_T
+    );
 
     $("#match_pole_1").css("background-color", COLOR_NEW_CT);
     $("#match_pole_2").css("background-color", COLOR_NEW_T);
@@ -544,22 +601,28 @@ function updateTopPanel(
 
     // Определяем, какая команда на какой стороне
     const teams = {
-      left: left[0]?.team === "CT"
-        ? { side: "ct", score: scoreTeamCT }
-        : { side: "t", score: scoreTeamT },
-      right: right[0]?.team === "CT"
-        ? { side: "ct", score: scoreTeamCT }
-        : { side: "t", score: scoreTeamT }
+      left:
+        left[0]?.team === "CT"
+          ? { side: "ct", score: scoreTeamCT }
+          : { side: "t", score: scoreTeamT },
+      right:
+        right[0]?.team === "CT"
+          ? { side: "ct", score: scoreTeamCT }
+          : { side: "t", score: scoreTeamT },
     };
 
     // Сначала скрываем все блоки
-    $("#left_team #best_of .block1, #left_team #best_of .block2, #left_team #best_of .block3, #left_team #best_of .block4, #left_team #best_of .block5").css({
+    $(
+      "#left_team #best_of .block1, #left_team #best_of .block2, #left_team #best_of .block3, #left_team #best_of .block4, #left_team #best_of .block5"
+    ).css({
       "background-color": "",
-      "opacity": "0"
+      opacity: "0",
     });
-    $("#right_team #best_of .block1, #right_team #best_of .block2, #right_team #best_of .block3, #right_team #best_of .block4, #right_team #best_of .block5").css({
+    $(
+      "#right_team #best_of .block1, #right_team #best_of .block2, #right_team #best_of .block3, #right_team #best_of .block4, #right_team #best_of .block5"
+    ).css({
       "background-color": "",
-      "opacity": "0"
+      opacity: "0",
     });
 
     // Устанавливаем цвет основной полосы
@@ -574,9 +637,15 @@ function updateTopPanel(
 
     if (matchFormat === "bo3") {
       // Показываем только нужные блоки для bo3 (block4 и block5)
-      $("#left_team #best_of .block4, #left_team #best_of .block5").css("opacity", "1");
-      $("#right_team #best_of .block4, #right_team #best_of .block5").css("opacity", "1");
-      
+      $("#left_team #best_of .block4, #left_team #best_of .block5").css(
+        "opacity",
+        "1"
+      );
+      $("#right_team #best_of .block4, #right_team #best_of .block5").css(
+        "opacity",
+        "1"
+      );
+
       // Для левой команды
       if (teams.left.score >= 1) {
         $("#left_team #best_of .block4").css("background-color", COLOR_WHITE);
@@ -584,7 +653,7 @@ function updateTopPanel(
       if (teams.left.score >= 2) {
         $("#left_team #best_of .block5").css("background-color", COLOR_WHITE);
       }
-      
+
       // Для правой команды
       if (teams.right.score >= 1) {
         $("#right_team #best_of .block4").css("background-color", COLOR_WHITE);
@@ -594,9 +663,13 @@ function updateTopPanel(
       }
     } else if (matchFormat === "bo5") {
       // Показываем только нужные блоки для bo5 (block1, block2 и block3)
-      $("#left_team #best_of .block1, #left_team #best_of .block2, #left_team #best_of .block3").css("opacity", "1");
-      $("#right_team #best_of .block1, #right_team #best_of .block2, #right_team #best_of .block3").css("opacity", "1");
-      
+      $(
+        "#left_team #best_of .block1, #left_team #best_of .block2, #left_team #best_of .block3"
+      ).css("opacity", "1");
+      $(
+        "#right_team #best_of .block1, #right_team #best_of .block2, #right_team #best_of .block3"
+      ).css("opacity", "1");
+
       // Для левой команды
       if (teams.left.score >= 1) {
         $("#left_team #best_of .block1").css("background-color", COLOR_WHITE);
@@ -607,7 +680,7 @@ function updateTopPanel(
       if (teams.left.score >= 3) {
         $("#left_team #best_of .block3").css("background-color", COLOR_WHITE);
       }
-      
+
       // Для правой команды
       if (teams.right.score >= 1) {
         $("#right_team #best_of .block1").css("background-color", COLOR_WHITE);
@@ -620,21 +693,27 @@ function updateTopPanel(
       }
     } else {
       // Для bo1 скрываем все блоки
-      $("#left_team #best_of .block1, #left_team #best_of .block2, #left_team #best_of .block3, #left_team #best_of .block4, #left_team #best_of .block5").css("opacity", "0");
-      $("#right_team #best_of .block1, #right_team #best_of .block2, #right_team #best_of .block3, #right_team #best_of .block4, #right_team #best_of .block5").css("opacity", "0");
+      $(
+        "#left_team #best_of .block1, #left_team #best_of .block2, #left_team #best_of .block3, #left_team #best_of .block4, #left_team #best_of .block5"
+      ).css("opacity", "0");
+      $(
+        "#right_team #best_of .block1, #right_team #best_of .block2, #right_team #best_of .block3, #right_team #best_of .block4, #right_team #best_of .block5"
+      ).css("opacity", "0");
     }
   }
 }
 
 function updateRoundNow(round, map) {
   if (!round || !map) return;
-  
+
   // Используем глобальную переменную round_now
-  round_now = map.round + (round.phase == "over" || round.phase == "intermission" ? 0 : 1);
-  
+  round_now =
+    map.round +
+    (round.phase == "over" || round.phase == "intermission" ? 0 : 1);
+
   // Обновляем отображение номера раунда
   $("#round_number").text("Round " + round_now + " / 24");
-  
+
   // Примечание: сброс start_money теперь происходит в updateStateFreezetime
 }
 
@@ -654,7 +733,7 @@ function updateRoundState(
     if (!players || !Array.isArray(players)) {
       return 0;
     }
-    
+
     let count = 0;
     for (let i = 0; i < players.length; i++) {
       if (players[i].state && players[i].state.health > 0) {
@@ -674,33 +753,33 @@ function updateRoundState(
     .css("color", teams.right.side == "ct" ? COLOR_NEW_CT : COLOR_NEW_T);
 
   switch (phase_countdowns.phase) {
-      case "warmup":
-          updateStateWarmup(phase_countdowns, teams);
-          break;
-      case "freezetime":
-          updateStateFreezetime(phase_countdowns, previously, teams);
-          break;
-      case "live":
-          updateStateLive(phase_countdowns, bomb, players, previously, teams);
-          break;
-      case "over":
-          updateStateOver(phase_countdowns, round, previously, teams);
-          break;
-      case "bomb":
-          updateStatePlanted(phase_countdowns, round, previously, teams);
-          break;
-      case "defuse":
-          updateStateDefuse(phase_countdowns, bomb, players, teams);
-          break;
-      case "paused":
-          updateStatePaused(phase_countdowns, "paused", previously, map);
-          break;
-      case "timeout_t":
-          updateStatePaused(phase_countdowns, "timeout_t", previously, map);
-          break;
-      case "timeout_ct":
-          updateStatePaused(phase_countdowns, "timeout_ct", previously, map);
-          break;
+    case "warmup":
+      updateStateWarmup(phase_countdowns, teams);
+      break;
+    case "freezetime":
+      updateStateFreezetime(phase_countdowns, previously, teams);
+      break;
+    case "live":
+      updateStateLive(phase_countdowns, bomb, players, previously, teams);
+      break;
+    case "over":
+      updateStateOver(phase_countdowns, round, previously, teams);
+      break;
+    case "bomb":
+      updateStatePlanted(phase_countdowns, round, previously, teams);
+      break;
+    case "defuse":
+      updateStateDefuse(phase_countdowns, bomb, players, teams);
+      break;
+    case "paused":
+      updateStatePaused(phase_countdowns, "paused", previously, map);
+      break;
+    case "timeout_t":
+      updateStatePaused(phase_countdowns, "timeout_t", previously, map);
+      break;
+    case "timeout_ct":
+      updateStatePaused(phase_countdowns, "timeout_ct", previously, map);
+      break;
   }
 }
 
@@ -724,33 +803,33 @@ function updateStateFreezetime(phase, previously, teams) {
   if (phase) {
     // Удаляем все классы таймера раунда
     removeRoundTimeGraphics();
-    
+
     // Сбрасываем состояние бомбы
     resetBomb();
-    
+
     // Сбрасываем состояние разминирования
     isDefusing = false;
-    
+
     // Сбрасываем начальные деньги игроков для нового раунда
     start_money = {};
-    
+
     // Показываем статистику игроков
     showPlayerStats(phase);
-    
+
     // Показываем утилиты и деньги
     $("#players_left #box_utility").slideDown(500);
     $("#players_right #box_utility").slideDown(500);
     $("#players_left #box_monetary").slideDown(500);
     $("#players_right #box_monetary").slideDown(500);
-    
+
     // Устанавливаем цвет таймера
     $("#round_timer_text").css("color", COLOR_GRAY);
-    
+
     // Очищаем дополнительные классы таймера раунда
     $("#round_timer_text").removeClass("bomb_active");
     $("#round_timer_text").removeClass("bomb_defused");
     $("#round_timer_text").removeClass("bomb_exploded");
-    
+
     if (previously.hasOwnProperty("round")) {
       if (previously.round.hasOwnProperty("win_team")) {
         if (previously.round.win_team == "CT") {
@@ -817,7 +896,7 @@ function updateStateOver(
 
   // Всегда сбрасываем бомбу при завершении раунда
   resetBomb();
-  
+
   if (phase_countdowns) {
     $("#round_timer_text").css("color", COLOR_GRAY);
     //#region Which Team Won
@@ -940,10 +1019,10 @@ function updateStatePlanted(phase, round, previously, teams) {
         if ($("#round_timer_text").hasClass("flash"))
           $("#round_timer_text").removeClass("flash");
         animateRoundTimer("bomb_active", false);
-        
+
         // После анимации таймера скрываем текст с часами
         $("#round_timer_text").text(""); // Очищаем текст таймера
-        
+
         showMiddleAlert(COLOR_NEW_T, COLOR_NEW_T, "BOMB PLANTED", COLOR_NEW_T);
         var wait = setTimeout(function () {
           $("#alert_middle")
@@ -1010,10 +1089,10 @@ function updateStateDefuse(phase, bomb, players, teams) {
         if (bomb.state == "defusing") {
           let player_steamid = bomb.player;
           let defuserName = "Unknown Player"; // Имя по умолчанию
-          
+
           // Получаем доступ к глобальной переменной allplayers
           const allplayers = window.allplayers;
-          
+
           // Проверяем, есть ли игрок в глобальном объекте allplayers
           if (allplayers && player_steamid && allplayers[player_steamid]) {
             defuserName = allplayers[player_steamid].name || defuserName;
@@ -1021,7 +1100,7 @@ function updateStateDefuse(phase, bomb, players, teams) {
           // Если не нашли в allplayers, ищем в переданных players
           else if (players) {
             // Если players - объект с игроками по steamid
-            if (typeof players === 'object' && !Array.isArray(players)) {
+            if (typeof players === "object" && !Array.isArray(players)) {
               if (player_steamid && players[player_steamid]) {
                 defuserName = players[player_steamid].name || defuserName;
               }
@@ -1030,14 +1109,18 @@ function updateStateDefuse(phase, bomb, players, teams) {
             else if (Array.isArray(players)) {
               for (let i = 0; i < players.length; i++) {
                 const _player = players[i];
-                if (_player && (_player.steamid === player_steamid || _player.observer_slot === bomb.player)) {
+                if (
+                  _player &&
+                  (_player.steamid === player_steamid ||
+                    _player.observer_slot === bomb.player)
+                ) {
                   defuserName = _player.name || defuserName;
                   break;
                 }
               }
             }
           }
-          
+
           // Выводим сообщение о разминировании
           //console.log(`Defuser found: ${defuserName}, steamid: ${player_steamid}`);
           showAlertSlide(
@@ -1053,62 +1136,62 @@ function updateStateDefuse(phase, bomb, players, teams) {
 
 function updateStateLive(phase, bomb, players, previously, teams) {
   if (phase) {
-      removeRoundTimeGraphics();
-      forceRemoveAlerts();
-      resetBomb(teams);
-      hidePlayerStats(phase, previously);
-      if (checkPrev(previously, "freezetime")) {
-          $("#players_left #box_monetary").slideUp(500);
-          $("#players_right #box_monetary").slideUp(500);
-      }
-      if (phase.phase_ends_in <= 109.9) {
-          $("#players_left #box_utility").slideUp(500);
-          $("#players_right #box_utility").slideUp(500);
-      }
-      /*if (phase.phase_ends_in <= 5) {
+    removeRoundTimeGraphics();
+    forceRemoveAlerts();
+    resetBomb(teams);
+    hidePlayerStats(phase, previously);
+    if (checkPrev(previously, "freezetime")) {
+      $("#players_left #box_monetary").slideUp(500);
+      $("#players_right #box_monetary").slideUp(500);
+    }
+    if (phase.phase_ends_in <= 109.9) {
+      $("#players_left #box_utility").slideUp(500);
+      $("#players_right #box_utility").slideUp(500);
+    }
+    /*if (phase.phase_ends_in <= 5) {
           $("#round_timer_text")
               .addClass("animated flash")
               .css("animation-duration", "2s")
               .css("animation-iteration-count", "infinite");
       }*/
-      $("#round_timer_text").css(
-          "color",
-          phase.phase_ends_in <= 10 ? COLOR_RED : COLOR_WHITE
-      );
-      if (phase.phase_ends_in) {
-          var clock_time = Math.abs(Math.ceil(phase.phase_ends_in));
-          var count_minute = Math.floor(clock_time / 60);
-          var count_seconds = clock_time - count_minute * 60;
-          if (count_seconds < 10) {
-              count_seconds = "0" + count_seconds;
-          }
-          $("#round_timer_text").text(count_minute + ":" + count_seconds);
+    $("#round_timer_text").css(
+      "color",
+      phase.phase_ends_in <= 10 ? COLOR_RED : COLOR_WHITE
+    );
+    if (phase.phase_ends_in) {
+      var clock_time = Math.abs(Math.ceil(phase.phase_ends_in));
+      var count_minute = Math.floor(clock_time / 60);
+      var count_seconds = clock_time - count_minute * 60;
+      if (count_seconds < 10) {
+        count_seconds = "0" + count_seconds;
       }
-      if (bomb != null) {
-          if (bomb.state == "planting") {
-              let side = teams.left.side == "T" ? "#left_team" : "#right_team";
-              let player_steamid = bomb.player;
-              
-              // Поиск игрока в тех, что уже переданы в функцию players (должны быть все steamID)
-              let planter = null;
-              for (let steamid in players) {
-                  if (steamid === player_steamid) {
-                      planter = players[steamid];
-                      break;
-                  }
-              }
-              
-              if (planter) {
-                  showAlertSlide(
-                      side,
-                      COLOR_NEW_T,
-                      planter.name + " is planting the bomb"
-                  );
-              } else {
+      $("#round_timer_text").text(count_minute + ":" + count_seconds);
+    }
+    if (bomb != null) {
+      if (bomb.state == "planting") {
+        let side = teams.left.side == "T" ? "#left_team" : "#right_team";
+        let player_steamid = bomb.player;
+
+        // Поиск игрока в тех, что уже переданы в функцию players (должны быть все steamID)
+        let planter = null;
+        for (let steamid in players) {
+          if (steamid === player_steamid) {
+            planter = players[steamid];
+            break;
+          }
+        }
+
+        if (planter) {
+          showAlertSlide(
+            side,
+            COLOR_NEW_T,
+            planter.name + " is planting the bomb"
+          );
+        } else {
           showAlertSlide(side, COLOR_NEW_T, "Bomb is being planted");
-              }
-          }
+        }
       }
+    }
   }
 }
 
@@ -1165,7 +1248,9 @@ function updateStatePaused(phase, type, previously, map) {
     $("#alert_middle #alert_text_middle")
       .text(
         // Всегда показываем название команды T, независимо от стороны
-        map.team_t.name ? map.team_t.name.toUpperCase() + " TIMEOUT" : "T TIMEOUT"
+        map.team_t.name
+          ? map.team_t.name.toUpperCase() + " TIMEOUT"
+          : "T TIMEOUT"
       )
       .css("color", COLOR_NEW_T);
     showAlertSlide(
@@ -1195,7 +1280,9 @@ function updateStatePaused(phase, type, previously, map) {
     $("#alert_middle #alert_text_middle")
       .text(
         // Всегда показываем название команды CT, независимо от стороны
-        map.team_ct.name ? map.team_ct.name.toUpperCase() + " TIMEOUT" : "CT TIMEOUT"
+        map.team_ct.name
+          ? map.team_ct.name.toUpperCase() + " TIMEOUT"
+          : "CT TIMEOUT"
       )
       .css("color", COLOR_NEW_CT);
     showAlertSlide(
@@ -1364,7 +1451,9 @@ function updatePlayers(
   if (!map) {
     console.log("Map is undefined in updatePlayers");
   } else {
-    console.log(`Map data in updatePlayers: CT logo: ${map.team_ct?.logo}, T logo: ${map.team_t?.logo}`);
+    console.log(
+      `Map data in updatePlayers: CT logo: ${map.team_ct?.logo}, T logo: ${map.team_t?.logo}`
+    );
   }
 
   if (teams_players) {
@@ -1393,7 +1482,9 @@ function fillPlayers(
   if (!map) {
     console.log("Map is undefined in fillPlayers");
   } else {
-    console.log(`Map data in fillPlayers: CT logo: ${map.team_ct?.logo}, T logo: ${map.team_t?.logo}`);
+    console.log(
+      `Map data in fillPlayers: CT logo: ${map.team_ct?.logo}, T logo: ${map.team_t?.logo}`
+    );
   }
 
   if (teams_players?.left?.players) {
@@ -1517,53 +1608,65 @@ function fillPlayer(
     .find("#player_alias_text")
     .css("color", dead ? COLOR_WHITE_HALF : COLOR_WHITE);
 
-    $player.find("#player_image").removeClass("dead");
-    if (disp_player_avatars) {
-      if (player.hasOwnProperty("avatar") && player.avatar) {
-        // Если у игрока есть аватарка, используем её
-        $player
-          .find("#player_image")
-          .attr("src", "/uploads/" + player.avatar)
-          .addClass(dead ? "dead" : "");
+  $player.find("#player_image").removeClass("dead");
+  if (disp_player_avatars) {
+    if (player.hasOwnProperty("avatar") && player.avatar) {
+      // Если у игрока есть аватарка, используем её
+      $player
+        .find("#player_image")
+        .attr("src", "/uploads/" + player.avatar)
+        .addClass(dead ? "dead" : "");
+    } else {
+      // Если у игрока нет аватарки, используем логотип команды
+      let _img = "";
+
+      // Логируем информацию для отладки
+      console.log(
+        `Player ${player.name} (team: ${team}) has no avatar, trying to use team logo`
+      );
+
+      // Проверяем наличие данных о командах и их логотипах
+      if (map && map.team_ct && map.team_t) {
+        // Логируем информацию о логотипах команд
+        console.log(
+          `Team logos available - CT: ${map.team_ct.logo}, T: ${map.team_t.logo}`
+        );
+
+        if (team === "CT" && map.team_ct.logo) {
+          // Для CT команды используем её логотип
+          _img = "/uploads/" + map.team_ct.logo;
+          console.log(`Using CT team logo: ${_img} for player ${player.name}`);
+        } else if (team === "T" && map.team_t.logo) {
+          // Для T команды используем её логотип
+          _img = "/uploads/" + map.team_t.logo;
+          console.log(`Using T team logo: ${_img} for player ${player.name}`);
+        }
       } else {
-        // Если у игрока нет аватарки, используем логотип команды
-        let _img = "";
-        
-        // Логируем информацию для отладки
-        console.log(`Player ${player.name} (team: ${team}) has no avatar, trying to use team logo`);
-        
-        // Проверяем наличие данных о командах и их логотипах
-        if (map && map.team_ct && map.team_t) {
-          // Логируем информацию о логотипах команд
-          console.log(`Team logos available - CT: ${map.team_ct.logo}, T: ${map.team_t.logo}`);
-          
-          if (team === "CT" && map.team_ct.logo) {
-            // Для CT команды используем её логотип
-            _img = "/uploads/" + map.team_ct.logo;
-            console.log(`Using CT team logo: ${_img} for player ${player.name}`);
-          } else if (team === "T" && map.team_t.logo) {
-            // Для T команды используем её логотип
-            _img = "/uploads/" + map.team_t.logo;
-            console.log(`Using T team logo: ${_img} for player ${player.name}`);
-          }
-        } else {
-          console.log(`No team logos available or map data incomplete for player ${player.name}`);
-        }
-        
-        // Если логотип команды не найден или путь некорректный, используем дефолтный логотип
-        if (!_img || _img === "/uploads/" || _img.includes("undefined") || _img.includes("null")) {
-          _img = team === "CT" 
-            ? "/images/logo_ct_default.png" 
-            : "/images/logo_t_default.png";
-        }
-        
-        // Устанавливаем изображение и добавляем класс dead, если игрок мертв
-        $player
-          .find("#player_image")
-          .attr("src", _img)
-          .addClass(dead ? "dead" : "");
+        console.log(
+          `No team logos available or map data incomplete for player ${player.name}`
+        );
       }
+
+      // Если логотип команды не найден или путь некорректный, используем дефолтный логотип
+      if (
+        !_img ||
+        _img === "/uploads/" ||
+        _img.includes("undefined") ||
+        _img.includes("null")
+      ) {
+        _img =
+          team === "CT"
+            ? "/images/logo_ct_default.png"
+            : "/images/logo_t_default.png";
+      }
+
+      // Устанавливаем изображение и добавляем класс dead, если игрок мертв
+      $player
+        .find("#player_image")
+        .attr("src", _img)
+        .addClass(dead ? "dead" : "");
     }
+  }
 
   if (slot >= 1 && slot <= 5) {
     $top.find("#player_alias_text").text(player.name);
@@ -1699,7 +1802,7 @@ function fillPlayer(
 
   // Вычисляем потраченную сумму
   const spent = start_money[steamid] - stats.money;
-  
+
   // Отображаем потраченную сумму с правильным знаком
   if (spent > 0) {
     // Если потрачено больше, чем было, показываем со знаком минус
@@ -1796,12 +1899,12 @@ function updatePlayerNames(allplayers) {
   Object.values(allplayers).forEach((player) => {
     const slot = player.observer_slot;
     const playerName = player.name;
-    
+
     // Предполагаем, что у вас есть элементы с id вида #player_alias_text_0, #player_alias_text_1 и т.д.
     const playerAliasElement = document.querySelector(
       `#player_alias_text_${slot}`
     );
-    
+
     if (playerAliasElement) {
       playerAliasElement.textContent = `${slot} | ${playerName}`;
     }
@@ -1818,12 +1921,12 @@ function removeRoundTimeGraphics() {
   $("#round_timer_text").removeClass("players_eliminated_CT");
   $("#round_timer_text").removeClass("round_time_reached");
   $("#round_timer_text").removeClass("round_warmup");
-  
+
   // Добавляем удаление классов bomb_active и bomb_defused
   $("#round_timer_text").removeClass("bomb_active");
   $("#round_timer_text").removeClass("bomb_defused");
   $("#round_timer_text").removeClass("bomb_exploded");
-  
+
   // Добавляем удаление классов для паузы
   $("#round_timer_text").removeClass("pause_active");
   $("#round_timer_text").removeClass("pause_active_T");
@@ -1852,19 +1955,19 @@ function bomb(time) {
 function resetBomb(teams) {
   // Останавливаем таймер бомбы
   clearInterval(bomb_timer);
-  
+
   // Сбрасываем состояние разминирования
   isDefusing = false;
-  
+
   // Скрываем индикаторы бомбы и разминирования
   $("#timers #bomb_bar").css("opacity", 0);
   $("#timers #defuse_bar").css("opacity", 0);
-  
+
   // Удаляем классы таймера, связанные с бомбой
   $("#round_timer_text").removeClass("bomb_active");
   $("#round_timer_text").removeClass("bomb_defused");
   $("#round_timer_text").removeClass("bomb_exploded");
-  
+
   // Скрываем иконки разминирования
   if (teams) {
     if (teams.left && teams.left.side == "t") {
@@ -1992,15 +2095,15 @@ function animateRoundTimer(_class, remove_graphics) {
   animateElement("#round_timer_text", "fadeOut", function () {
     $("#round_timer_text").removeClass("animated fadeOut");
     if (remove_graphics) removeRoundTimeGraphics();
-    
+
     // Очищаем текст и добавляем класс
     $("#round_timer_text").text("").addClass(_class);
-    
+
     // Если это bomb_active, не показываем текст таймера
     if (_class === "bomb_active") {
       $("#round_timer_text").text("");
     }
-    
+
     animateElement("#round_timer_text", "fadeIn", function () {
       $("#round_timer_text").removeClass("animated fadeIn");
     });
@@ -2165,7 +2268,7 @@ function checkGuns(weapons) {
   return false;
 }
 
-function updateTeamValues(left, right, map) { 
+function updateTeamValues(left, right, map) {
   // Преобразуем объекты в массивы
   const leftArray = Object.values(left);
   const rightArray = Object.values(right);
@@ -2217,47 +2320,47 @@ function updateTeamValues(left, right, map) {
 
   // Добавляем проверки на существование свойств
   if (map?.team_ct?.consecutive_round_losses == 0) {
-      left_loss = 1400;
+    left_loss = 1400;
   } else if (map?.team_ct?.consecutive_round_losses == 1) {
-      left_loss = 1900;
-      $("#players_left .loss_1").css("background-color", left_color);
+    left_loss = 1900;
+    $("#players_left .loss_1").css("background-color", left_color);
   } else if (map?.team_ct?.consecutive_round_losses == 2) {
-      left_loss = 2400;
-      $("#players_left .loss_1").css("background-color", left_color);
-      $("#players_left .loss_2").css("background-color", left_color);
+    left_loss = 2400;
+    $("#players_left .loss_1").css("background-color", left_color);
+    $("#players_left .loss_2").css("background-color", left_color);
   } else if (map?.team_ct?.consecutive_round_losses == 3) {
-      left_loss = 2900;
-      $("#players_left .loss_1").css("background-color", left_color);
-      $("#players_left .loss_2").css("background-color", left_color);
-      $("#players_left .loss_3").css("background-color", left_color);
+    left_loss = 2900;
+    $("#players_left .loss_1").css("background-color", left_color);
+    $("#players_left .loss_2").css("background-color", left_color);
+    $("#players_left .loss_3").css("background-color", left_color);
   } else if (map?.team_ct?.consecutive_round_losses >= 4) {
-      left_loss = 3400;
-      $("#players_left .loss_1").css("background-color", left_color);
-      $("#players_left .loss_2").css("background-color", left_color);
-      $("#players_left .loss_3").css("background-color", left_color);
-      $("#players_left .loss_4").css("background-color", left_color);
+    left_loss = 3400;
+    $("#players_left .loss_1").css("background-color", left_color);
+    $("#players_left .loss_2").css("background-color", left_color);
+    $("#players_left .loss_3").css("background-color", left_color);
+    $("#players_left .loss_4").css("background-color", left_color);
   }
 
   if (map?.team_t?.consecutive_round_losses == 0) {
-      right_loss = 1400;
+    right_loss = 1400;
   } else if (map?.team_t?.consecutive_round_losses == 1) {
-      right_loss = 1900;
-      $("#players_right .loss_1").css("background-color", right_color);
+    right_loss = 1900;
+    $("#players_right .loss_1").css("background-color", right_color);
   } else if (map?.team_t?.consecutive_round_losses == 2) {
-      right_loss = 2400;
-      $("#players_right .loss_1").css("background-color", right_color);
-      $("#players_right .loss_2").css("background-color", right_color);
+    right_loss = 2400;
+    $("#players_right .loss_1").css("background-color", right_color);
+    $("#players_right .loss_2").css("background-color", right_color);
   } else if (map?.team_t?.consecutive_round_losses == 3) {
-      right_loss = 2900;
-      $("#players_right .loss_1").css("background-color", right_color);
-      $("#players_right .loss_2").css("background-color", right_color);
-      $("#players_right .loss_3").css("background-color", right_color);
+    right_loss = 2900;
+    $("#players_right .loss_1").css("background-color", right_color);
+    $("#players_right .loss_2").css("background-color", right_color);
+    $("#players_right .loss_3").css("background-color", right_color);
   } else if (map?.team_t?.consecutive_round_losses >= 4) {
-      right_loss = 3400;
-      $("#players_right .loss_1").css("background-color", right_color);
-      $("#players_right .loss_2").css("background-color", right_color);
-      $("#players_right .loss_3").css("background-color", right_color);
-      $("#players_right .loss_4").css("background-color", right_color);
+    right_loss = 3400;
+    $("#players_right .loss_1").css("background-color", right_color);
+    $("#players_right .loss_2").css("background-color", right_color);
+    $("#players_right .loss_3").css("background-color", right_color);
+    $("#players_right .loss_4").css("background-color", right_color);
   }
 
   $("#players_left #loss_text").css("color", left_color);
@@ -2268,15 +2371,15 @@ function updateTeamValues(left, right, map) {
 
 function countNades(left, right) {
   var count_left_smokegrenade = 0,
-      count_left_incgrenade = 0,
-      count_left_molotov = 0,
-      count_left_flashbang = 0,
-      count_left_hegrenade = 0;
+    count_left_incgrenade = 0,
+    count_left_molotov = 0,
+    count_left_flashbang = 0,
+    count_left_hegrenade = 0;
   var count_right_smokegrenade = 0,
-      count_right_incgrenade = 0,
-      count_right_molotov = 0,
-      count_right_flashbang = 0,
-      count_right_hegrenade = 0;
+    count_right_incgrenade = 0,
+    count_right_molotov = 0,
+    count_right_flashbang = 0,
+    count_right_hegrenade = 0;
 
   // Определяем стороны команд на основе первого игрока каждой команды
   let side_left = left[0]?.team || "CT";
@@ -2286,61 +2389,61 @@ function countNades(left, right) {
   side_right = side_right.toUpperCase();
 
   for (let key in left) {
-      let player = left[key];
-      let weapons = player.weapons || {}; // Получаем оружие напрямую из свойства
-      for (let key2 in weapons) {
-          let weapon = weapons[key2];
-          let name = weapon.name.replace("weapon_", "");
-          let type = weapon.type;
-          if (type == "Grenade") {
-              switch (name) {
-                  case "smokegrenade":
-                      count_left_smokegrenade += 1;
-                      break;
-                  case "incgrenade":
-                      count_left_incgrenade += 1;
-                      break;
-                  case "molotov":
-                      count_left_molotov += 1;
-                      break;
-                  case "flashbang":
-                      count_left_flashbang += 1;
-                      break;
-                  case "hegrenade":
-                      count_left_hegrenade += 1;
-                      break;
-              }
-          }
+    let player = left[key];
+    let weapons = player.weapons || {}; // Получаем оружие напрямую из свойства
+    for (let key2 in weapons) {
+      let weapon = weapons[key2];
+      let name = weapon.name.replace("weapon_", "");
+      let type = weapon.type;
+      if (type == "Grenade") {
+        switch (name) {
+          case "smokegrenade":
+            count_left_smokegrenade += 1;
+            break;
+          case "incgrenade":
+            count_left_incgrenade += 1;
+            break;
+          case "molotov":
+            count_left_molotov += 1;
+            break;
+          case "flashbang":
+            count_left_flashbang += 1;
+            break;
+          case "hegrenade":
+            count_left_hegrenade += 1;
+            break;
+        }
       }
+    }
   }
 
   for (let key in right) {
-      let player = right[key];
-      let weapons = player.weapons || {}; // Получаем оружие напрямую из свойства
-      for (let key2 in weapons) {
-          let weapon = weapons[key2];
-          let name = weapon.name.replace("weapon_", "");
-          let type = weapon.type;
-          if (type == "Grenade") {
-              switch (name) {
-                  case "smokegrenade":
-                      count_right_smokegrenade += weapon.ammo_reserve;
-                      break;
-                  case "incgrenade":
-                      count_right_incgrenade += weapon.ammo_reserve;
-                      break;
-                  case "molotov":
-                      count_right_molotov += weapon.ammo_reserve;
-                      break;
-                  case "flashbang":
-                      count_right_flashbang += weapon.ammo_reserve;
-                      break;
-                  case "hegrenade":
-                      count_right_hegrenade += weapon.ammo_reserve;
-                      break;
-              }
-          }
+    let player = right[key];
+    let weapons = player.weapons || {}; // Получаем оружие напрямую из свойства
+    for (let key2 in weapons) {
+      let weapon = weapons[key2];
+      let name = weapon.name.replace("weapon_", "");
+      let type = weapon.type;
+      if (type == "Grenade") {
+        switch (name) {
+          case "smokegrenade":
+            count_right_smokegrenade += weapon.ammo_reserve;
+            break;
+          case "incgrenade":
+            count_right_incgrenade += weapon.ammo_reserve;
+            break;
+          case "molotov":
+            count_right_molotov += weapon.ammo_reserve;
+            break;
+          case "flashbang":
+            count_right_flashbang += weapon.ammo_reserve;
+            break;
+          case "hegrenade":
+            count_right_hegrenade += weapon.ammo_reserve;
+            break;
+        }
       }
+    }
   }
 
   $("#players_left #util_nade_1").removeClass();
@@ -2420,327 +2523,327 @@ function countNades(left, right) {
   $("#players_left #box_heading_text").css(
     "color",
     side_left == "CT" ? COLOR_NEW_CT : COLOR_NEW_T
-);
-$("#players_right #box_heading_text").css(
+  );
+  $("#players_right #box_heading_text").css(
     "color",
     side_right == "CT" ? COLOR_NEW_CT : COLOR_NEW_T
-);
+  );
 
-$("#players_left #util_nade_1_count").text("x" + count_left_smokegrenade);
-$("#players_left #util_nade_1").addClass("util_smokegrenade_" + side_left);
-$("#players_left #util_nade_2_count").text(
+  $("#players_left #util_nade_1_count").text("x" + count_left_smokegrenade);
+  $("#players_left #util_nade_1").addClass("util_smokegrenade_" + side_left);
+  $("#players_left #util_nade_2_count").text(
     "x" + (count_left_incgrenade + count_left_molotov)
-);
-$("#players_left #util_nade_2").addClass(
+  );
+  $("#players_left #util_nade_2").addClass(
     side_left == "CT" ? "util_incgrenade_CT" : "util_molotov_T"
-);
-$("#players_left #util_nade_3_count").text("x" + count_left_flashbang);
-$("#players_left #util_nade_3").addClass("util_flashbang_" + side_left);
-$("#players_left #util_nade_4_count").text("x" + count_left_hegrenade);
-$("#players_left #util_nade_4").addClass("util_hegrenade_" + side_left);
+  );
+  $("#players_left #util_nade_3_count").text("x" + count_left_flashbang);
+  $("#players_left #util_nade_3").addClass("util_flashbang_" + side_left);
+  $("#players_left #util_nade_4_count").text("x" + count_left_hegrenade);
+  $("#players_left #util_nade_4").addClass("util_hegrenade_" + side_left);
 
-$("#players_right #util_nade_4_count").text("x" + count_right_smokegrenade);
-$("#players_right #util_nade_4").addClass("util_smokegrenade_" + side_right);
-$("#players_right #util_nade_3_count").text(
+  $("#players_right #util_nade_4_count").text("x" + count_right_smokegrenade);
+  $("#players_right #util_nade_4").addClass("util_smokegrenade_" + side_right);
+  $("#players_right #util_nade_3_count").text(
     "x" + (count_right_incgrenade + count_right_molotov)
-);
-$("#players_right #util_nade_3").addClass(
+  );
+  $("#players_right #util_nade_3").addClass(
     side_right == "CT" ? "util_incgrenade_CT" : "util_molotov_T"
-);
-$("#players_right #util_nade_2_count").text("x" + count_right_flashbang);
-$("#players_right #util_nade_2").addClass("util_flashbang_" + side_right);
-$("#players_right #util_nade_1_count").text("x" + count_right_hegrenade);
-$("#players_right #util_nade_1").addClass("util_hegrenade_" + side_right);
+  );
+  $("#players_right #util_nade_2_count").text("x" + count_right_flashbang);
+  $("#players_right #util_nade_2").addClass("util_flashbang_" + side_right);
+  $("#players_right #util_nade_1_count").text("x" + count_right_hegrenade);
+  $("#players_right #util_nade_1").addClass("util_hegrenade_" + side_right);
 }
 
 let radarInitialized = false;
 
-  function initializeRadar() {
-    window.radar = {
-      lastAngles: {},
-      lastAmmo: {},
-      lastAlivePositions: {},
-      resolution: 1,
-      offset: { x: 0, y: 0 },
-      zRange: { min: 0, max: 0 },
-      // Кэш для хранения элементов DOM
-      domCache: {
-        radarContainer: null,
+function initializeRadar() {
+  window.radar = {
+    lastAngles: {},
+    lastAmmo: {},
+    lastAlivePositions: {},
+    resolution: 1,
+    offset: { x: 0, y: 0 },
+    zRange: { min: 0, max: 0 },
+    // Кэш для хранения элементов DOM
+    domCache: {
+      radarContainer: null,
       overlayElement: null,
-      },
-      // Кэш для хранения данных карты
-      mapCache: {},
-      // Флаг для отслеживания обновлений
-      updateFlags: {
-        playersNeedUpdate: false,
+    },
+    // Кэш для хранения данных карты
+    mapCache: {},
+    // Флаг для отслеживания обновлений
+    updateFlags: {
+      playersNeedUpdate: false,
       grenadeNeedUpdate: false,
-      },
-      // Счетчик кадров для оптимизации
+    },
+    // Счетчик кадров для оптимизации
     frameCounter: 0,
-    };
-  
+  };
+
   window.radar.loadMapData = function (mapName) {
-      // Очищаем кеш игроков при загрузке новой карты
-      this.lastAngles = {};
-      this.lastAmmo = {};
-      this.lastAlivePositions = {};
-      
-      // Проверяем, есть ли карта в кэше
-      const cleanMapName = mapName.toLowerCase().trim();
-      if (this.mapCache[cleanMapName]) {
-        // Используем кэшированные данные
-        const cachedData = this.mapCache[cleanMapName];
-        this.applyMapData(cachedData, cleanMapName);
-        return;
-      }
-      
-      // Очищаем DOM элементы только один раз
-      this.clearRadarElements();
-      
-      const metaPath = `/maps/${cleanMapName}/meta.json`;
-      const radarPath = `/maps/${cleanMapName}/radar.png`;
-      const overlayPath = `/maps/${cleanMapName}/overlay_buyzones.png`;
-      
-      // Инициализируем кэш DOM элементов
+    // Очищаем кеш игроков при загрузке новой карты
+    this.lastAngles = {};
+    this.lastAmmo = {};
+    this.lastAlivePositions = {};
+
+    // Проверяем, есть ли карта в кэше
+    const cleanMapName = mapName.toLowerCase().trim();
+    if (this.mapCache[cleanMapName]) {
+      // Используем кэшированные данные
+      const cachedData = this.mapCache[cleanMapName];
+      this.applyMapData(cachedData, cleanMapName);
+      return;
+    }
+
+    // Очищаем DOM элементы только один раз
+    this.clearRadarElements();
+
+    const metaPath = `/maps/${cleanMapName}/meta.json`;
+    const radarPath = `/maps/${cleanMapName}/radar.png`;
+    const overlayPath = `/maps/${cleanMapName}/overlay_buyzones.png`;
+
+    // Инициализируем кэш DOM элементов
     this.domCache.radarContainer = document.getElementById("radar-players");
     this.domCache.overlayElement = document.getElementById("radarBuyZones");
-      
-      fetch(metaPath)
+
+    fetch(metaPath)
       .then((response) => {
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
-          return response.json();
-        })
+        return response.json();
+      })
       .then((mapData) => {
-          // Кэшируем данные карты
-          this.mapCache[cleanMapName] = {
-            mapData,
-            radarPath,
+        // Кэшируем данные карты
+        this.mapCache[cleanMapName] = {
+          mapData,
+          radarPath,
           overlayPath,
-          };
-          
-          // Применяем данные карты
-          this.applyMapData(this.mapCache[cleanMapName], cleanMapName);
-        })
+        };
+
+        // Применяем данные карты
+        this.applyMapData(this.mapCache[cleanMapName], cleanMapName);
+      })
       .catch((error) =>
         console.warn("Не удалось загрузить настройки карты:", error)
       );
-    };
-    
-    // Новый метод для применения данных карты
+  };
+
+  // Новый метод для применения данных карты
   window.radar.applyMapData = function (cachedData, mapName) {
-      const { mapData, radarPath, overlayPath } = cachedData;
-      
-      // Сохраняем все данные как есть
-      this.mapData = mapData;
-      this.resolution = mapData.resolution;
-      this.offset = mapData.offset;
-      this.splits = mapData.splits;
-      this.zRange = mapData.zRange;
-      
-      // Обновляем элементы радара
-      if (this.domCache.radarContainer) {
-        this.domCache.radarContainer.style.backgroundImage = `url('${radarPath}')`;
+    const { mapData, radarPath, overlayPath } = cachedData;
+
+    // Сохраняем все данные как есть
+    this.mapData = mapData;
+    this.resolution = mapData.resolution;
+    this.offset = mapData.offset;
+    this.splits = mapData.splits;
+    this.zRange = mapData.zRange;
+
+    // Обновляем элементы радара
+    if (this.domCache.radarContainer) {
+      this.domCache.radarContainer.style.backgroundImage = `url('${radarPath}')`;
       this.domCache.radarContainer.style.backgroundSize = "cover";
       this.domCache.radarContainer.style.backgroundPosition = "center";
-      }
-      
-      if (this.domCache.overlayElement) {
-        this.domCache.overlayElement.style.backgroundImage = `url('${overlayPath}')`;
+    }
+
+    if (this.domCache.overlayElement) {
+      this.domCache.overlayElement.style.backgroundImage = `url('${overlayPath}')`;
       this.domCache.overlayElement.style.backgroundSize = "cover";
       this.domCache.overlayElement.style.backgroundPosition = "center";
-      }
-    };
-    
-    // Новый метод для очистки элементов радара
+    }
+  };
+
+  // Новый метод для очистки элементов радара
   window.radar.clearRadarElements = function () {
-      // Используем более эффективный способ очистки DOM
+    // Используем более эффективный способ очистки DOM
     const radarContainer = document.getElementById("radar-players");
-      if (radarContainer) {
-        // Сохраняем только фон радара
-        const backgroundImage = radarContainer.style.backgroundImage;
-        
-        // Используем innerHTML для быстрой очистки
+    if (radarContainer) {
+      // Сохраняем только фон радара
+      const backgroundImage = radarContainer.style.backgroundImage;
+
+      // Используем innerHTML для быстрой очистки
       radarContainer.innerHTML = "";
-        
-        // Восстанавливаем фон
-        radarContainer.style.backgroundImage = backgroundImage;
-      }
-      
-      // Сбрасываем глобальную переменную активного игрока
-      window.activePlayerSteamId = null;
-    };
-  
+
+      // Восстанавливаем фон
+      radarContainer.style.backgroundImage = backgroundImage;
+    }
+
+    // Сбрасываем глобальную переменную активного игрока
+    window.activePlayerSteamId = null;
+  };
+
   window.radar.positionToPerc = function (position, axis) {
-      const pos = position[axis];
-      const offset = this.offset[axis];
-      return ((pos + offset) / (1024 * this.resolution)) * 100;
-    };
-  
+    const pos = position[axis];
+    const offset = this.offset[axis];
+    return ((pos + offset) / (1024 * this.resolution)) * 100;
+  };
+
   window.radar.updatePlayer = function (player, position) {
-      const steamid = player.steamid;
-      
-      // Проверяем, мертв ли игрок
-      const isDead = player.state.health <= 0;
-      
-      // Оптимизация: используем кэширование для позиций мертвых игроков
-      if (isDead) {
-        if (!this.lastAlivePositions[steamid]) {
-          this.lastAlivePositions[steamid] = position;
-        }
-        position = this.lastAlivePositions[steamid];
-      } else {
+    const steamid = player.steamid;
+
+    // Проверяем, мертв ли игрок
+    const isDead = player.state.health <= 0;
+
+    // Оптимизация: используем кэширование для позиций мертвых игроков
+    if (isDead) {
+      if (!this.lastAlivePositions[steamid]) {
         this.lastAlivePositions[steamid] = position;
       }
-      
-      const playerElement = document.getElementById(`player-${steamid}`);
-      if (!playerElement) return;
-      
-      // Обновляем состояние игрока (мертвый/живой)
+      position = this.lastAlivePositions[steamid];
+    } else {
+      this.lastAlivePositions[steamid] = position;
+    }
+
+    const playerElement = document.getElementById(`player-${steamid}`);
+    if (!playerElement) return;
+
+    // Обновляем состояние игрока (мертвый/живой)
     playerElement.classList.toggle("dead_map", isDead);
     playerElement.style.opacity = isDead ? "0.5" : "1";
-      
-      // Оптимизация: вычисляем позицию только если игрок должен быть видимым
-      const { x, y, level } = this.positionToPixels(position);
-      
-      // Оптимизация: используем classList для переключения видимости
+
+    // Оптимизация: вычисляем позицию только если игрок должен быть видимым
+    const { x, y, level } = this.positionToPixels(position);
+
+    // Оптимизация: используем classList для переключения видимости
     if (level === "lower" || level === "upper") {
       playerElement.style.display = "block";
-      } else {
+    } else {
       playerElement.style.display = "none";
-        return; // Прекращаем обновление, если игрок не видим
-      }
-      
-      // Оптимизация: используем transform для перемещения (лучше для производительности)
-      playerElement.style.transform = `translate(${x}px, ${y}px)`;
-      
-      // Обновляем направление игрока только если он жив
-      if (!isDead && player.forward) {
+      return; // Прекращаем обновление, если игрок не видим
+    }
+
+    // Оптимизация: используем transform для перемещения (лучше для производительности)
+    playerElement.style.transform = `translate(${x}px, ${y}px)`;
+
+    // Обновляем направление игрока только если он жив
+    if (!isDead && player.forward) {
       const markerElement = playerElement.querySelector(".player-marker");
-        
-        if (markerElement) {
+
+      if (markerElement) {
         markerElement.style.display = "block";
-          
-          // Оптимизация: кэшируем разбор строки
-          const rawAngle = player.forward.split(", ");
-          const x = parseFloat(rawAngle[0]);
-          const y = parseFloat(rawAngle[1]);
-          
-          if (!isNaN(x) && !isNaN(y)) {
-            // Оптимизация: упрощаем вычисление угла
+
+        // Оптимизация: кэшируем разбор строки
+        const rawAngle = player.forward.split(", ");
+        const x = parseFloat(rawAngle[0]);
+        const y = parseFloat(rawAngle[1]);
+
+        if (!isNaN(x) && !isNaN(y)) {
+          // Оптимизация: упрощаем вычисление угла
           const angle = x > 0 ? 90 + y * -1 * 90 : 270 + y * 90;
-            markerElement.style.transform = `rotate(${angle}deg)`;
-          }
-        }
-      } else if (isDead) {
-      const markerElement = playerElement.querySelector(".player-marker");
-        if (markerElement) {
-        markerElement.style.display = "none";
+          markerElement.style.transform = `rotate(${angle}deg)`;
         }
       }
-      
-      // Отдельная обработка fireElement - только если игрок жив
-      // ... existing code ...
-      if (!isDead) {
+    } else if (isDead) {
+      const markerElement = playerElement.querySelector(".player-marker");
+      if (markerElement) {
+        markerElement.style.display = "none";
+      }
+    }
+
+    // Отдельная обработка fireElement - только если игрок жив
+    // ... existing code ...
+    if (!isDead) {
       const fireElement = playerElement.querySelector(".background-fire");
-        
-        if (fireElement) {
-          // По умолчанию скрываем эффект огня
+
+      if (fireElement) {
+        // По умолчанию скрываем эффект огня
         fireElement.style.display = "none";
-          
-          if (player.weapons) {
+
+        if (player.weapons) {
           const activeWeapon = Object.values(player.weapons).find(
             (weapon) => weapon.state === "active"
           );
-            const currentAmmo = activeWeapon?.ammo_clip;
-            const lastAmmo = this.lastAmmo[player.steamid];
-            
-            // Показываем эффект огня только если количество патронов уменьшилось
-            if (lastAmmo !== undefined && currentAmmo < lastAmmo) {
+          const currentAmmo = activeWeapon?.ammo_clip;
+          const lastAmmo = this.lastAmmo[player.steamid];
+
+          // Показываем эффект огня только если количество патронов уменьшилось
+          if (lastAmmo !== undefined && currentAmmo < lastAmmo) {
             fireElement.style.display = "block";
-              
-              // Используем кэшированные данные для угла
-              const rawAngle = player.forward.split(", ");
-              const x = parseFloat(rawAngle[0]);
-              const y = parseFloat(rawAngle[1]);
-              
-              if (!isNaN(x) && !isNaN(y)) {
+
+            // Используем кэшированные данные для угла
+            const rawAngle = player.forward.split(", ");
+            const x = parseFloat(rawAngle[0]);
+            const y = parseFloat(rawAngle[1]);
+
+            if (!isNaN(x) && !isNaN(y)) {
               const angle = x > 0 ? 90 + y * -1 * 90 : 270 + y * 90;
-                
-                const distance = 30;
-                const radians = (angle - 90) * (Math.PI / 180);
-                const translateX = Math.cos(radians) * distance;
-                const translateY = Math.sin(radians) * distance;
-                
+
+              const distance = 30;
+              const radians = (angle - 90) * (Math.PI / 180);
+              const translateX = Math.cos(radians) * distance;
+              const translateY = Math.sin(radians) * distance;
+
               fireElement.style.transform = `translate(calc(-50% + ${translateX}px), calc(-50% + ${translateY}px)) rotate(${
                 angle + 90
               }deg)`;
-              }
-            }
-            
-            // Сохраняем текущее количество патронов
-            if (activeWeapon) {
-              this.lastAmmo[player.steamid] = currentAmmo;
             }
           }
+
+          // Сохраняем текущее количество патронов
+          if (activeWeapon) {
+            this.lastAmmo[player.steamid] = currentAmmo;
+          }
         }
-      } else {
-        // Если игрок мертв, явно скрываем эффект огня
+      }
+    } else {
+      // Если игрок мертв, явно скрываем эффект огня
       const fireElement = playerElement.querySelector(".background-fire");
-        if (fireElement) {
+      if (fireElement) {
         fireElement.style.display = "none";
-        }
       }
-// ... existing code ...
-    };
-  
+    }
+    // ... existing code ...
+  };
+
   window.radar.positionToPixels = function (position) {
-      // Оптимизация: кэшируем DOM элемент
-      if (!this.domCache.radarContainer) {
+    // Оптимизация: кэшируем DOM элемент
+    if (!this.domCache.radarContainer) {
       this.domCache.radarContainer = document.getElementById("radar-players");
-      }
-      
-      const radarContainer = this.domCache.radarContainer;
-      if (!radarContainer) {
+    }
+
+    const radarContainer = this.domCache.radarContainer;
+    if (!radarContainer) {
       return { x: 0, y: 0, level: "unknown" };
-      }
-      
-      // Оптимизация: преобразуем position только один раз
-      let posX, posY, posZ;
-      
+    }
+
+    // Оптимизация: преобразуем position только один раз
+    let posX, posY, posZ;
+
     if (typeof position === "string") {
       const posArray = position.split(", ").map(Number);
-        posX = posArray[0];
-        posY = posArray[1];
-        posZ = posArray[2];
-      } else if (Array.isArray(position)) {
-        posX = position[0];
-        posY = position[1];
-        posZ = position[2];
-      } else {
-        posX = position.x;
-        posY = position.y;
-        posZ = position.z;
-      }
-      
-      // Оптимизация: кэшируем диапазоны Z
+      posX = posArray[0];
+      posY = posArray[1];
+      posZ = posArray[2];
+    } else if (Array.isArray(position)) {
+      posX = position[0];
+      posY = position[1];
+      posZ = position[2];
+    } else {
+      posX = position.x;
+      posY = position.y;
+      posZ = position.z;
+    }
+
+    // Оптимизация: кэшируем диапазоны Z
     const lowerLevelRange = this.splits?.[0]?.zRange || {
       min: -Infinity,
       max: Infinity,
     };
-      const upperLevelRange = this.zRange || { min: -Infinity, max: Infinity };
-      
-      // Определяем, на каком этаже находится объект
+    const upperLevelRange = this.zRange || { min: -Infinity, max: Infinity };
+
+    // Определяем, на каком этаже находится объект
     const isLowerLevel =
       posZ >= lowerLevelRange.min && posZ <= lowerLevelRange.max;
     const isUpperLevel =
       posZ >= upperLevelRange.min && posZ <= upperLevelRange.max;
-      
-      // Оптимизация: кэшируем размеры контейнера
-      const containerWidth = radarContainer.offsetWidth;
-      const containerHeight = radarContainer.offsetHeight;
-      
-      // Преобразуем координаты карты в пиксели
+
+    // Оптимизация: кэшируем размеры контейнера
+    const containerWidth = radarContainer.offsetWidth;
+    const containerHeight = radarContainer.offsetHeight;
+
+    // Преобразуем координаты карты в пиксели
     let x =
       ((posX + this.offset.x) / (1024 * this.resolution)) *
       containerWidth *
@@ -2750,207 +2853,207 @@ let radarInitialized = false;
       ((posY + this.offset.y) / (1024 * this.resolution)) *
         containerHeight *
         1.02;
-      
-      // Оптимизация: применяем смещение только если нужно
-      if (isLowerLevel && this.splits?.[0]) {
-        const split = this.splits[0];
+
+    // Оптимизация: применяем смещение только если нужно
+    if (isLowerLevel && this.splits?.[0]) {
+      const split = this.splits[0];
       x += ((split.offset.x * containerWidth) / 100) * 1.9;
       y -= ((split.offset.y * containerHeight) / 100) * 2.8;
-      }
-      
-      return { 
-        x, 
-        y,
+    }
+
+    return {
+      x,
+      y,
       level: isLowerLevel ? "lower" : isUpperLevel ? "upper" : "unknown",
-      };
     };
+  };
+}
+
+function updateRadar(allplayers, map, data, observed, bomb, player, grenades) {
+  // Инициализация радара, если он еще не инициализирован
+  if (!radarInitialized) {
+    initializeRadar();
+    radarInitialized = true;
   }
 
-  function updateRadar(allplayers, map, data, observed, bomb, player, grenades) {
-    // Инициализация радара, если он еще не инициализирован
-    if (!radarInitialized) {
-      initializeRadar();
-      radarInitialized = true;
-    }
-    
-    // Проверка на фризтайм или вармап
+  // Проверка на фризтайм или вармап
   const isWarmup = data?.map?.phase === "warmup";
   const isFreezeTime = data?.phase_countdowns?.phase === "freezetime";
-    
-    // Очищаем радар при начале фризтайма или вармапа
-    if ((isWarmup || isFreezeTime) && !window.radar.lastPhase) {
-      clearAllRadarElements();
+
+  // Очищаем радар при начале фризтайма или вармапа
+  if ((isWarmup || isFreezeTime) && !window.radar.lastPhase) {
+    clearAllRadarElements();
     window.radar.lastPhase = isWarmup ? "warmup" : "freezetime";
-    } else if (!isWarmup && !isFreezeTime && window.radar.lastPhase) {
-      // Сбрасываем флаг, когда фризтайм или вармап закончились
-      window.radar.lastPhase = null;
-    }
-    
-    // Оптимизация: проверяем, нужно ли обновлять карту
+  } else if (!isWarmup && !isFreezeTime && window.radar.lastPhase) {
+    // Сбрасываем флаг, когда фризтайм или вармап закончились
+    window.radar.lastPhase = null;
+  }
+
+  // Оптимизация: проверяем, нужно ли обновлять карту
   if (
     map?.name &&
     (!window.radar.currentMap || window.radar.currentMap !== map.name)
   ) {
-      // Очищаем все гранаты при смене карты
-      clearAllGrenades();
-      
-      window.radar.currentMap = map.name;
-      window.radar.loadMapData(map.name);
-    }
-    
-    // Оптимизация: увеличиваем счетчик кадров
-    window.radar.frameCounter = (window.radar.frameCounter + 1) % 60;
-    
-    // Обновление бомбы только если есть данные о бомбе
-    if (window.radar && bomb) {
+    // Очищаем все гранаты при смене карты
+    clearAllGrenades();
+
+    window.radar.currentMap = map.name;
+    window.radar.loadMapData(map.name);
+  }
+
+  // Оптимизация: увеличиваем счетчик кадров
+  window.radar.frameCounter = (window.radar.frameCounter + 1) % 60;
+
+  // Обновление бомбы только если есть данные о бомбе
+  if (window.radar && bomb) {
     const bombElement = document.querySelector("#bomb-container");
-      updateBombState(bomb, bombElement);
-    } else if (window.radar && window.radar.frameCounter % 10 === 0) {
-      // Проверяем реже для оптимизации
+    updateBombState(bomb, bombElement);
+  } else if (window.radar && window.radar.frameCounter % 10 === 0) {
+    // Проверяем реже для оптимизации
     const bombElement = document.querySelector("#bomb-container");
-      if (bombElement) {
+    if (bombElement) {
       bombElement.style.display = "none";
-      }
     }
-    
-    // Обновление игроков
-    if (allplayers && window.radar) {
-      // Обновляем глобальную переменную активного игрока
-      window.activePlayerSteamId = data?.player?.steamid || observed?.steamid;
-      
-      // Оптимизация: кэшируем DOM элементы
-      if (!window.radar.domCache.radarContainer) {
+  }
+
+  // Обновление игроков
+  if (allplayers && window.radar) {
+    // Обновляем глобальную переменную активного игрока
+    window.activePlayerSteamId = data?.player?.steamid || observed?.steamid;
+
+    // Оптимизация: кэшируем DOM элементы
+    if (!window.radar.domCache.radarContainer) {
       window.radar.domCache.radarContainer =
         document.getElementById("radar-players");
-      }
-      const radarContainer = window.radar.domCache.radarContainer;
-      
-      // Оптимизация: обновляем игроков только каждый второй кадр
-      if (window.radar.frameCounter % 2 === 0) {
-        // Создаем Set с ID текущих игроков для быстрого поиска
-        const currentPlayerIds = new Set();
-        
-        // Обновляем всех игроков
-        Object.entries(allplayers).forEach(([steamid, player]) => {
-          if (!steamid) return;
-          
-          currentPlayerIds.add(`player-${steamid}`);
-          
-          // Добавляем steamid в объект игрока, если его нет
-          if (!player.steamid) {
-            player.steamid = steamid;
+    }
+    const radarContainer = window.radar.domCache.radarContainer;
+
+    // Оптимизация: обновляем игроков только каждый второй кадр
+    if (window.radar.frameCounter % 2 === 0) {
+      // Создаем Set с ID текущих игроков для быстрого поиска
+      const currentPlayerIds = new Set();
+
+      // Обновляем всех игроков
+      Object.entries(allplayers).forEach(([steamid, player]) => {
+        if (!steamid) return;
+
+        currentPlayerIds.add(`player-${steamid}`);
+
+        // Добавляем steamid в объект игрока, если его нет
+        if (!player.steamid) {
+          player.steamid = steamid;
+        }
+
+        let playerElement = document.getElementById(`player-${steamid}`);
+
+        // Если элемент не существует, создаем его
+        if (!playerElement) {
+          playerElement = createPlayerElement(player, steamid);
+          if (radarContainer && playerElement) {
+            radarContainer.appendChild(playerElement);
           }
-          
-          let playerElement = document.getElementById(`player-${steamid}`);
-          
-          // Если элемент не существует, создаем его
-          if (!playerElement) {
-            playerElement = createPlayerElement(player, steamid);
-            if (radarContainer && playerElement) {
-              radarContainer.appendChild(playerElement);
-            }
-          }
-          
-          // Обновляем цвет и слот игрока
-          if (playerElement) {
-            // Определяем, несет ли игрок бомбу
-            const hasBomb = steamid === bomb?.player;
-            
-            // Обновляем цвет в зависимости от команды и наличия бомбы
-            if (hasBomb) {
-              playerElement.style.backgroundColor = PLAYER_ORANGE;
-            } else {
+        }
+
+        // Обновляем цвет и слот игрока
+        if (playerElement) {
+          // Определяем, несет ли игрок бомбу
+          const hasBomb = steamid === bomb?.player;
+
+          // Обновляем цвет в зависимости от команды и наличия бомбы
+          if (hasBomb) {
+            playerElement.style.backgroundColor = PLAYER_ORANGE;
+          } else {
             playerElement.style.backgroundColor =
               player.team.toLowerCase() === "ct" ? COLOR_NEW_CT : COLOR_NEW_T;
-            }
-            
-            // Обработка слотов
-            let slotIdentifier;
+          }
+
+          // Обработка слотов
+          let slotIdentifier;
           if (typeof player.observer_slot === "number") {
             slotIdentifier =
               player.observer_slot === 9 ? 0 : player.observer_slot + 1;
-            } else {
+          } else {
             slotIdentifier = "N/A";
-            }
-            
-            // Обновляем номер слота в элементе
+          }
+
+          // Обновляем номер слота в элементе
           const slotElement = playerElement.querySelector(".player-slot");
-            if (slotElement) {
-              slotElement.textContent = slotIdentifier;
-            }
+          if (slotElement) {
+            slotElement.textContent = slotIdentifier;
+          }
           playerElement.setAttribute("data-slot", slotIdentifier);
-            
-            // Выбранному игроку добавляем класс selected
+
+          // Выбранному игроку добавляем класс selected
           playerElement.classList.toggle(
             "active_player_map",
             steamid === window.activePlayerSteamId
           );
-          }
-          
-          // Проверяем, изменилась ли позиция игрока
+        }
+
+        // Проверяем, изменилась ли позиция игрока
         const position = player.position
           ? player.position.split(", ").map(Number)
           : null;
-          
+
         if (
           position &&
           (!player.lastPosition ||
-              Math.abs(position[0] - player.lastPosition.x) > 0.5 || 
-              Math.abs(position[1] - player.lastPosition.y) > 0.5 || 
+            Math.abs(position[0] - player.lastPosition.x) > 0.5 ||
+            Math.abs(position[1] - player.lastPosition.y) > 0.5 ||
             Math.abs(position[2] - player.lastPosition.z) > 0.5)
         ) {
-            // Обновляем позицию игрока
-            window.radar.updatePlayer(player, {
-              x: position[0],
-              y: position[1],
+          // Обновляем позицию игрока
+          window.radar.updatePlayer(player, {
+            x: position[0],
+            y: position[1],
             z: position[2],
-            });
-            
-            // Сохраняем последнюю позицию
+          });
+
+          // Сохраняем последнюю позицию
           player.lastPosition = {
             x: position[0],
             y: position[1],
             z: position[2],
           };
-          }
-        });
-        
-        // Оптимизация: удаляем элементы игроков, которых нет в текущем списке
-        // Делаем это реже для оптимизации
-        if (window.radar.frameCounter % 10 === 0 && radarContainer) {
+        }
+      });
+
+      // Оптимизация: удаляем элементы игроков, которых нет в текущем списке
+      // Делаем это реже для оптимизации
+      if (window.radar.frameCounter % 10 === 0 && radarContainer) {
         const currentPlayerElements = Array.from(
           radarContainer.querySelectorAll('[id^="player-"]')
         );
         currentPlayerElements.forEach((element) => {
-            if (!currentPlayerIds.has(element.id)) {
-              element.remove();
-            }
-          });
-        }
+          if (!currentPlayerIds.has(element.id)) {
+            element.remove();
+          }
+        });
       }
     }
-    
-    // Обновление гранат с ограничением частоты
-    if (grenades && window.radar && window.radar.frameCounter % 1 === 0) {
-      updateGrenades(grenades, allplayers);
-    }
   }
+
+  // Обновление гранат с ограничением частоты
+  if (grenades && window.radar && window.radar.frameCounter % 1 === 0) {
+    updateGrenades(grenades, allplayers);
+  }
+}
 
 // Добавляем новую функцию для очистки всех элементов радара
 function clearAllRadarElements() {
   // Очищаем все элементы игроков
   document.querySelectorAll('[id^="player-"]').forEach((el) => el.remove());
-  
+
   // Очищаем все элементы гранат
   document
     .querySelectorAll(
       ".grenade, .inferno-flame, .inferno-container, .flame-point"
     )
     .forEach((el) => el.remove());
-  
+
   // Очищаем бомбу
   document.querySelectorAll("#bomb-container").forEach((el) => el.remove());
-  
+
   // Очищаем контейнеры гранат
   const grenadeContainers = [
     "#smokes",
@@ -2963,11 +3066,11 @@ function clearAllRadarElements() {
     if (container) container.innerHTML = "";
   });
 }
-  
+
 function createPlayerElement(player, steamid) {
   if (!steamid || !player) {
-      //console.error('Недостаточно данных для создания элемента игрока:', { steamid, player });
-      return null;
+    //console.error('Недостаточно данных для создания элемента игрока:', { steamid, player });
+    return null;
   }
 
   // Создаем основной элемент игрока
@@ -2991,22 +3094,22 @@ function createPlayerElement(player, steamid) {
   // Преобразуем observer_slot в нужный идентификатор
   let slotIdentifier;
   if (player.observer_slot === 9) {
-      slotIdentifier = 0; // 9 -> 0
+    slotIdentifier = 0; // 9 -> 0
   } else if (player.observer_slot >= 0 && player.observer_slot < 9) {
-      slotIdentifier = player.observer_slot + 1; // 0 -> 1, 1 -> 2, ..., 8 -> 9
+    slotIdentifier = player.observer_slot + 1; // 0 -> 1, 1 -> 2, ..., 8 -> 9
   } else if (player.observer_slot >= 10) {
-      slotIdentifier = player.observer_slot; // 10 -> 10, 11 -> 11, и т.д.
+    slotIdentifier = player.observer_slot; // 10 -> 10, 11 -> 11, и т.д.
   } else {
     slotIdentifier = "N/A"; // Если слот неизвестен
   }
 
- // Добавляем проверку на наличие бомбы
+  // Добавляем проверку на наличие бомбы
   const hasBomb = Object.values(player.weapons || {}).some(
     (weapon) => weapon.type === "C4"
   );
- if (hasBomb) {
-     playerElement.style.backgroundColor = PLAYER_ORANGE;
- }
+  if (hasBomb) {
+    playerElement.style.backgroundColor = PLAYER_ORANGE;
+  }
 
   // Устанавливаем data-slot
   playerElement.setAttribute("data-slot", slotIdentifier);
@@ -3019,7 +3122,7 @@ function createPlayerElement(player, steamid) {
 
   // Создаем дочерние элементы (маркер и эффект огня)
   const elements = {
-      marker: createMarkerContainer(),
+    marker: createMarkerContainer(),
     fire: createFireContainer(),
   };
 
@@ -3029,60 +3132,60 @@ function createPlayerElement(player, steamid) {
   // Возвращаем созданный элемент
   return playerElement;
 }
-  
-  function createMarkerContainer() {
+
+function createMarkerContainer() {
   const container = document.createElement("div");
   container.className = "player-marker";
 
   const triangle = document.createElement("div");
   triangle.className = "player-triangle";
-    
-    container.appendChild(triangle);
-    /*container.appendChild(fire);*/
-    return container;
-  }
 
-  function formatObserverSlot(slot) {
-    // Удаляем console.log, который может замедлять работу
-    const slotNumber = parseInt(slot);
+  container.appendChild(triangle);
+  /*container.appendChild(fire);*/
+  return container;
+}
+
+function formatObserverSlot(slot) {
+  // Удаляем console.log, который может замедлять работу
+  const slotNumber = parseInt(slot);
   return slotNumber === 9 ? "0" : (slotNumber + 1).toString();
-  }
-  
-  function createSlotElement(player) {
-    // Удаляем console.log, который может замедлять работу
+}
+
+function createSlotElement(player) {
+  // Удаляем console.log, который может замедлять работу
   const element = document.createElement("div");
   element.className = "player-slot";
-    
-    // Проверяем, что observer_slot существует и является числом
-    if (player.observer_slot !== undefined) {
-      element.textContent = formatObserverSlot(player.observer_slot);
-    } else {
+
+  // Проверяем, что observer_slot существует и является числом
+  if (player.observer_slot !== undefined) {
+    element.textContent = formatObserverSlot(player.observer_slot);
+  } else {
     element.textContent = "N/A";
-    }
-    
-    return element;
   }
-  
-  function createFireContainer() {
+
+  return element;
+}
+
+function createFireContainer() {
   const container = document.createElement("div");
   container.className = "background-fire";
-    
+
   const bg = document.createElement("div");
   bg.className = "bg";
-    
-    container.appendChild(bg);
+
+  container.appendChild(bg);
   container.style.display = "none";
-    // Добавляем позиционирование
+  // Добавляем позиционирование
   container.style.position = "absolute";
   container.style.transformOrigin = "center center";
-    // Смещаем контейнер за пределы маркера игрока
+  // Смещаем контейнер за пределы маркера игрока
   container.style.left = "50%";
   container.style.top = "50%";
   container.style.transform = "translate(-50%, -50%)";
-    
-    return container;
+
+  return container;
 }
-  
+
 function updatePlayerElement(element, player) {
   if (!element || !player) {
     //console.error('Недостаточно данных для обновления элемента игрока:', { element, player });
@@ -3123,134 +3226,134 @@ function updatePlayerElement(element, player) {
   // Обновляем data-slot атрибут
   element.setAttribute("data-slot", slotIdentifier);
 }
-  
-    function updateBombState(bomb, bombElement) {
-      // Если нет данных о бомбе или нет позиции, скрываем элемент бомбы
-      if (!bomb || !bomb.position) {
-          //console.warn('No bomb data or position');
-          if (bombElement) {
+
+function updateBombState(bomb, bombElement) {
+  // Если нет данных о бомбе или нет позиции, скрываем элемент бомбы
+  if (!bomb || !bomb.position) {
+    //console.warn('No bomb data or position');
+    if (bombElement) {
       bombElement.style.display = "none";
-          }
-          return;
-      }
-    
+    }
+    return;
+  }
+
   const radarPlayers = document.getElementById("radar-players");
-      
-      // Проверяем наличие необходимых элементов
-      if (!radarPlayers) {
-          //console.warn('Radar players container not found');
-          return;
-      }
-    
-      // Создаем элемент бомбы, если он не существует
-      if (!bombElement) {
+
+  // Проверяем наличие необходимых элементов
+  if (!radarPlayers) {
+    //console.warn('Radar players container not found');
+    return;
+  }
+
+  // Создаем элемент бомбы, если он не существует
+  if (!bombElement) {
     bombElement = document.createElement("div");
     bombElement.id = "bomb-container";
-          bombElement.innerHTML = `
+    bombElement.innerHTML = `
               <div class="bomb-icon"></div>
               <!--<div class="bomb-timer"></div>-->
           `;
-          radarPlayers.appendChild(bombElement);
-      }
-      
-      if (!window.radar) {
-          //console.warn('Radar not initialized');
-          return;
-      }
-    
-      try {
-          // Преобразуем координаты из строки в массив чисел
-          let position;
-    if (typeof bomb.position === "string") {
-      position = bomb.position.split(", ").map(Number);
-          } else if (bomb.position.x !== undefined) {
-              position = [bomb.position.x, bomb.position.y, bomb.position.z];
-          } else {
-              //console.warn('Invalid bomb position format');
-      bombElement.style.display = "none";
-              return;
-          }
-    
-    switch (bomb.state) {
-      case "carried":
-        bombElement.style.display = "none";
-                  break;
-                  
-      case "dropped":
-        bombElement.className = "bomb-state dropped";
-        bombElement.style.display = "block";
-                  updateBombPosition(position, bombElement);
-                  break;
-                  
-      case "planted":
-        bombElement.className = "bomb-state planted";
-        bombElement.style.display = "block";
-                  updateBombPosition(position, bombElement);
-                  break;
-                  
-      case "defused":
-        bombElement.className = "bomb-state defused";
-        bombElement.style.display = "block";
-                  updateBombPosition(position, bombElement);
-                  break;
-                  
-      case "exploded":
-        bombElement.style.display = "none";
-                  break;
-                  
-              default:
-        bombElement.style.display = "none";
-          }
-      } catch (error) {
-          //console.error('Error updating bomb:', error);
-          // В случае ошибки скрываем элемент бомбы
-          if (bombElement) {
-      bombElement.style.display = "none";
-          }
-      }
-    }
-  
-// Обновляем функцию updateBombPosition для более точного позиционирования
-function updateBombPosition(position, bombElement) {
-  if (!position || !bombElement || !window.radar) {
-      //  console.warn('Missing required parameters for updateBombPosition:', {
-      //    hasPosition: !!position,
-      //    hasBombElement: !!bombElement,
-      //    hasRadar: !!window.radar
-      //});
-      return;
+    radarPlayers.appendChild(bombElement);
+  }
+
+  if (!window.radar) {
+    //console.warn('Radar not initialized');
+    return;
   }
 
   try {
-      // Проверяем этаж
-      const isLowerLevel = window.radar.splits?.[0]?.zRange 
+    // Преобразуем координаты из строки в массив чисел
+    let position;
+    if (typeof bomb.position === "string") {
+      position = bomb.position.split(", ").map(Number);
+    } else if (bomb.position.x !== undefined) {
+      position = [bomb.position.x, bomb.position.y, bomb.position.z];
+    } else {
+      //console.warn('Invalid bomb position format');
+      bombElement.style.display = "none";
+      return;
+    }
+
+    switch (bomb.state) {
+      case "carried":
+        bombElement.style.display = "none";
+        break;
+
+      case "dropped":
+        bombElement.className = "bomb-state dropped";
+        bombElement.style.display = "block";
+        updateBombPosition(position, bombElement);
+        break;
+
+      case "planted":
+        bombElement.className = "bomb-state planted";
+        bombElement.style.display = "block";
+        updateBombPosition(position, bombElement);
+        break;
+
+      case "defused":
+        bombElement.className = "bomb-state defused";
+        bombElement.style.display = "block";
+        updateBombPosition(position, bombElement);
+        break;
+
+      case "exploded":
+        bombElement.style.display = "none";
+        break;
+
+      default:
+        bombElement.style.display = "none";
+    }
+  } catch (error) {
+    //console.error('Error updating bomb:', error);
+    // В случае ошибки скрываем элемент бомбы
+    if (bombElement) {
+      bombElement.style.display = "none";
+    }
+  }
+}
+
+// Обновляем функцию updateBombPosition для более точного позиционирования
+function updateBombPosition(position, bombElement) {
+  if (!position || !bombElement || !window.radar) {
+    //  console.warn('Missing required parameters for updateBombPosition:', {
+    //    hasPosition: !!position,
+    //    hasBombElement: !!bombElement,
+    //    hasRadar: !!window.radar
+    //});
+    return;
+  }
+
+  try {
+    // Проверяем этаж
+    const isLowerLevel = window.radar.splits?.[0]?.zRange
       ? position[2] <= window.radar.splits[0].zRange.max &&
         position[2] >= window.radar.splits[0].zRange.min
-          : false;
+      : false;
 
-      let x = position[0] + window.radar.offset.x;
-      let y = position[1] + window.radar.offset.y;
-      const scale = 1024 * window.radar.resolution;
+    let x = position[0] + window.radar.offset.x;
+    let y = position[1] + window.radar.offset.y;
+    const scale = 1024 * window.radar.resolution;
 
-      if (isLowerLevel && window.radar.splits?.[0]) {
-          const split = window.radar.splits[0];
+    if (isLowerLevel && window.radar.splits?.[0]) {
+      const split = window.radar.splits[0];
       x = (x / scale) * 100 + split.offset.x * 1.9;
       y = (y / scale) * 100 + split.offset.y * 2.8;
-      } else {
-          x = (x / scale) * 100;
-          y = (y / scale) * 100;
-      }
+    } else {
+      x = (x / scale) * 100;
+      y = (y / scale) * 100;
+    }
 
-      // Регулировка позиции бомбы
-      bombElement.style.left = `${x + 4}%`;
-      bombElement.style.bottom = `${y - 6}%`;
+    // Регулировка позиции бомбы
+    bombElement.style.left = `${x + 4}%`;
+    bombElement.style.bottom = `${y - 6}%`;
     bombElement.setAttribute("data-z", position[2]);
     bombElement.setAttribute("data-level", isLowerLevel ? "lower" : "upper");
-      
-      // Добавляем плавное перемещение
+
+    // Добавляем плавное перемещение
     bombElement.style.transition = "left 0.1s linear, bottom 0.1s linear";
   } catch (error) {
-      //console.error('Error in updateBombPosition:', error);
+    //console.error('Error in updateBombPosition:', error);
   }
 }
 
@@ -3284,14 +3387,14 @@ function updateGrenades(grenades, allplayers) {
 
     // Исправляем создание объекта playerTeams
     const playerTeams = {};
-    
+
     // Правильно заполняем объект playerTeams
     Object.entries(allplayers).forEach(([steamid, player]) => {
       if (steamid && player && player.team) {
         playerTeams[steamid] = player.team;
       }
     });
-    
+
     // Используем Set для отслеживания существующих гранат
     const existingGrenades = {
       smoke: new Set(),
@@ -3304,10 +3407,10 @@ function updateGrenades(grenades, allplayers) {
     // Обрабатываем только определенное количество гранат за один кадр
     const grenadeKeys = Object.keys(grenades);
     const MAX_GRENADES_PER_FRAME = 20; // Ограничиваем количество обрабатываемых гранат
-    
+
     grenadeKeys.slice(0, MAX_GRENADES_PER_FRAME).forEach((id) => {
       const grenade = grenades[id];
-      
+
       if (
         grenade.type === "smoke" ||
         grenade.type === "flashbang" ||
@@ -3332,9 +3435,9 @@ function updateGrenades(grenades, allplayers) {
           : isFirebomb
           ? "firebomb"
           : "";
-        
+
         existingGrenades[grenadeType].add(id);
-        
+
         // Исправляем выбор контейнера для разных типов гранат
         const container = isSmoke
           ? smokesContainer
@@ -3353,75 +3456,75 @@ function updateGrenades(grenades, allplayers) {
         let grenadeElement = document.getElementById(grenadeId);
 
         // Специальная обработка для inferno (огня)
-// Специальная обработка для inferno (огня)
-if (isInferno) {
-  if (!grenadeElement) {
+        // Специальная обработка для inferno (огня)
+        if (isInferno) {
+          if (!grenadeElement) {
             grenadeElement = document.createElement("div");
-    grenadeElement.id = grenadeId;
+            grenadeElement.id = grenadeId;
             grenadeElement.className = "inferno-container";
-    grenadeElement.dataset.createdAt = Date.now(); // Добавляем метку времени создания
-    container.appendChild(grenadeElement);
-  }
+            grenadeElement.dataset.createdAt = Date.now(); // Добавляем метку времени создания
+            container.appendChild(grenadeElement);
+          }
 
-  if (grenade.flames) {
-    const existingFlames = new Set();
-    
-    // Ограничиваем количество обрабатываемых точек пламени
-    const flameEntries = Object.entries(grenade.flames);
-    const MAX_FLAMES_PER_FRAME = 15;
-    
+          if (grenade.flames) {
+            const existingFlames = new Set();
+
+            // Ограничиваем количество обрабатываемых точек пламени
+            const flameEntries = Object.entries(grenade.flames);
+            const MAX_FLAMES_PER_FRAME = 15;
+
             flameEntries
               .slice(0, MAX_FLAMES_PER_FRAME)
               .forEach(([flameId, position]) => {
-      existingFlames.add(flameId);
+                existingFlames.add(flameId);
                 let flameElement = document.getElementById(
                   `${grenadeId}_${flameId}`
                 );
-      
-      if (!flameElement) {
-                  flameElement = document.createElement("div");
-        flameElement.id = `${grenadeId}_${flameId}`;
-                  flameElement.className = "flame-point";
-        grenadeElement.appendChild(flameElement);
-      }
 
-      // Используем более эффективный способ преобразования позиции
+                if (!flameElement) {
+                  flameElement = document.createElement("div");
+                  flameElement.id = `${grenadeId}_${flameId}`;
+                  flameElement.className = "flame-point";
+                  grenadeElement.appendChild(flameElement);
+                }
+
+                // Используем более эффективный способ преобразования позиции
                 const flamePos =
                   typeof position === "string"
                     ? position.split(", ").map(Number)
                     : [position.x, position.y, position.z];
-              
-              const scale = 1024 * window.radar.resolution;
 
-              // Проверяем, на каком этаже находится точка пламени
-              const isLowerLevel = window.radar.splits?.[0]?.zRange 
+                const scale = 1024 * window.radar.resolution;
+
+                // Проверяем, на каком этаже находится точка пламени
+                const isLowerLevel = window.radar.splits?.[0]?.zRange
                   ? flamePos[2] <= window.radar.splits[0].zRange.max &&
                     flamePos[2] >= window.radar.splits[0].zRange.min
-                : false;
+                  : false;
 
-              let x = flamePos[0] + window.radar.offset.x;
-              let y = flamePos[1] + window.radar.offset.y;
+                let x = flamePos[0] + window.radar.offset.x;
+                let y = flamePos[1] + window.radar.offset.y;
 
-              if (isLowerLevel && window.radar.splits?.[0]) {
-                const split = window.radar.splits[0];
-                const baseX = (x / scale) * 100;
-                const baseY = (y / scale) * 100;
-                
+                if (isLowerLevel && window.radar.splits?.[0]) {
+                  const split = window.radar.splits[0];
+                  const baseX = (x / scale) * 100;
+                  const baseY = (y / scale) * 100;
+
                   x = baseX + split.offset.x * 1.9;
                   y = baseY + split.offset.y * 2.8;
-              } else {
-                x = (x / scale) * 100;
-                y = (y / scale) * 100;
-              }
+                } else {
+                  x = (x / scale) * 100;
+                  y = (y / scale) * 100;
+                }
 
-              // Возвращаемся к оригинальному позиционированию
-              flameElement.style.left = `${x + 4}%`;
-              flameElement.style.bottom = `${y + 96}%`;
+                // Возвращаемся к оригинальному позиционированию
+                flameElement.style.left = `${x + 4}%`;
+                flameElement.style.bottom = `${y + 96}%`;
                 flameElement.setAttribute(
                   "data-level",
                   isLowerLevel ? "lower" : "upper"
                 );
-            });
+              });
 
             // Удаляем только те flames, которых больше нет в данных
             if (lifetime >= 22) {
@@ -3429,10 +3532,10 @@ if (isInferno) {
                 .querySelectorAll(".flame-point")
                 .forEach((flame) => {
                   const flameId = flame.id.replace(`${grenadeId}_`, "");
-                if (!existingFlames.has(flameId)) {
-                  flame.remove();
-                }
-              });
+                  if (!existingFlames.has(flameId)) {
+                    flame.remove();
+                  }
+                });
             }
           }
 
@@ -3442,59 +3545,59 @@ if (isInferno) {
         } else {
           // Обработка других типов гранат
 
-//console.log('grenades', grenades);
-//console.log('playerTeams', playerTeams);
+          //console.log('grenades', grenades);
+          //console.log('playerTeams', playerTeams);
 
-// Добавьте этот код перед созданием элемента гранаты
-if (!playerTeams[grenade.owner]) {
-  //console.log('Неизвестная команда для гранаты:', {
-  //  grenadeType: grenade.type,
-  //  grenadeId: id,
-  //  owner: grenade.owner,
-  //  allPlayerIds: Object.keys(playerTeams)
-  //});
-}
+          // Добавьте этот код перед созданием элемента гранаты
+          if (!playerTeams[grenade.owner]) {
+            //console.log('Неизвестная команда для гранаты:', {
+            //  grenadeType: grenade.type,
+            //  grenadeId: id,
+            //  owner: grenade.owner,
+            //  allPlayerIds: Object.keys(playerTeams)
+            //});
+          }
 
-if (!grenadeElement) {
+          if (!grenadeElement) {
             grenadeElement = document.createElement("div");
-  grenadeElement.id = grenadeId;
-  
-  if (isFirebomb) {
+            grenadeElement.id = grenadeId;
+
+            if (isFirebomb) {
               grenadeElement.className = "firebomb-grenade";
-    const ownerTeam = playerTeams[grenade.owner];
+              const ownerTeam = playerTeams[grenade.owner];
               const teamClass = `util_${
                 ownerTeam === "T" ? "molotov" : "incgrenade"
               }_${ownerTeam || "default"}`;
-    grenadeElement.classList.add(teamClass);
-    
+              grenadeElement.classList.add(teamClass);
+
               const imgElement = document.createElement("img");
               imgElement.className = "firebomb-icon";
               imgElement.src = `/images/maps/element/grenades/weapon_${
                 ownerTeam === "T" ? "molotov" : "incgrenade"
               }_${ownerTeam || "default"}.webp`;
-    
-    grenadeElement.appendChild(imgElement);
-  } else {
+
+              grenadeElement.appendChild(imgElement);
+            } else {
               grenadeElement.className = isSmoke
                 ? "smoke-grenade"
                 : isFlash
                 ? "flash-grenade"
                 : "hegrenades-grenade";
-  
-    const ownerTeam = playerTeams[grenade.owner];
+
+              const ownerTeam = playerTeams[grenade.owner];
               const teamClass = `util_${
                 isSmoke ? "smokegrenade" : isFlash ? "flashbang" : "hegrenade"
               }_${ownerTeam || "default"}`;
-    grenadeElement.classList.add(teamClass);
-    
+              grenadeElement.classList.add(teamClass);
+
               const imgElement = document.createElement("img");
               imgElement.className = isSmoke
                 ? "smoke-icon"
                 : isFlash
                 ? "flash-icon"
                 : "hegrenades-icon";
-    
-    // Исправляем путь к изображению
+
+              // Исправляем путь к изображению
               const grenadeType = isSmoke
                 ? "smokegrenade"
                 : isFlash
@@ -3503,28 +3606,28 @@ if (!grenadeElement) {
               imgElement.src = `/images/maps/element/grenades/weapon_${grenadeType}${
                 ownerTeam ? "_" + ownerTeam : ""
               }.webp`;
-    
-    // Обработка ошибки загрузки изображения - используем версию по умолчанию
+
+              // Обработка ошибки загрузки изображения - используем версию по умолчанию
               imgElement.onerror = function () {
-      this.src = `/images/maps/element/grenades/weapon_${grenadeType}_default.webp`;
-    };
-    
-    grenadeElement.appendChild(imgElement);
-  }
-    
-  container.appendChild(grenadeElement);
-}
+                this.src = `/images/maps/element/grenades/weapon_${grenadeType}_default.webp`;
+              };
+
+              grenadeElement.appendChild(imgElement);
+            }
+
+            container.appendChild(grenadeElement);
+          }
 
           // Оптимизируем обработку позиции
           const position =
             typeof grenade.position === "string"
               ? grenade.position.split(", ").map(Number)
-            : [grenade.position.x, grenade.position.y, grenade.position.z];
+              : [grenade.position.x, grenade.position.y, grenade.position.z];
 
           const scale = 1024 * window.radar.resolution;
 
           // Проверяем, на каком этаже находится граната
-          const isLowerLevel = window.radar.splits?.[0]?.zRange 
+          const isLowerLevel = window.radar.splits?.[0]?.zRange
             ? position[2] <= window.radar.splits[0].zRange.max &&
               position[2] >= window.radar.splits[0].zRange.min
             : false;
@@ -3536,7 +3639,7 @@ if (!grenadeElement) {
             const split = window.radar.splits[0];
             const baseX = (x / scale) * 100;
             const baseY = (y / scale) * 100;
-            
+
             x = baseX + split.offset.x * 1.9;
             y = baseY + split.offset.y * 2.8;
           } else {
@@ -3561,7 +3664,7 @@ if (!grenadeElement) {
               // Дым активен - показываем эффект дыма
               grenadeElement.style.transition = "none";
               grenadeElement.classList.add("smoke-active");
-              
+
               // Удаляем иконку гранаты, если она есть
               const iconElement = grenadeElement.querySelector(".smoke-icon");
               if (iconElement) {
@@ -3574,7 +3677,7 @@ if (!grenadeElement) {
             }
           } else if (isFirebomb) {
             const FIREBOMB_MAX_LIFETIME = 7.0; // Максимальное время жизни зажигательной гранаты
-            
+
             if (
               lifetime >= FIREBOMB_MAX_LIFETIME &&
               !grenadeElement.dataset.exploded
@@ -3587,9 +3690,9 @@ if (!grenadeElement) {
               if (iconElement) {
                 iconElement.remove();
               }
-              
+
               grenadeElement.classList.add("firebomb-active");
-              
+
               // Используем setTimeout для удаления элемента после анимации
               setTimeout(() => {
                 existingGrenades.firebomb.delete(id);
@@ -3598,7 +3701,7 @@ if (!grenadeElement) {
             }
           } else if (isFlash) {
             const FLASH_MAX_LIFETIME = 1.5;
-            
+
             if (
               lifetime >= FLASH_MAX_LIFETIME &&
               !grenadeElement.dataset.exploded
@@ -3625,11 +3728,11 @@ if (!grenadeElement) {
             }
           } else if (isFrag) {
             const FRAG_MAX_LIFETIME = 1.5;
-            
+
             if (grenadeElement && grenadeElement.dataset.exploded) {
               return;
             }
-            
+
             if (lifetime >= FRAG_MAX_LIFETIME) {
               if (
                 grenadeElement &&
@@ -3662,7 +3765,7 @@ if (!grenadeElement) {
                 }, 7000);
               }
             }
-          } 
+          }
         }
       }
     });
@@ -3688,19 +3791,19 @@ if (!grenadeElement) {
         .querySelectorAll(".inferno-container")
         .forEach((element) => {
           const id = element.id.replace("inferno_", "");
-        if (!existingGrenades.inferno.has(id)) {
-          element.remove();
-        } else {
-          // Проверяем время жизни инферно
-          const createdAt = parseInt(element.dataset.createdAt || 0);
-          const currentTime = Date.now();
-          const lifetime = (currentTime - createdAt) / 1000;
-          
-          if (lifetime >= 7.0) {
+          if (!existingGrenades.inferno.has(id)) {
             element.remove();
+          } else {
+            // Проверяем время жизни инферно
+            const createdAt = parseInt(element.dataset.createdAt || 0);
+            const currentTime = Date.now();
+            const lifetime = (currentTime - createdAt) / 1000;
+
+            if (lifetime >= 7.0) {
+              element.remove();
+            }
           }
-        }
-      });
+        });
     }
 
     // Остальные гранаты очищаем реже
@@ -3718,7 +3821,7 @@ if (!grenadeElement) {
           element.remove();
         }
       });
-      
+
       // Отдельная очистка для firebomb элементов
       const firebombsContainer = document.getElementById("firebombs");
       if (firebombsContainer) {
@@ -3726,10 +3829,10 @@ if (!grenadeElement) {
           .querySelectorAll(".firebomb-grenade")
           .forEach((element) => {
             const id = element.id.replace("firebomb_", "");
-          if (!existingGrenades.firebomb.has(id)) {
-            element.remove();
-          }
-        });
+            if (!existingGrenades.firebomb.has(id)) {
+              element.remove();
+            }
+          });
       }
     }
   } catch (error) {
@@ -3760,8 +3863,8 @@ function clearAllGrenades() {
 gsiManager.subscribe((event) => {
   switch (event.type) {
     case "update":
-          updateHUD(event.data);
-          break;
+      updateHUD(event.data);
+      break;
   }
 });
 
@@ -3769,7 +3872,7 @@ gsiManager.subscribe((event) => {
 document.addEventListener("DOMContentLoaded", function () {
   // Используем новую функцию connectWebSocket
   const socket = connectWebSocket();
-  
+
   if (socket) {
     socket.on("gsi", (data) => {
       updateHUD(data);
@@ -3778,21 +3881,22 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // Инициализация системы обновления кадров при загрузке страницы
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   //console.log("HUD загружен, инициализация системы обновления кадров");
-  
+
   // Запускаем систему обновления кадров
   window.requestAnimationFrame(frameRateControlledUpdate);
-  
+
   // Проверяем, находимся ли мы в оверлее
-  const isOverlay = window.location.href.includes('overlay') || 
-                     window.navigator.userAgent.includes('Electron');
-                     
+  const isOverlay =
+    window.location.href.includes("overlay") ||
+    window.navigator.userAgent.includes("Electron");
+
   if (isOverlay) {
     //console.log('Запуск в режиме оверлея');
-    
+
     // Добавляем обработчик ошибок для оверлея
-    window.onerror = function(message, source, lineno, colno, error) {
+    window.onerror = function (message, source, lineno, colno, error) {
       //console.error('Ошибка в оверлее:', message, 'Строка:', lineno);
       return true; // Предотвращаем стандартную обработку ошибок
     };
@@ -3806,13 +3910,13 @@ function connectWebSocket() {
     // const isHttps = window.location.protocol === "https:";
     // const socketProtocol = isHttps ? "wss:" : "ws:";
     // const socketPort = isHttps ? "2627" : "2626";
-    
+
     const socketProtocol = "ws:";
     const socketPort = "2626";
-    
+
     const socketUrl = `${socketProtocol}//${window.location.hostname}:${socketPort}`;
     //console.log("Подключение к WebSocket:", socketUrl);
-    
+
     const socket = io(socketUrl, {
       transports: ["websocket"],
       reconnection: true,
@@ -3820,13 +3924,13 @@ function connectWebSocket() {
       reconnectionDelay: 1000,
       // secure: isHttps,
     });
-    
-    socket.on("connect", function() {
+
+    socket.on("connect", function () {
       //console.log("Соединение установлено через HTTP");
       socket.emit("ready");
     });
-    
-    socket.on("connect_error", function(error) {
+
+    socket.on("connect_error", function (error) {
       //console.error("Ошибка подключения:", error);
       // Удаляем попытку переключения на HTTP
       // if (isHttps) {
@@ -3836,9 +3940,9 @@ function connectWebSocket() {
       //   socket.connect();
       // }
     });
-    
+
     // ... остальные обработчики событий ...
-    
+
     return socket;
   } catch (error) {
     //console.error("Ошибка при создании WebSocket:", error);

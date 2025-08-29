@@ -1,0 +1,10 @@
+{
+  "name": "CSBangladeshHUDv2 HUD",
+  "description": "Кастомный HUD tamim66 | https://github.com/tamim66/CSBangladeshHUDv2",
+  "author": "tam66",
+  "version": "2.0.0",
+  "radar": true,
+  "killfeed": false,
+  "HLAE_killfeed": true,
+  "HLAE_killfeed_castom": false
+}

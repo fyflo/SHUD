@@ -1,0 +1,10 @@
+{
+  "name": "Default HUD",
+  "description": "Custom HUD",
+  "author": "tamim66",
+  "version": "2.0.0",
+  "radar": true,
+  "killfeed": false,
+  "HLAE_killfeed": true,
+  "HLAE_killfeed_castom": false
+}

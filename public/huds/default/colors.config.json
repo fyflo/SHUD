@@ -1,0 +1,14 @@
+{
+  "BG_DEAD_CT": "rgba(107, 105, 254, 0.6)",
+  "BG_DEAD_T": "rgba(254, 97, 0, 0.6)",
+  "COLOR_CT": "rgba(87, 136, 168, 1)",
+  "COLOR_CT_SPECTATOR": "linear-gradient(0deg, rgba(87, 136, 168, 1 ) 0%, rgba(87, 136, 168,0.623) 100%)",
+  "COLOR_MAIN_PANEL": "rgba(12, 15, 18, 0.75)",
+  "COLOR_NEW_CT": "rgba(28, 0, 138, 1)",
+  "COLOR_NEW_T": "rgba(255, 0, 0, 1)",
+  "COLOR_SUB_PANEL": "rgba(12, 15, 18, 0.6)",
+  "COLOR_T": "rgba(193, 149, 17, 1)",
+  "COLOR_T_SPECTATOR": "linear-gradient(0deg, rgba(193, 149, 17,1) 0%, rgba(193, 149, 17, 0.623) 100%)",
+  "COLOR_WHITE_DULL": "rgba(250, 250, 250, 0.25)",
+  "COLOR_WHITE_HALF": "rgba(250, 250, 250, 0.5)"
+}
