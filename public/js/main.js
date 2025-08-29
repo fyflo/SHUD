@@ -232,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
           body: JSON.stringify({
             team1_id: team1Id,
             team2_id: team2Id,
-            format: formatSelect || 'bo1',
+            format: formatSelect || "bo1",
           }),
         });
 
@@ -1338,7 +1338,11 @@ function createMatchElement(match) {
               match.match_name || "Без названия"
             }</span>
             <span class="match-map">${match.map || "-"}</span>
-            <span class="match-time">${match.match_time && match.match_time.trim() ? match.match_time : "-"}</span>
+            <span class="match-time">${
+              match.match_time && match.match_time.trim()
+                ? match.match_time
+                : "-"
+            }</span>
             <span class="match-status ${match.status}">${match.status}</span>
         </div>
         <div class="match-teams">
@@ -1806,8 +1810,8 @@ async function editTeam(teamId) {
     if (window.changeButtonToEdit) {
       window.changeButtonToEdit("add-team-btn", "Обновить команду");
     } else {
-    const submitBtn = form.querySelector('button[type="submit"]');
-    submitBtn.textContent = "Обновить команду";
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.textContent = "Обновить команду";
       submitBtn.style.backgroundColor = "#007bff";
       submitBtn.style.borderColor = "#007bff";
     }
@@ -1865,7 +1869,7 @@ async function handleTeamSubmit(event) {
     // Сброс формы
     form.reset();
     delete form.dataset.editId;
-    
+
     // Возвращаем кнопку к исходному состоянию
     if (window.resetButtonToAdd) {
       window.resetButtonToAdd("add-team-btn", "Добавить команду");
@@ -2006,13 +2010,13 @@ async function handlePlayerSubmit(e) {
     // Очищаем форму и сбрасываем состояние редактирования
     form.reset();
     form.removeAttribute("data-edit-id");
-    
+
     // Возвращаем кнопку к исходному состоянию
     if (window.resetButtonToAdd) {
       window.resetButtonToAdd("add-player-btn", "Добавить игрока");
     } else {
-    const submitBtn = form.querySelector('button[type="submit"]');
-    submitBtn.textContent = "Добавить игрока";
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.textContent = "Добавить игрока";
       submitBtn.style.backgroundColor = "";
       submitBtn.style.borderColor = "";
     }
@@ -2174,6 +2178,8 @@ async function loadHUDs() {
                 </div>
                 <h3 data-i18n="closeOverlayHint">ALT+Q - Закрыть оверлей</h3>
                 <h3 data-i18n="toggleOverlayHint">ALT+X - Свернуть/Развернуть оверлей</h3>
+                <h3 data-i18n="hlaeKillfeedHint">exec observer_HLAE_kill</h3>
+                <h3 data-i18n="cs2ToolsKillfeedHint">exec observer_cs2_tools_killfeed</h3>
                 <div class="players-table-container">
                     <table class="players-table">
                         <thead>
@@ -2199,7 +2205,11 @@ async function loadHUDs() {
                                                 onerror="this.src='/images/default-hud.png'">
                                         </div>
                                     </td>
-                                    <td>${hud.name}</td>
+                                    <td>${
+                                      hud.name
+                                    }<div class="hud-features" id="hud-features-${
+                                  hud.id
+                                }"></div></td>
                                     <td>${hud.description || "-"}</td>
                                     <td class="hud-actions">
                                         <button class="copy-url-btn" onclick="copyHUDUrl('${
@@ -2217,6 +2227,10 @@ async function loadHUDs() {
                                         }" data-i18n="launchOverlay">
                                             ${i18n("launchOverlay")}
                                         </button>
+                                        <button class="colors-button" data-hud="${
+                                          hud.id
+                                        }">Цвета</button>
+
                                     </td>
                                 </tr>
                             `
@@ -2239,6 +2253,1267 @@ async function loadHUDs() {
 
       // Инициализируем поиск
       initializeHUDSearch();
+
+      // Подгружаем признаки поддержки фич из /huds/<id>/config.json
+      const renderHudFeatures = async (hud) => {
+        try {
+          const resp = await fetch(`/huds/${hud.id}/config.json`, {
+            cache: "no-store",
+          });
+          if (!resp.ok) return;
+          const cfg = await resp.json();
+          const container = document.getElementById(`hud-features-${hud.id}`);
+          if (!container) return;
+          const icons = [];
+          if (cfg && cfg.radar) {
+            icons.push(
+              '<i class="fas fa-map feature feature-radar" title="Кастомный радар"></i>'
+            );
+          } else if (cfg && cfg.radar === false) {
+            icons.push(
+              '<i class="fas fa-map-slash feature feature-radar-disabled" title="Радар отключен"></i>'
+            );
+          }
+          if (cfg && cfg.killfeed) {
+            icons.push(
+              '<i class="fas fa-skull feature feature-killfeed" title="Кастомный киллфид"></i>'
+            );
+          }
+          if (cfg && cfg.HLAE_killfeed) {
+            icons.push(
+              '<i class="fas fa-bolt feature feature-hlae" title="HLAE + Killfeed из CS2"></i>'
+            );
+          }
+          if (cfg && cfg.HLAE_killfeed_castom) {
+            icons.push(
+              '<i class="fas fa-tools feature feature-hlae-custom" title="HLAE + CS2 tools с кастомным killfeed"></i>'
+            );
+          }
+          container.innerHTML = icons.join(" ");
+        } catch {}
+      };
+      Array.isArray(huds) && huds.forEach((h) => renderHudFeatures(h));
+
+      // === Цвета HUD: модальное окно ===
+      const modal = document.getElementById("hud-colors-modal");
+      const titleEl = document.getElementById("hud-colors-title");
+      const formEl = document.getElementById("hud-colors-form");
+      const btnSave = document.getElementById("hud-colors-save");
+      const btnReset = document.getElementById("hud-colors-reset");
+      const btnClose = document.getElementById("hud-colors-close");
+      const btnCancel = document.getElementById("hud-colors-cancel");
+
+      function closeColorsModal() {
+        if (modal) modal.style.display = "none";
+        if (formEl) formEl.innerHTML = "";
+      }
+
+      if (btnClose) btnClose.addEventListener("click", closeColorsModal);
+      if (btnCancel) btnCancel.addEventListener("click", closeColorsModal);
+
+      // Функция для обновления HLAE конфигов
+      async function updateHlaeConfigs(hlaeColors) {
+        try {
+          // Извлекаем цвета и альфа значения
+          const ctColor = hlaeColors.HLAE_CT_COLOR || "rgba(40, 120, 240, 1)";
+          const tColor = hlaeColors.HLAE_T_COLOR || "rgba(229, 11, 11, 1)";
+          const ctAlpha = hlaeColors.HLAE_CT_ALPHA || "150";
+          const tAlpha = hlaeColors.HLAE_T_ALPHA || "150";
+          const glowAlpha = hlaeColors.HLAE_GLOW_ALPHA || "50";
+          const trailsAlpha = hlaeColors.HLAE_TRAILS_ALPHA || "50";
+          const teamidAlpha = hlaeColors.HLAE_TEAMID_ALPHA || "80";
+
+          // Парсим цвета
+          const parseRgba = (rgba) => {
+            const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+            if (match) {
+              return {
+                r: parseInt(match[1]),
+                g: parseInt(match[2]),
+                b: parseInt(match[3]),
+              };
+            }
+            return { r: 40, g: 120, b: 240 }; // fallback
+          };
+
+          const ctRgb = parseRgba(ctColor);
+          const tRgb = parseRgba(tColor);
+
+          // Обновляем HLAE конфиг
+          const hlaeConfig = `sv_cheats 1
+cl_drawhud_force_teamid_overhead 1
+cl_draw_only_deathnotices 1
+cl_drawhud_force_deathnotices 1
+spec_show_xray 1
+cl_drawhud_force_radar 0
+cl_sanitize_muted_players 0
+spec_allow_roaming 1
+cl_drawhud 1
+voice_enable 0
+volume 0.3
+cl_obs_interp_enable 0
+fps_max 70.000000
+bind "/" "spec_autodirector 1"
+bind "." "spec_autodirector 0"
+safezonex 0.988
+safezoney 0.97
+mirv_deathmsg colors ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b} ${ctAlpha}
+mirv_deathmsg colors t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${tAlpha}
+mirv_colors glow ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b} ${glowAlpha}
+mirv_colors glow t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${glowAlpha}
+mirv_colors trails ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b} ${trailsAlpha}
+mirv_colors trails t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${trailsAlpha}
+mirv_colors smokes ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b}
+mirv_colors smokes t ${tRgb.r} ${tRgb.g} ${tRgb.b}
+mirv_colors teamid ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b} ${teamidAlpha}
+mirv_colors teamid t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${teamidAlpha}
+
+// HLAE PGL настройки для GSI
+mirv_pgl url "ws://localhost:1349/socket.io/?EIO=3&transport=websocket"
+mirv_pgl start
+
+// Дополнительные HLAE команды для расширенных данных
+mirv_pgl data "position"
+mirv_pgl data "forward"
+mirv_pgl data "camera"
+mirv_pgl data "weapons"
+mirv_pgl data "player"
+mirv_pgl data "allplayers"
+mirv_pgl data "bomb"
+mirv_pgl data "grenades"
+mirv_pgl data "round"
+mirv_pgl data "map"
+mirv_pgl data "previously"
+mirv_pgl data "provider"
+
+// Настройки для отправки данных каждые 100ms
+mirv_pgl interval 100`;
+
+          // Обновляем CS2 tools конфиг
+          const cs2ToolsConfig = `sv_cheats 1
+
+cl_drawhud_force_teamid_overhead 1
+cl_draw_only_deathnotices 1
+cl_drawhud_force_deathnotices 1
+spec_show_xray 1
+cl_drawhud_force_radar 0
+cl_sanitize_muted_players 0
+spec_allow_roaming 1
+cl_drawhud 1
+voice_enable 0
+volume 0.3
+cl_obs_interp_enable 0
+fps_max 70.000000
+r_always_render_all_windows 1
+bind "/" "spec_autodirector 1"
+bind "." "spec_autodirector 0"
+safezonex 0.988
+safezoney 0.97
+
+mirv_deathmsg colors ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b} ${ctAlpha}
+mirv_deathmsg colors t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${tAlpha}
+mirv_colors glow ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b} ${glowAlpha}
+mirv_colors glow t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${glowAlpha}
+mirv_colors trails ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b} ${trailsAlpha}
+mirv_colors trails t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${trailsAlpha}
+mirv_colors smokes ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b}
+mirv_colors smokes t ${tRgb.r} ${tRgb.g} ${tRgb.b}
+mirv_colors teamid ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b} ${teamidAlpha}
+mirv_colors teamid t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${teamidAlpha}
+
+// HLAE PGL настройки для GSI
+afx_interop connect 1
+cl_draw_only_deathnotices 1
+cl_obs_interp_enable 0
+cl_drawhud_force_teamid_overhead 1
+cl_teamid_overhead_always 2
+cl_drawhud_force_radar 0
+cl_drawhud_force_deathnotices -1
+cl_net_showevents 1
+mirv_pgl url "ws://localhost:1349/socket.io/?EIO=3&transport=websocket"
+mirv_pgl start`;
+
+          // Отправляем обновленные конфиги на сервер
+          await Promise.all([
+            fetch("/api/update-hlae-config", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                config: "hlae",
+                content: hlaeConfig,
+              }),
+            }),
+            fetch("/api/update-hlae-config", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                config: "cs2tools",
+                content: cs2ToolsConfig,
+              }),
+            }),
+          ]);
+        } catch (error) {
+          console.error("Ошибка обновления HLAE конфигов:", error);
+          throw error;
+        }
+      }
+
+      async function openColorsModal(hudId) {
+        if (!modal || !formEl || !titleEl) return;
+        titleEl.textContent = hudId;
+        modal.style.display = "block";
+        formEl.innerHTML = "Загрузка...";
+        try {
+          // Загружаем текущие значения и исходные дефолты из index.js HUD'a
+          const [resp, jsResp] = await Promise.all([
+            fetch(`/api/hud-config/${hudId}`),
+            fetch(`/huds/${hudId}/index.js`, { cache: "no-store" }).catch(
+              () => null
+            ),
+          ]);
+          const data = await resp.json();
+          const hudJs = jsResp && jsResp.ok ? await jsResp.text() : "";
+
+          // Собираем оригинальные значения цветов из HUD index.js
+          const defaultsMap = {};
+          if (hudJs) {
+            try {
+              const re = /([A-Z][A-Z0-9_]+)\s*=\s*(["'`])([\s\S]*?)\2/g;
+              let m;
+              while ((m = re.exec(hudJs))) {
+                const k = m[1];
+                const v = m[3];
+                if (
+                  /rgba\(|rgb\(|linear-gradient|#([0-9a-f]{3}|[0-9a-f]{6})/i.test(
+                    v
+                  )
+                ) {
+                  defaultsMap[k] = v;
+                }
+              }
+            } catch {}
+          }
+
+          const values = (data && data.values) || {};
+          const fields = Array.from(
+            new Set([...Object.keys(defaultsMap), ...Object.keys(values)])
+          )
+            .filter((k) => !k.startsWith("HLAE_")) // Исключаем HLAE поля из основной формы
+            .sort();
+
+          formEl.innerHTML =
+            fields
+              .map((k) => {
+                const v = values[k] || "";
+                const orig = defaultsMap[k] || "";
+                const initial = v || orig;
+                return `
+                <div class=\"form-group\" style=\"margin-bottom:8px; display:flex; align-items:center; gap:10px;\">\n                  <label style=\"min-width:220px; display:flex; align-items:center; justify-content:space-between; gap:10px;\">\n                    <span>${k}</span>\n                    <span title=\"Оригинальный цвет из HUD\" style=\"display:inline-flex;align-items:center;gap:6px;\">\n                      <span style=\"display:inline-block;width:14px;height:14px;border-radius:2px;background:${
+                  orig || "transparent"
+                };border:1px solid #555\"></span>\n                    </span>\n                  </label>\n                  <input type=\"text\" data-key=\"${k}\" value=\"${initial}\" placeholder=\"rgba(r,g,b,a) или CSS-градиент\" style=\"flex:1\" />\n                  <span class=\"swatch-now\" data-key-swatch=\"${k}\" data-default=\"${orig}\" title=\"Текущий цвет\" style=\"display:inline-block;width:14px;height:14px;border-radius:2px;border:1px solid #555;background:${
+                  initial || "transparent"
+                }\"></span>\n                  \n                  <!-- Переключатель режима -->\n                  <div style=\"display:flex; align-items:center; gap:6px;\">\n                    <label style=\"font-size:12px;opacity:.75\">Режим:</label>\n                    <select data-key-mode=\"${k}\" style=\"font-size:12px; padding:2px;\">\n                      <option value=\"solid\">Цвет</option>\n                      <option value=\"gradient\">Градиент</option>\n                    </select>\n                  </div>\n                  \n                  <!-- Палитра для сплошного цвета -->\n                  <div class=\"color-controls\" data-key-color-controls=\"${k}\" style=\"display:flex; align-items:center; gap:6px;\">\n                    <label style=\"display:flex; align-items:center; gap:6px; cursor:pointer;\">\n                      <input title=\"Палитра\" type=\"color\" data-key-color=\"${k}\" />\n\n                    </label>\n                    <div style=\"display:flex; align-items:center; gap:6px; min-width:150px;\">\n                      <span style=\"font-size:12px;opacity:.75\">A</span>\n                      <input type=\"range\" min=\"0\" max=\"1\" step=\"0.01\" data-key-alpha=\"${k}\" style=\"width:90px\" />\n                      <input type=\"number\" min=\"0\" max=\"1\" step=\"0.01\" data-key-alpha-num=\"${k}\" style=\"width:60px\" />\n                    </div>\n                  </div>\n                  \n                  <!-- Контролы для градиента -->\n                  <div class=\"gradient-controls\" data-key-gradient-controls=\"${k}\" style=\"display:none; flex-direction:column; gap:6px; min-width:200px;\">\n                    <div style=\"display:flex; align-items:center; gap:6px;\">\n                      <span style=\"font-size:12px;opacity:.75\">Угол:</span>\n                      <input type=\"number\" data-key-gradient-angle=\"${k}\" value=\"0\" min=\"0\" max=\"360\" step=\"1\" style=\"width:60px\" />\n                      <span style=\"font-size:12px;opacity:.75\">°</span>\n                    </div>\n                    <div style=\"display:flex; align-items:center; gap:6px;\">\n                      <span style=\"font-size:12px;opacity:.75\">Цвет 1:</span>\n                      <input type=\"color\" data-key-gradient-color1=\"${k}\" value=\"#5788a8\" />\n                      <input type=\"range\" min=\"0\" max=\"1\" step=\"0.01\" data-key-gradient-alpha1=\"${k}\" value=\"1\" style=\"width:60px\" />\n                      <input type=\"number\" min=\"0\" max=\"1\" step=\"0.01\" data-key-gradient-alpha1-num=\"${k}\" value=\"1\" style=\"width:40px\" />\n                    </div>\n                    <div style=\"display:flex; align-items:center; gap:6px;\">\n                      <span style=\"font-size:12px;opacity:.75\">Цвет 2:</span>\n                      <input type=\"color\" data-key-gradient-color2=\"${k}\" value=\"#5788a8\" />\n                      <input type=\"range\" min=\"0\" max=\"1\" step=\"0.01\" data-key-gradient-alpha2=\"${k}\" value=\"0.623\" style=\"width:60px\" />\n                      <input type=\"number\" min=\"0\" max=\"1\" step=\"0.01\" data-key-gradient-alpha2-num=\"${k}\" value=\"0.623\" style=\"width:40px\" />\n                    </div>\n                  </div>\n                </div>
+              `;
+              })
+              .join("") +
+            // Добавляем секцию HLAE цветов
+            `<div style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.1); border-radius: 8px; border-left: 4px solid #ff9800;">
+              <h4 style="margin: 0 0 15px 0; color: #ff9800; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-bolt"></i>
+                HLAE & CS2 Цвета
+              </h4>
+              <div style="font-size: 12px; opacity: 0.8; margin-bottom: 15px;">
+                Настройки цветов для HLAE killfeed и CS2 tools конфигов.<br>
+                <strong>HLAE цвета автоматически синхронизируются с основными цветами HUD (COLOR_NEW_CT/COLOR_NEW_T)</strong>
+              </div>
+              
+              <!-- Настройка пути к CS2 -->
+              <div style="margin-bottom: 15px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 4px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                  <span style="font-size: 12px; opacity: 0.8;">Путь к CS2:</span>
+                  <input type="text" id="cs2-path-input" placeholder="Путь к папке cfg CS2" style="flex: 1; padding: 4px 8px; font-size: 12px;" />
+                  <button id="cs2-path-save" style="padding: 4px 8px; font-size: 12px; background: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer;">Сохранить</button>
+                </div>
+                <div id="cs2-path-status" style="font-size: 11px; opacity: 0.7;"></div>
+              </div>
+              <div class="form-group" style="margin-bottom:8px; display:flex; align-items:center; gap:10px;">
+                <label style="min-width:220px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                  <span>HLAE_CT_COLOR</span>
+                  <span title="HLAE цвет CT по умолчанию (синхронизирован с COLOR_NEW_CT)" style="display:inline-flex;align-items:center;gap:6px;">
+                    <span style="display:inline-block;width:14px;height:14px;border-radius:2px;background:${
+                      values.HLAE_CT_COLOR ||
+                      values.COLOR_NEW_CT ||
+                      "rgba(40, 120, 240, 1)"
+                    };border:1px solid #555"></span>
+                  </span>
+                </label>
+                <input type="text" data-key="HLAE_CT_COLOR" value="${
+                  values.HLAE_CT_COLOR ||
+                  values.COLOR_NEW_CT ||
+                  "rgba(40, 120, 240, 1)"
+                }" placeholder="rgba(r,g,b,a)" style="flex:1" />
+                <span class="swatch-now" data-key-swatch="HLAE_CT_COLOR" data-default="${
+                  values.COLOR_NEW_CT || "rgba(40, 120, 240, 1)"
+                }" title="Текущий цвет" style="display:inline-block;width:14px;height:14px;border-radius:2px;border:1px solid #555;background:${
+              values.HLAE_CT_COLOR ||
+              values.COLOR_NEW_CT ||
+              "rgba(40, 120, 240, 1)"
+            }"></span>
+                
+                <div class="color-controls" data-key-color-controls="HLAE_CT_COLOR" style="display:flex; align-items:center; gap:6px;">
+                  <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                    <input title="Палитра" type="color" data-key-color="HLAE_CT_COLOR" value="#2878f0" />
+                    <span style="font-size:12px;opacity:.75">палитра</span>
+                  </label>
+                  <div style="display:flex; align-items:center; gap:6px; min-width:150px;">
+                    <span style="font-size:12px;opacity:.75">A</span>
+                    <input type="range" min="0" max="1" step="0.01" data-key-alpha="HLAE_CT_COLOR" style="width:90px" value="1" />
+                    <input type="number" min="0" max="1" step="0.01" data-key-alpha-num="HLAE_CT_COLOR" style="width:60px" value="1" />
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-group" style="margin-bottom:8px; display:flex; align-items:center; gap:10px;">
+                <label style="min-width:220px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                  <span>HLAE_T_COLOR</span>
+                  <span title="HLAE цвет T по умолчанию (синхронизирован с COLOR_NEW_T)" style="display:inline-flex;align-items:center;gap:6px;">
+                    <span style="display:inline-block;width:14px;height:14px;border-radius:2px;background:${
+                      values.HLAE_T_COLOR ||
+                      values.COLOR_NEW_T ||
+                      "rgba(229, 11, 11, 1)"
+                    };border:1px solid #555"></span>
+                  </span>
+                </label>
+                <input type="text" data-key="HLAE_T_COLOR" value="${
+                  values.HLAE_T_COLOR ||
+                  values.COLOR_NEW_T ||
+                  "rgba(229, 11, 11, 1)"
+                }" placeholder="rgba(r,g,b,a)" style="flex:1" />
+                <span class="swatch-now" data-key-swatch="HLAE_T_COLOR" data-default="${
+                  values.COLOR_NEW_T || "rgba(229, 12, 11, 1)"
+                }" title="Текущий цвет" style="display:inline-block;width:14px;height:14px;border-radius:2px;border:1px solid #555;background:${
+              values.HLAE_T_COLOR ||
+              values.COLOR_NEW_T ||
+              "rgba(229, 11, 11, 1)"
+            }"></span>
+                
+                <div class="color-controls" data-key-color-controls="HLAE_T_COLOR" style="display:flex; align-items:center; gap:6px;">
+                  <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                    <input title="Палитра" type="color" data-key-color="HLAE_T_COLOR" value="#e50b0b" />
+                    <span style="font-size:12px;opacity:.75">палитра</span>
+                  </label>
+                  <div style="display:flex; align-items:center; gap:6px; min-width:150px;">
+                    <span style="font-size:12px;opacity:.75">A</span>
+                    <input type="range" min="0" max="1" step="0.01" data-key-alpha="HLAE_T_COLOR" style="width:90px" value="1" />
+                    <input type="number" min="0" max="1" step="0.01" data-key-alpha-num="HLAE_T_COLOR" style="width:60px" value="1" />
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-group" style="margin-bottom:8px; display:flex; align-items:center; gap:10px;">
+                <label style="min-width:220px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                  <span>HLAE_CT_ALPHA</span>
+                  <span style="font-size:12px;opacity:.75">Значение: ${
+                    values.HLAE_CT_ALPHA || "150"
+                  }</span>
+                </label>
+                <input type="number" data-key="HLAE_CT_ALPHA" value="${
+                  values.HLAE_CT_ALPHA || "150"
+                }" min="0" max="255" step="1" style="width:80px" />
+                <div style="display:flex; align-items:center; gap:6px; min-width:150px;">
+                  <span style="font-size:12px;opacity:.75">0-255</span>
+                  <input type="range" min="0" max="255" step="1" data-key-alpha-range="HLAE_CT_ALPHA" style="width:90px" value="${
+                    values.HLAE_CT_ALPHA || "150"
+                  }" />
+                </div>
+              </div>
+              
+              <div class="form-group" style="margin-bottom:8px; display:flex; align-items:center; gap:10px;">
+                <label style="min-width:220px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                  <span>HLAE_T_ALPHA</span>
+                  <span style="font-size:12px;opacity:.75">Значение: ${
+                    values.HLAE_T_ALPHA || "150"
+                  }</span>
+                </label>
+                <input type="number" data-key="HLAE_T_ALPHA" value="${
+                  values.HLAE_T_ALPHA || "150"
+                }" min="0" max="255" step="1" style="width:80px" />
+                <div style="display:flex; align-items:center; gap:6px; min-width:150px;">
+                  <span style="font-size:12px;opacity:.75">0-255</span>
+                  <input type="range" min="0" max="255" step="1" data-key-alpha-range="HLAE_T_ALPHA" style="width:90px" value="${
+                    values.HLAE_T_ALPHA || "150"
+                  }" />
+                </div>
+              </div>
+              
+              <div class="form-group" style="margin-bottom:8px; display:flex; align-items:center; gap:10px;">
+                <label style="min-width:220px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                  <span>HLAE_GLOW_ALPHA</span>
+                  <span style="font-size:12px;opacity:.75">Значение: ${
+                    values.HLAE_GLOW_ALPHA || "50"
+                  }</span>
+                </label>
+                <input type="number" data-key="HLAE_GLOW_ALPHA" value="${
+                  values.HLAE_GLOW_ALPHA || "50"
+                }" min="0" max="255" step="1" style="width:80px" />
+                <div style="display:flex; align-items:center; gap:6px; min-width:150px;">
+                  <span style="font-size:12px;opacity:.75">0-255</span>
+                  <input type="range" min="0" max="255" step="1" data-key-alpha-range="HLAE_GLOW_ALPHA" style="width:90px" value="${
+                    values.HLAE_GLOW_ALPHA || "50"
+                  }" />
+                </div>
+              </div>
+              
+              <div class="form-group" style="margin-bottom:8px; display:flex; align-items:center; gap:10px;">
+                <label style="min-width:220px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                  <span>HLAE_TRAILS_ALPHA</span>
+                  <span style="font-size:12px;opacity:.75">Значение: ${
+                    values.HLAE_TRAILS_ALPHA || "50"
+                  }</span>
+                </label>
+                <input type="number" data-key="HLAE_TRAILS_ALPHA" value="${
+                  values.HLAE_TRAILS_ALPHA || "50"
+                }" min="0" max="255" step="1" style="width:80px" />
+                <div style="display:flex; align-items:center; gap:6px; min-width:150px;">
+                  <span style="font-size:12px;opacity:.75">0-255</span>
+                  <input type="range" min="0" max="255" step="1" data-key-alpha-range="HLAE_TRAILS_ALPHA" style="width:90px" value="${
+                    values.HLAE_TRAILS_ALPHA || "50"
+                  }" />
+                </div>
+              </div>
+              
+              <div class="form-group" style="margin-bottom:8px; display:flex; align-items:center; gap:10px;">
+                <label style="min-width:220px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                  <span>HLAE_TEAMID_ALPHA</span>
+                  <span style="font-size:12px;opacity:.75">Значение: ${
+                    values.HLAE_TEAMID_ALPHA || "80"
+                  }</span>
+                </label>
+                <input type="number" data-key="HLAE_TEAMID_ALPHA" value="${
+                  values.HLAE_TEAMID_ALPHA || "80"
+                }" min="0" max="255" step="1" style="width:80px" />
+                <div style="display:flex; align-items:center; gap:6px; min-width:150px;">
+                  <span style="font-size:12px;opacity:.75">0-255</span>
+                  <input type="range" min="0" max="255" step="1" data-key-alpha-range="HLAE_TEAMID_ALPHA" style="width:90px" value="${
+                    values.HLAE_TEAMID_ALPHA || "80"
+                  }" />
+                </div>
+              </div>
+            </div>`;
+
+          // Синхронизируем color input c rgba
+          formEl.querySelectorAll("input[data-key]")?.forEach((inp) => {
+            const key = inp.getAttribute("data-key");
+            const color = formEl.querySelector(
+              `input[data-key-color="${key}\"]`
+            );
+            const swatch = formEl.querySelector(`[data-key-swatch="${key}\"]`);
+            const alphaRange = formEl.querySelector(
+              `input[data-key-alpha="${key}\"]`
+            );
+            const alphaNum = formEl.querySelector(
+              `input[data-key-alpha-num="${key}\"]`
+            );
+            const toHex = (rgba) => {
+              try {
+                const m = rgba.match(
+                  /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i
+                );
+                if (!m) return null;
+                const r = Number(m[1]).toString(16).padStart(2, "0");
+                const g = Number(m[2]).toString(16).padStart(2, "0");
+                const b = Number(m[3]).toString(16).padStart(2, "0");
+                return `#${r}${g}${b}`;
+              } catch {
+                return null;
+              }
+            };
+            const parseAlpha = (rgba) => {
+              const m =
+                rgba &&
+                rgba.match(/rgba\([^,]+,[^,]+,[^,]+,\s*([0-9.]+)\s*\)/i);
+              const a = m ? parseFloat(m[1]) : NaN;
+              return Number.isFinite(a) ? Math.max(0, Math.min(1, a)) : 1;
+            };
+            const fromHex = (hex, aVal) => {
+              if (!/^#?[0-9a-fA-F]{6}$/.test(hex)) return null;
+              const h = hex.replace("#", "");
+              const r = parseInt(h.slice(0, 2), 16);
+              const g = parseInt(h.slice(2, 4), 16);
+              const b = parseInt(h.slice(4, 6), 16);
+              const a = Number.isFinite(aVal) ? aVal : 1;
+              return `rgba(${r}, ${g}, ${b}, ${a})`;
+            };
+            const isColorish = (val) =>
+              typeof val === "string" &&
+              /rgba\(|rgb\(|linear-gradient|#([0-9a-f]{3}|[0-9a-f]{6})/i.test(
+                val
+              );
+            const applySwatch = () => {
+              if (!swatch) return;
+              const def = swatch.getAttribute("data-default") || "";
+              const bg = isColorish(inp.value)
+                ? inp.value
+                : isColorish(def)
+                ? def
+                : "transparent";
+              swatch.style.background = bg;
+            };
+            // init swatch state
+            applySwatch();
+            // init alpha controls from current value
+            const initA =
+              parseAlpha(inp.value || swatch.getAttribute("data-default")) || 1;
+            if (alphaRange) alphaRange.value = String(initA);
+            if (alphaNum) alphaNum.value = String(initA);
+            if (color) {
+              const hex = toHex(inp.value || "");
+              if (hex) color.value = hex;
+              color.addEventListener("input", () => {
+                const a = alphaNum ? parseFloat(alphaNum.value) : 1;
+                const rgba = fromHex(color.value, a);
+                if (rgba) {
+                  inp.value = rgba;
+                  applySwatch();
+                }
+              });
+            }
+            // alpha sync
+            const applyAlpha = () => {
+              const a = alphaNum ? parseFloat(alphaNum.value) : 1;
+              if (alphaRange) alphaRange.value = String(a);
+              // rebuild rgba using current RGB from text input
+              const hex = toHex(inp.value || "");
+              if (hex) {
+                const rgba = fromHex(hex, a);
+                if (rgba) {
+                  inp.value = rgba;
+                  applySwatch();
+                }
+              }
+            };
+            if (alphaRange)
+              alphaRange.addEventListener("input", () => {
+                if (alphaNum) alphaNum.value = alphaRange.value;
+                applyAlpha();
+              });
+            if (alphaNum) alphaNum.addEventListener("input", applyAlpha);
+            inp.addEventListener("input", applySwatch);
+          });
+
+          // Автоматическая синхронизация HLAE цветов с основными цветами HUD
+          const syncHlaeColors = () => {
+            const ctColorInput = formEl.querySelector(
+              'input[data-key="HLAE_CT_COLOR"]'
+            );
+            const tColorInput = formEl.querySelector(
+              'input[data-key="HLAE_T_COLOR"]'
+            );
+            const ctNewColorInput = formEl.querySelector(
+              'input[data-key="COLOR_NEW_CT"]'
+            );
+            const tNewColorInput = formEl.querySelector(
+              'input[data-key="COLOR_NEW_T"]'
+            );
+
+            if (ctColorInput && ctNewColorInput && !values.HLAE_CT_COLOR) {
+              // Если HLAE_CT_COLOR не был изменен пользователем, синхронизируем с COLOR_NEW_CT
+              ctColorInput.value = ctNewColorInput.value;
+              const swatch = formEl.querySelector(
+                '[data-key-swatch="HLAE_CT_COLOR"]'
+              );
+              if (swatch) swatch.style.background = ctNewColorInput.value;
+            }
+
+            if (tColorInput && tNewColorInput && !values.HLAE_T_COLOR) {
+              // Если HLAE_T_COLOR не был изменен пользователем, синхронизируем с COLOR_NEW_T
+              tColorInput.value = tNewColorInput.value;
+              const swatch = formEl.querySelector(
+                '[data-key-swatch="HLAE_T_COLOR"]'
+              );
+              if (swatch) swatch.style.background = tNewColorInput.value;
+            }
+          };
+
+          // Запускаем синхронизацию после инициализации всех полей
+          syncHlaeColors();
+
+          // Добавляем обработчики изменений для автоматической синхронизации HLAE цветов
+          const ctNewColorInput = formEl.querySelector(
+            'input[data-key="COLOR_NEW_CT"]'
+          );
+          const tNewColorInput = formEl.querySelector(
+            'input[data-key="COLOR_NEW_T"]'
+          );
+
+          if (ctNewColorInput) {
+            ctNewColorInput.addEventListener("input", () => {
+              if (!values.HLAE_CT_COLOR) {
+                // Только если пользователь не изменял HLAE цвет
+                const hlaeCtInput = formEl.querySelector(
+                  'input[data-key="HLAE_CT_COLOR"]'
+                );
+                const swatch = formEl.querySelector(
+                  '[data-key-swatch="HLAE_CT_COLOR"]'
+                );
+                if (hlaeCtInput && swatch) {
+                  hlaeCtInput.value = ctNewColorInput.value;
+                  swatch.style.background = ctNewColorInput.value;
+                }
+              }
+            });
+          }
+
+          if (tNewColorInput) {
+            tNewColorInput.addEventListener("input", () => {
+              if (!values.HLAE_T_COLOR) {
+                // Только если пользователь не изменял HLAE цвет
+                const hlaeTInput = formEl.querySelector(
+                  'input[data-key="HLAE_T_COLOR"]'
+                );
+                const swatch = formEl.querySelector(
+                  '[data-key-swatch="HLAE_T_COLOR"]'
+                );
+                if (hlaeTInput && swatch) {
+                  hlaeTInput.value = tNewColorInput.value;
+                  swatch.style.background = tNewColorInput.value;
+                }
+              }
+            });
+          }
+
+          // Добавляем обработчики для HLAE цветов, чтобы их swatch'и обновлялись
+          const hlaeCtInput = formEl.querySelector(
+            'input[data-key="HLAE_CT_COLOR"]'
+          );
+          const hlaeTInput = formEl.querySelector(
+            'input[data-key="HLAE_T_COLOR"]'
+          );
+
+          if (hlaeCtInput) {
+            hlaeCtInput.addEventListener("input", () => {
+              const swatch = formEl.querySelector(
+                '[data-key-swatch="HLAE_CT_COLOR"]'
+              );
+              if (swatch) {
+                swatch.style.background = hlaeCtInput.value;
+              }
+            });
+          }
+
+          if (hlaeTInput) {
+            hlaeTInput.addEventListener("input", () => {
+              const swatch = formEl.querySelector(
+                '[data-key-swatch="HLAE_T_COLOR"]'
+              );
+              if (swatch) {
+                swatch.style.background = hlaeTInput.value;
+              }
+            });
+          }
+
+          // Инициализация переключателей режима и контролов градиента
+          formEl
+            .querySelectorAll("select[data-key-mode]")
+            ?.forEach((modeSelect) => {
+              const key = modeSelect.getAttribute("data-key-mode");
+              const colorControls = formEl.querySelector(
+                `[data-key-color-controls="${key}"]`
+              );
+              const gradientControls = formEl.querySelector(
+                `[data-key-gradient-controls="${key}"]`
+              );
+              const textInput = formEl.querySelector(
+                `input[data-key="${key}"]`
+              );
+
+              // Функция для генерации градиента
+              const generateGradient = () => {
+                const angle =
+                  formEl.querySelector(`[data-key-gradient-angle="${key}"]`)
+                    ?.value || 0;
+                const color1 =
+                  formEl.querySelector(`[data-key-gradient-color1="${key}"]`)
+                    ?.value || "#5788a8";
+                const alpha1 =
+                  formEl.querySelector(
+                    `[data-key-gradient-alpha1-num="${key}"]`
+                  )?.value || 1;
+                const color2 =
+                  formEl.querySelector(`[data-key-gradient-color2="${key}"]`)
+                    ?.value || "#5788a8";
+                const alpha2 =
+                  formEl.querySelector(
+                    `[data-key-gradient-alpha2-num="${key}"]`
+                  )?.value || 0.623;
+
+                // Конвертируем hex в rgba
+                const hexToRgba = (hex, alpha) => {
+                  const r = parseInt(hex.slice(1, 3), 16);
+                  const g = parseInt(hex.slice(3, 5), 16);
+                  const b = parseInt(hex.slice(5, 7), 16);
+                  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                };
+
+                const rgba1 = hexToRgba(color1, alpha1);
+                const rgba2 = hexToRgba(color2, alpha2);
+
+                return `linear-gradient(${angle}deg, ${rgba1} 0%, ${rgba2} 100%)`;
+              };
+
+              // Функция для обновления текстового поля
+              const updateTextInput = () => {
+                if (modeSelect.value === "gradient") {
+                  textInput.value = generateGradient();
+                }
+              };
+
+              // Обработчик переключения режима
+              modeSelect.addEventListener("change", () => {
+                if (modeSelect.value === "solid") {
+                  colorControls.style.display = "flex";
+                  gradientControls.style.display = "none";
+                } else {
+                  colorControls.style.display = "none";
+                  gradientControls.style.display = "flex";
+                  updateTextInput();
+                }
+              });
+
+              // Обработчики для контролов градиента
+              gradientControls.querySelectorAll("input").forEach((input) => {
+                input.addEventListener("input", updateTextInput);
+              });
+
+              // Синхронизация альфа-слайдеров с числовыми полями для градиента
+              const alpha1Range = formEl.querySelector(
+                `[data-key-gradient-alpha1="${key}"]`
+              );
+              const alpha1Num = formEl.querySelector(
+                `[data-key-gradient-alpha1-num="${key}"]`
+              );
+              const alpha2Range = formEl.querySelector(
+                `[data-key-gradient-alpha2="${key}"]`
+              );
+              const alpha2Num = formEl.querySelector(
+                `[data-key-gradient-alpha2-num="${key}"]`
+              );
+
+              if (alpha1Range && alpha1Num) {
+                alpha1Range.addEventListener("input", () => {
+                  alpha1Num.value = alpha1Range.value;
+                  updateTextInput();
+                });
+                alpha1Num.addEventListener("input", () => {
+                  alpha1Range.value = alpha1Num.value;
+                  updateTextInput();
+                });
+              }
+
+              if (alpha2Range && alpha2Num) {
+                alpha2Range.addEventListener("input", () => {
+                  alpha2Num.value = alpha2Range.value;
+                  updateTextInput();
+                });
+                alpha2Num.addEventListener("input", () => {
+                  alpha2Range.value = alpha2Num.value;
+                  updateTextInput();
+                });
+              }
+
+              // Определяем начальный режим
+              const isGradient = textInput.value.includes("linear-gradient");
+              if (isGradient) {
+                modeSelect.value = "gradient";
+                colorControls.style.display = "none";
+                gradientControls.style.display = "flex";
+
+                // Парсим существующий градиент
+                const gradientMatch = textInput.value.match(
+                  /linear-gradient\((\d+)deg,\s*rgba\(([^)]+)\)\s*0%,\s*rgba\(([^)]+)\)\s*100%\)/
+                );
+                if (gradientMatch) {
+                  const angle = gradientMatch[1];
+                  const rgba1 = gradientMatch[2];
+                  const rgba2 = gradientMatch[3];
+
+                  // Устанавливаем значения в контролы
+                  const angleInput = formEl.querySelector(
+                    `[data-key-gradient-angle="${key}"]`
+                  );
+                  if (angleInput) angleInput.value = angle;
+
+                  // Парсим rgba и устанавливаем цвета
+                  const parseRgba = (rgba) => {
+                    const match = rgba.match(
+                      /(\d+),\s*(\d+),\s*(\d+),\s*([0-9.]+)/
+                    );
+                    if (match) {
+                      const [_, r, g, b, a] = match;
+                      const hex = `#${Number(r)
+                        .toString(16)
+                        .padStart(2, "0")}${Number(g)
+                        .toString(16)
+                        .padStart(2, "0")}${Number(b)
+                        .toString(16)
+                        .padStart(2, "0")}`;
+                      return { hex, alpha: parseFloat(a) };
+                    }
+                    return { hex: "#5788a8", alpha: 1 };
+                  };
+
+                  const color1Data = parseRgba(rgba1);
+                  const color2Data = parseRgba(rgba2);
+
+                  const color1Input = formEl.querySelector(
+                    `[data-key-gradient-color1="${key}"]`
+                  );
+                  const alpha1Input = formEl.querySelector(
+                    `[data-key-gradient-alpha1-num="${key}"]`
+                  );
+                  const color2Input = formEl.querySelector(
+                    `[data-key-gradient-color2="${key}"]`
+                  );
+                  const alpha2Input = formEl.querySelector(
+                    `[data-key-gradient-alpha2-num="${key}"]`
+                  );
+
+                  if (color1Input) color1Input.value = color1Data.hex;
+                  if (alpha1Input) alpha1Input.value = color1Data.alpha;
+                  if (color2Input) color2Input.value = color2Data.hex;
+                  if (alpha2Input) alpha2Input.value = color2Data.alpha;
+                }
+              }
+            });
+
+          // Инициализация HLAE полей
+          formEl
+            .querySelectorAll("input[data-key-alpha-range]")
+            ?.forEach((rangeInput) => {
+              const key = rangeInput.getAttribute("data-key-alpha-range");
+              const numberInput = formEl.querySelector(
+                `input[data-key="${key}"]`
+              );
+
+              if (numberInput) {
+                // Синхронизация слайдера с числовым полем
+                rangeInput.addEventListener("input", () => {
+                  numberInput.value = rangeInput.value;
+                });
+
+                numberInput.addEventListener("input", () => {
+                  const value = parseInt(numberInput.value) || 0;
+                  const clampedValue = Math.max(0, Math.min(255, value));
+                  rangeInput.value = clampedValue;
+                  numberInput.value = clampedValue;
+                });
+              }
+            });
+
+          // Загружаем текущий путь к CS2
+          try {
+            const cs2PathResp = await fetch("/api/cs2-path");
+            if (cs2PathResp.ok) {
+              const cs2PathData = await cs2PathResp.json();
+              const cs2PathInput = document.getElementById("cs2-path-input");
+              const cs2PathStatus = document.getElementById("cs2-path-status");
+
+              if (cs2PathInput && cs2PathStatus) {
+                cs2PathInput.value = cs2PathData.path;
+                cs2PathStatus.textContent = cs2PathData.autoDetected
+                  ? "✓ Автоопределен"
+                  : "⚠ Ручная настройка";
+                cs2PathStatus.style.color = cs2PathData.autoDetected
+                  ? "#4CAF50"
+                  : "#FF9800";
+              }
+            }
+          } catch (error) {
+            console.warn("Failed to load CS2 path:", error);
+          }
+
+          // Инициализация HLAE цветовых полей
+          formEl
+            .querySelectorAll("input[data-key-color]")
+            ?.forEach((colorInput) => {
+              const key = colorInput.getAttribute("data-key-color");
+              const textInput = formEl.querySelector(
+                `input[data-key="${key}"]`
+              );
+              const alphaRange = formEl.querySelector(
+                `input[data-key-alpha="${key}"]`
+              );
+              const alphaNum = formEl.querySelector(
+                `input[data-key-alpha-num="${key}"]`
+              );
+
+              if (textInput && alphaRange && alphaNum) {
+                colorInput.addEventListener("input", () => {
+                  const hex = colorInput.value;
+                  const alpha = parseFloat(alphaNum.value) || 1;
+
+                  // Конвертируем hex в rgba
+                  const r = parseInt(hex.slice(1, 3), 16);
+                  const g = parseInt(hex.slice(3, 5), 16);
+                  const b = parseInt(hex.slice(5, 7), 16);
+
+                  textInput.value = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+
+                  // Обновляем swatch
+                  const swatch = formEl.querySelector(
+                    `[data-key-swatch="${key}"]`
+                  );
+                  if (swatch) {
+                    swatch.style.background = textInput.value;
+                  }
+                });
+
+                // Синхронизация альфа-слайдеров
+                alphaRange.addEventListener("input", () => {
+                  alphaNum.value = alphaRange.value;
+                  updateHlaeColor(textInput, colorInput, alphaRange.value);
+                });
+
+                alphaNum.addEventListener("input", () => {
+                  const value = parseFloat(alphaNum.value) || 1;
+                  const clampedValue = Math.max(0, Math.min(1, value));
+                  alphaRange.value = clampedValue;
+                  alphaNum.value = clampedValue;
+                  updateHlaeColor(textInput, colorInput, clampedValue);
+                });
+              }
+            });
+
+          // Обработчик для сохранения пути к CS2
+          const cs2PathSaveBtn = document.getElementById("cs2-path-save");
+          if (cs2PathSaveBtn) {
+            cs2PathSaveBtn.addEventListener("click", async () => {
+              const cs2PathInput = document.getElementById("cs2-path-input");
+              const cs2PathStatus = document.getElementById("cs2-path-status");
+
+              if (!cs2PathInput || !cs2PathStatus) return;
+
+              const newPath = cs2PathInput.value.trim();
+              if (!newPath) {
+                alert("Введите путь к папке cfg CS2");
+                return;
+              }
+
+              try {
+                const resp = await fetch("/api/cs2-path", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ path: newPath }),
+                });
+
+                const result = await resp.json();
+                if (resp.ok && result.ok) {
+                  cs2PathStatus.textContent = "✓ Путь обновлен";
+                  cs2PathStatus.style.color = "#4CAF50";
+                  alert(`Путь к CS2 обновлен: ${newPath}`);
+                } else {
+                  throw new Error(result.error || "Unknown error");
+                }
+              } catch (error) {
+                console.error("Failed to save CS2 path:", error);
+                cs2PathStatus.textContent = "✗ Ошибка: " + error.message;
+                cs2PathStatus.style.color = "#f44336";
+                alert("Ошибка при сохранении пути к CS2: " + error.message);
+              }
+            });
+          }
+
+          // Функция для обновления HLAE цвета
+          function updateHlaeColor(textInput, colorInput, alpha) {
+            const hex = colorInput.value;
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+
+            textInput.value = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+
+            // Обновляем swatch
+            const key = textInput.getAttribute("data-key");
+            const swatch = formEl.querySelector(`[data-key-swatch="${key}"]`);
+            if (swatch) {
+              swatch.style.background = textInput.value;
+            }
+          }
+
+          // Функция для обновления цветовых полей после сохранения
+          function updateFormColorsAfterSave(savedColors) {
+            Object.entries(savedColors).forEach(([key, value]) => {
+              // Обновляем текстовое поле
+              const textInput = formEl.querySelector(
+                `input[data-key="${key}"]`
+              );
+              if (textInput) {
+                textInput.value = value;
+              }
+
+              // Обновляем swatch
+              const swatch = formEl.querySelector(`[data-key-swatch="${key}"]`);
+              if (swatch) {
+                swatch.style.background = value;
+                console.log(`Swatch updated for ${key}: ${value}`);
+              } else if (!key.includes("_ALPHA")) {
+                // Предупреждаем только для не-альфа полей, так как у альфа-значений нет swatch'ей
+                console.warn(`Swatch not found for ${key}`);
+              }
+
+              // Для HLAE цветов обновляем специальные поля
+              if (key.startsWith("HLAE_")) {
+                // Дополнительно обновляем swatch для HLAE цветов (на случай, если основной не нашелся)
+                const hlaeSwatch = formEl.querySelector(
+                  `[data-key-swatch="${key}"]`
+                );
+                if (hlaeSwatch) {
+                  hlaeSwatch.style.background = value;
+                  console.log(`HLAE swatch updated for ${key}: ${value}`);
+                } else if (!key.includes("_ALPHA")) {
+                  // Предупреждаем только для не-альфа полей
+                  console.warn(`HLAE swatch not found for ${key}`);
+                }
+
+                // Принудительно обновляем все swatch'и для HLAE цветов
+                const allHlaeSwatches = formEl.querySelectorAll(
+                  `[data-key-swatch="${key}"]`
+                );
+                allHlaeSwatches.forEach((swatch, index) => {
+                  swatch.style.background = value;
+                  console.log(
+                    `HLAE swatch ${index + 1} updated for ${key}: ${value}`
+                  );
+                });
+                // Обновляем цветовой picker для HLAE цветов
+                const colorInput = formEl.querySelector(
+                  `input[data-key-color="${key}"]`
+                );
+                if (colorInput && value.startsWith("rgba(")) {
+                  // Парсим rgba и конвертируем в hex
+                  const rgbaMatch = value.match(
+                    /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/
+                  );
+                  if (rgbaMatch) {
+                    const r = parseInt(rgbaMatch[1]);
+                    const g = parseInt(rgbaMatch[2]);
+                    const b = parseInt(rgbaMatch[3]);
+                    const hex = `#${r.toString(16).padStart(2, "0")}${g
+                      .toString(16)
+                      .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+                    colorInput.value = hex;
+                  }
+                }
+
+                // Обновляем альфа-слайдеры для HLAE цветов (0-1)
+                const alphaRange = formEl.querySelector(
+                  `input[data-key-alpha="${key}"]`
+                );
+                const alphaNum = formEl.querySelector(
+                  `input[data-key-alpha-num="${key}"]`
+                );
+                if (alphaRange && alphaNum && value.startsWith("rgba(")) {
+                  const rgbaMatch = value.match(
+                    /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/
+                  );
+                  if (rgbaMatch && rgbaMatch[4]) {
+                    const alpha = parseFloat(rgbaMatch[4]);
+                    alphaRange.value = alpha;
+                    alphaNum.value = alpha;
+                  }
+                }
+
+                // Обновляем альфа-слайдеры для HLAE альфа значений (0-255)
+                const alphaRange255 = formEl.querySelector(
+                  `input[data-key-alpha-range="${key}"]`
+                );
+                if (alphaRange255 && !isNaN(value) && key.includes("_ALPHA")) {
+                  alphaRange255.value = value;
+                }
+              } else {
+                // Для обычных цветов обновляем стандартные поля
+                const colorInput = formEl.querySelector(
+                  `input[data-key-color="${key}"]`
+                );
+                if (colorInput && value.startsWith("rgba(")) {
+                  // Парсим rgba и конвертируем в hex
+                  const rgbaMatch = value.match(
+                    /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/
+                  );
+                  if (rgbaMatch) {
+                    const r = parseInt(rgbaMatch[1]);
+                    const g = parseInt(rgbaMatch[2]);
+                    const b = parseInt(rgbaMatch[3]);
+                    const hex = `#${r.toString(16).padStart(2, "0")}${g
+                      .toString(16)
+                      .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+                    colorInput.value = hex;
+                  }
+                }
+
+                // Обновляем альфа-слайдеры для обычных цветов (0-1)
+                const alphaRange = formEl.querySelector(
+                  `input[data-key-alpha="${key}"]`
+                );
+                const alphaNum = formEl.querySelector(
+                  `input[data-key-alpha-num="${key}"]`
+                );
+                if (alphaRange && alphaNum && value.startsWith("rgba(")) {
+                  const rgbaMatch = value.match(
+                    /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/
+                  );
+                  if (rgbaMatch && rgbaMatch[4]) {
+                    const alpha = parseFloat(rgbaMatch[4]);
+                    alphaRange.value = alpha;
+                    alphaNum.value = alpha;
+                  }
+                }
+              }
+            });
+          }
+
+          if (btnSave) {
+            btnSave.onclick = async () => {
+              const payload = {};
+              formEl.querySelectorAll("input[data-key]")?.forEach((inp) => {
+                const k = inp.getAttribute("data-key");
+                const v = (inp.value || "").trim();
+                if (v) payload[k] = v;
+              });
+
+              try {
+                // Сохраняем конфиг HUD
+                const resp = await fetch(`/api/hud-config/${hudId}`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(payload),
+                });
+                const j = await resp.json().catch(() => ({}));
+
+                if (resp.ok && j.ok) {
+                  // Обновляем HLAE конфиги если есть HLAE цвета
+                  if (
+                    payload.HLAE_CT_COLOR ||
+                    payload.HLAE_T_COLOR ||
+                    payload.HLAE_CT_ALPHA ||
+                    payload.HLAE_T_ALPHA ||
+                    payload.HLAE_GLOW_ALPHA ||
+                    payload.HLAE_TRAILS_ALPHA ||
+                    payload.HLAE_TEAMID_ALPHA
+                  ) {
+                    try {
+                      await updateHlaeConfigs(payload);
+                    } catch (hlaeError) {
+                      console.warn(
+                        "Ошибка обновления HLAE конфигов:",
+                        hlaeError
+                      );
+                    }
+                  }
+
+                  // Обновляем все цветовые поля в форме после сохранения
+                  console.log("Updating form colors with payload:", payload);
+                  updateFormColorsAfterSave(payload);
+
+                  // Дополнительная проверка HLAE swatch'ей после обновления (синхронно)
+                  if (payload.HLAE_CT_COLOR || payload.HLAE_T_COLOR) {
+                    console.log(
+                      "Additional HLAE swatch update check (sync)..."
+                    );
+                    if (payload.HLAE_CT_COLOR) {
+                      const ctSwatches = formEl.querySelectorAll(
+                        `[data-key-swatch="HLAE_CT_COLOR"]`
+                      );
+                      console.log(`Found ${ctSwatches.length} CT swatches`);
+                      ctSwatches.forEach((swatch, index) => {
+                        swatch.style.background = payload.HLAE_CT_COLOR;
+                        console.log(
+                          `Additional CT swatch ${index + 1} update: ${
+                            payload.HLAE_CT_COLOR
+                          }`
+                        );
+                      });
+                    }
+                    if (payload.HLAE_T_COLOR) {
+                      const tSwatches = formEl.querySelectorAll(
+                        `[data-key-swatch="HLAE_T_COLOR"]`
+                      );
+                      console.log(`Found ${tSwatches.length} T swatches`);
+                      tSwatches.forEach((swatch, index) => {
+                        swatch.style.background = payload.HLAE_T_COLOR;
+                        console.log(
+                          `Additional T swatch ${index + 1} update: ${
+                            payload.HLAE_T_COLOR
+                          }`
+                        );
+                      });
+                    }
+                    console.log("Additional HLAE swatch update completed");
+                  }
+
+                  // Показываем информацию о том, где сохранены HLAE конфиги
+                  if (
+                    payload.HLAE_CT_COLOR ||
+                    payload.HLAE_T_COLOR ||
+                    payload.HLAE_CT_ALPHA ||
+                    payload.HLAE_T_ALPHA ||
+                    payload.HLAE_GLOW_ALPHA ||
+                    payload.HLAE_TRAILS_ALPHA ||
+                    payload.HLAE_TEAMID_ALPHA
+                  ) {
+                    try {
+                      const cs2PathResp = await fetch("/api/cs2-path");
+                      if (cs2PathResp.ok) {
+                        const cs2PathData = await cs2PathResp.json();
+                        alert(
+                          `Сохранено!\n\nHLAE конфиги обновлены в:\n${cs2PathData.path}`
+                        );
+                      } else {
+                        alert("Сохранено!\n\nHLAE конфиги обновлены.");
+                      }
+                    } catch (error) {
+                      alert("Сохранено!\n\nHLAE конфиги обновлены.");
+                    }
+                  } else {
+                    alert("Сохранено");
+                  }
+
+                  closeColorsModal();
+                } else {
+                  alert("Ошибка сохранения");
+                }
+              } catch {
+                alert("Ошибка запроса");
+              }
+            };
+          }
+
+          // Сброс к оригиналу: очищаем файл конфига
+          if (btnReset) {
+            btnReset.onclick = async () => {
+              if (!confirm("Сбросить все цвета к оригиналу?")) return;
+              try {
+                const resp = await fetch(`/api/hud-config/${hudId}`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({}),
+                });
+                await resp.json().catch(() => ({}));
+                closeColorsModal();
+                alert("Сброшено. Используются оригинальные цвета HUD.");
+              } catch {
+                alert("Ошибка запроса");
+              }
+            };
+          }
+        } catch (e) {
+          formEl.innerHTML = "Ошибка загрузки конфига";
+        }
+      }
+
+      hudsList.querySelectorAll(".colors-button").forEach((btn) => {
+        btn.addEventListener("click", () => openColorsModal(btn.dataset.hud));
+      });
     }
   } catch (error) {
     console.error("Ошибка загрузки HUD:", error);
@@ -2363,8 +3638,8 @@ async function updateGameInfo() {
 
     // Проверяем наличие и корректность логотипов в консоли
     //console.log("Логотипы команд:", {
-      //team1_logo_original: currentMatch.team1_logo,
-      //team2_logo_original: currentMatch.team2_logo,
+    //team1_logo_original: currentMatch.team1_logo,
+    //team2_logo_original: currentMatch.team2_logo,
     //});
 
     // Добавляем проверку на null/undefined и использование URL логотипа
@@ -2396,9 +3671,9 @@ async function updateGameInfo() {
 
     // Логируем итоговые пути к логотипам
     //console.log("Итоговые пути к логотипам:", {
-      //ctLogo,
-     // tLogo,
-   // });
+    //ctLogo,
+    // tLogo,
+    // });
 
     // Обновляем счет команд
     const ctScore = data.map?.team_ct?.score || "0";
@@ -2447,8 +3722,10 @@ async function updateGameInfo() {
           const ths = Number(player.state?.total_hs ?? 0);
           const rhs = Number(player.state?.round_killhs ?? 0);
           const kills = Number(player.match_stats?.kills ?? 0);
-          console.debug(`[UI HS] CT steamid=${player.steamid} name=${player.name} total_hs=${ths} round_killhs=${rhs} kills=${kills}`);
-        } catch(_e) {}
+          console.debug(
+            `[UI HS] CT steamid=${player.steamid} name=${player.name} total_hs=${ths} round_killhs=${rhs} kills=${kills}`
+          );
+        } catch (_e) {}
         playerRows += `
                     <tr class="player-row ${player.team.toLowerCase()}">
                         <td>${ctName}</td>
@@ -2484,8 +3761,10 @@ async function updateGameInfo() {
           const ths = Number(player.state?.total_hs ?? 0);
           const rhs = Number(player.state?.round_killhs ?? 0);
           const kills = Number(player.match_stats?.kills ?? 0);
-          console.debug(`[UI HS] T steamid=${player.steamid} name=${player.name} total_hs=${ths} round_killhs=${rhs} kills=${kills}`);
-        } catch(_e) {}
+          console.debug(
+            `[UI HS] T steamid=${player.steamid} name=${player.name} total_hs=${ths} round_killhs=${rhs} kills=${kills}`
+          );
+        } catch (_e) {}
         playerRows += `
                     <tr class="player-row ${player.team.toLowerCase()}">
                         <td>${tName}</td>
@@ -3042,7 +4321,8 @@ window.editMatch = async function (matchId) {
     // Устанавливаем время матча, если есть
     const matchTimeInput = document.getElementById("editMatchTime");
     if (matchTimeInput) {
-      matchTimeInput.value = match.match_time && match.match_time.trim() ? match.match_time : "";
+      matchTimeInput.value =
+        match.match_time && match.match_time.trim() ? match.match_time : "";
     }
 
     // Обновляем названия команд в селекторах выбора
@@ -3217,7 +4497,7 @@ window.editMatch = async function (matchId) {
         const result = await updateResponse.json();
         console.log("Результат обновления:", result);
 
-       /* if (result.success) {
+        /* if (result.success) {
           modal.style.display = "none";
           alert("Матч успешно обновлен");
           await loadMatchesList();
@@ -3264,7 +4544,7 @@ async function checkCS2Configs(customPath) {
       url += `?path=${encodeURIComponent(customPath)}`;
     }
     // Добавляем cache-busting параметр
-    url += (url.includes('?') ? '&' : '?') + `_=${Date.now()}`;
+    url += (url.includes("?") ? "&" : "?") + `_=${Date.now()}`;
 
     const response = await fetch(url);
     const data = await response.json();
@@ -3336,6 +4616,9 @@ async function updateConfigsStatus() {
   const observerHlaeKillStatusElement = document.getElementById(
     "cs2-observer_hlae_kill-status"
   );
+  const observerToolsStatusElement = document.getElementById(
+    "cs2-observer_tools-status"
+  );
   const customPathInput = document.getElementById("cs2-custom-path");
 
   // Проверяем только обязательные элементы
@@ -3348,14 +4631,21 @@ async function updateConfigsStatus() {
     return;
 
   // Устанавливаем начальные значения статусов
-  gsiStatusElement.textContent = "Проверка статуса GSI конфига...";
-  observerStatusElement.textContent = "Проверка статуса Observer конфига...";
-  observer2StatusElement.textContent = "Проверка статуса Observer2 конфига...";
-  observer_offStatusElement.textContent =
-    "Проверка статуса Observer_off конфига...";
+  gsiStatusElement.innerHTML =
+    '<span class="status-dot gray"></span>Проверка статуса GSI конфига...';
+  observerStatusElement.innerHTML =
+    '<span class="status-dot gray"></span>Проверка статуса Observer конфига...';
+  observer2StatusElement.innerHTML =
+    '<span class="status-dot gray"></span>Проверка статуса Observer2 конфига...';
+  observer_offStatusElement.innerHTML =
+    '<span class="status-dot gray"></span>Проверка статуса Observer_off конфига...';
+  if (observerToolsStatusElement) {
+    observerToolsStatusElement.innerHTML =
+      '<span class="status-dot gray"></span>Проверка статуса observer_cs2_tools_killfeed...';
+  }
   if (observerHlaeKillStatusElement) {
-    observerHlaeKillStatusElement.textContent =
-      "Проверка статуса observer_HLAE_kill.cfg...";
+    observerHlaeKillStatusElement.innerHTML =
+      '<span class="status-dot gray"></span>Проверка статуса observer_HLAE_kill.cfg...';
   }
 
   const data = await checkCS2Configs(
@@ -3364,38 +4654,73 @@ async function updateConfigsStatus() {
 
   if (data && data.success) {
     if (data.gsiInstalled) {
-      gsiStatusElement.textContent = "✓ GSI конфиг установлен";
+      gsiStatusElement.innerHTML =
+        '<span class="status-dot green"></span>GSI конфиг установлен';
     } else {
-      gsiStatusElement.textContent = "✗ GSI конфиг не установлен";
+      gsiStatusElement.innerHTML =
+        '<span class="status-dot red"></span>GSI конфиг не установлен';
     }
 
     if (data.observerInstalled) {
-      observerStatusElement.textContent = "✓ Observer конфиг установлен";
+      observerStatusElement.innerHTML =
+        '<span class="status-dot green"></span>Observer конфиг установлен';
     } else {
-      observerStatusElement.textContent = "✗ Observer конфиг не установлен";
+      if (data.sourceObserverExists === false) {
+        observerStatusElement.innerHTML =
+          '<span class="status-dot gray"></span>Observer конфиг: файла нет в папке cfg для установки';
+      } else {
+        observerStatusElement.innerHTML =
+          '<span class="status-dot red"></span>Observer конфиг не установлен';
+      }
     }
 
     if (data.observer2Installed) {
-      observer2StatusElement.textContent = "✓ Observer2 конфиг установлен";
+      observer2StatusElement.innerHTML =
+        '<span class="status-dot green"></span>Observer2 конфиг установлен';
     } else {
-      observer2StatusElement.textContent = "✗ Observer2 конфиг не установлен";
+      if (data.sourceObserver2Exists === false) {
+        observer2StatusElement.innerHTML =
+          '<span class="status-dot gray"></span>Observer2 конфиг: файла нет в папке cfg для установки';
+      } else {
+        observer2StatusElement.innerHTML =
+          '<span class="status-dot red"></span>Observer2 конфиг не установлен';
+      }
     }
 
     if (data.observer_offInstalled) {
-      observer_offStatusElement.textContent =
-        "✓ Observer_off конфиг установлен";
+      observer_offStatusElement.innerHTML =
+        '<span class="status-dot green"></span>Observer_off конфиг установлен';
     } else {
-      observer_offStatusElement.textContent =
-        "✗ Observer_off конфиг не установлен";
+      if (data.sourceObserverOffExists === false) {
+        observer_offStatusElement.innerHTML =
+          '<span class="status-dot gray"></span>Observer_off конфиг: файла нет в папке cfg для установки';
+      } else {
+        observer_offStatusElement.innerHTML =
+          '<span class="status-dot red"></span>Observer_off конфиг не установлен';
+      }
     }
 
+    if (observerToolsStatusElement) {
+      if (data.observerToolsInstalled) {
+        observerToolsStatusElement.innerHTML =
+          '<span class="status-dot green"></span>observer_cs2_tools_killfeed установлен';
+      } else {
+        if (data.sourceObserverToolsExists === false) {
+          observerToolsStatusElement.innerHTML =
+            '<span class="status-dot gray"></span>observer_cs2_tools_killfeed: файла нет в папке cfg для установки';
+        } else {
+          observerToolsStatusElement.innerHTML =
+            '<span class="status-dot red"></span>observer_cs2_tools_killfeed не установлен';
+        }
+      }
+    }
     if (observerHlaeKillStatusElement) {
       if (data.observerHlaeKillInstalled) {
-        observerHlaeKillStatusElement.textContent =
-          "✓ observer_HLAE_kill.cfg установлен";
+        observerHlaeKillStatusElement.innerHTML =
+          '<span class="status-dot green"></span>observer_HLAE_kill.cfg установлен';
       } else {
-        observerHlaeKillStatusElement.textContent =
-          "✗ observer_HLAE_kill.cfg не установлен";
+        observerHlaeKillStatusElement.innerHTML =
+          '<span class="status-dot red"></span>observer_HLAE_kill.cfg не установлен';
       }
     }
 
@@ -3409,16 +4734,21 @@ async function updateConfigsStatus() {
       }
     }
   } else {
-    gsiStatusElement.textContent = "? Не удалось проверить статус GSI конфига";
-    observerStatusElement.textContent =
-      "? Не удалось проверить статус Observer конфига";
-    observer2StatusElement.textContent =
-      "? Не удалось проверить статус Observer2 конфига";
-    observer_offStatusElement.textContent =
-      "? Не удалось проверить статус Observer_off конфига";
+    gsiStatusElement.innerHTML =
+      '<span class="status-dot red"></span>GSI конфиг не установлен';
+    observerStatusElement.innerHTML =
+      '<span class="status-dot red"></span>Observer конфиг не установлен';
+    observer2StatusElement.innerHTML =
+      '<span class="status-dot red"></span>Observer2 конфиг не установлен';
+    observer_offStatusElement.innerHTML =
+      '<span class="status-dot red"></span>Observer_off конфиг не установлен';
+    if (observerToolsStatusElement) {
+      observerToolsStatusElement.innerHTML =
+        '<span class="status-dot red"></span>observer_cs2_tools_killfeed не установлен';
+    }
     if (observerHlaeKillStatusElement) {
-      observerHlaeKillStatusElement.textContent =
-        "? Не удалось проверить статус observer_HLAE_kill.cfg";
+      observerHlaeKillStatusElement.innerHTML =
+        '<span class="status-dot red"></span>observer_HLAE_kill.cfg не установлен';
     }
 
     const pathElement = document.getElementById("cs2-path");
@@ -3678,7 +5008,7 @@ async function saveMatch(matchId) {
         pickTeam: item.querySelector(".pick-team-select").value,
         mapType: "pick",
         order_number: index + 1,
-        match_time: ' '
+        match_time: " ",
       };
     })
     .filter((map) => map.mapId); // Фильтруем только карты с выбранным значением
@@ -4836,11 +6166,11 @@ function initRegionFlags() {
     // Получаем ID команды для отладки
     const teamCard = region.closest(".team-card");
     //const teamId = teamCard
-      //? teamCard.getAttribute("data-team-id")
-      //: "неизвестно";
+    //? teamCard.getAttribute("data-team-id")
+    //: "неизвестно";
     //console.log(
-      //`Обрабатываем регион для команды ID ${teamId}:`,
-      //region.innerHTML
+    //`Обрабатываем регион для команды ID ${teamId}:`,
+    //region.innerHTML
     //);
 
     const regionText = region.textContent.trim();
@@ -5441,62 +6771,68 @@ function updateTeamNamesInSelects(team1Name, team2Name) {
 }
 
 // ... existing code ...
-        // Запуск HLAE
-        const launchHlaeBtn = document.getElementById('launch-hlae');
-        if (launchHlaeBtn) {
-          launchHlaeBtn.addEventListener('click', async function () {
-            try {
-              const resp = await fetch('/api/launch-hlae', { method: 'POST' });
-              const data = await resp.json().catch(() => ({}));
-              if (resp.ok) {
-                alert('HLAE запускается');
-              } else {
-                alert(`Ошибка запуска HLAE: ${data.error || 'неизвестно'}`);
-              }
-            } catch (e) {
-              alert('Ошибка запроса к серверу запуска HLAE');
-            }
-          });
-        }
+// Запуск HLAE
+const launchHlaeBtn = document.getElementById("launch-hlae");
+if (launchHlaeBtn) {
+  launchHlaeBtn.addEventListener("click", async function () {
+    try {
+      const resp = await fetch("/api/launch-hlae", { method: "POST" });
+      const data = await resp.json().catch(() => ({}));
+      if (resp.ok) {
+        alert("HLAE запускается");
+      } else {
+        alert(`Ошибка запуска HLAE: ${data.error || "неизвестно"}`);
+      }
+    } catch (e) {
+      alert("Ошибка запроса к серверу запуска HLAE");
+    }
+  });
+}
 
-        // Запуск CS2 HLAE с -insecure
-        const launchCs2HlaeInsecureBtn = document.getElementById('launch-cs2-hlae-insecure');
-        if (launchCs2HlaeInsecureBtn) {
-          launchCs2HlaeInsecureBtn.addEventListener('click', async function () {
-            try {
-              const resp = await fetch('/api/launch-cs2-hlae-insecure', { method: 'POST' });
-              const data = await resp.json().catch(() => ({}));
-              if (resp.ok) {
-                alert('CS2 запускается с HLAE и -insecure');
-              } else {
-                alert(`Ошибка запуска CS2 HLAE с -insecure: ${data.error || 'неизвестно'}`);
-              }
-            } catch (e) {
-              alert('Ошибка запроса к серверу запуска CS2 HLAE с -insecure');
-            }
-          });
-        }
-
-
+// Запуск CS2 HLAE с -insecure
+const launchCs2HlaeInsecureBtn = document.getElementById(
+  "launch-cs2-hlae-insecure"
+);
+if (launchCs2HlaeInsecureBtn) {
+  launchCs2HlaeInsecureBtn.addEventListener("click", async function () {
+    try {
+      const resp = await fetch("/api/launch-cs2-hlae-insecure", {
+        method: "POST",
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (resp.ok) {
+        // success: no UI notification
+      } else {
+        alert(
+          `Ошибка запуска CS2 HLAE с -insecure: ${data.error || "неизвестно"}`
+        );
+      }
+    } catch (e) {
+      alert("Ошибка запроса к серверу запуска CS2 HLAE с -insecure");
+    }
+  });
+}
 
 // ... existing code ...
 
 // Функция для обновления Dota 2 скорборда
 function updateDota2Scoreboard(data, currentMatch) {
-  const statsTable = document.querySelector("#scoreboard-section .player-stats-table");
+  const statsTable = document.querySelector(
+    "#scoreboard-section .player-stats-table"
+  );
   if (!statsTable) return;
 
   try {
     // Получаем названия команд из Dota 2 данных
     const radiantName = data.dota?.radiant_team?.name || "Radiant";
     const direName = data.dota?.dire_team?.name || "Dire";
-    
+
     // Получаем логотипы команд
-    const radiantLogo = data.dota?.radiant_team?.logo 
-      ? `/uploads/${data.dota.radiant_team.logo}` 
+    const radiantLogo = data.dota?.radiant_team?.logo
+      ? `/uploads/${data.dota.radiant_team.logo}`
       : "/images/default-team-logo.png";
-    const direLogo = data.dota?.dire_team?.logo 
-      ? `/uploads/${data.dota.dire_team.logo}` 
+    const direLogo = data.dota?.dire_team?.logo
+      ? `/uploads/${data.dota.dire_team.logo}`
       : "/images/default-team-logo.png";
 
     // Получаем счет команд (если доступен)
@@ -5516,7 +6852,8 @@ function updateDota2Scoreboard(data, currentMatch) {
             radiantPlayers.push({
               steamid: player.steamid || `Player ${i + 1}`,
               name: player.name || `Player ${i + 1}`,
-              hero: player.hero.name?.replace("npc_dota_hero_", "") || "Unknown",
+              hero:
+                player.hero.name?.replace("npc_dota_hero_", "") || "Unknown",
               kills: player.kills || 0,
               deaths: player.deaths || 0,
               assists: player.assists || 0,
@@ -5524,7 +6861,7 @@ function updateDota2Scoreboard(data, currentMatch) {
               gpm: player.gpm || 0,
               xpm: player.xpm || 0,
               lastHits: player.last_hits || 0,
-              denies: player.denies || 0
+              denies: player.denies || 0,
             });
           }
         }
@@ -5538,7 +6875,8 @@ function updateDota2Scoreboard(data, currentMatch) {
             direPlayers.push({
               steamid: player.steamid || `Player ${i + 1}`,
               name: player.name || `Player ${i + 1}`,
-              hero: player.hero.name?.replace("npc_dota_hero_", "") || "Unknown",
+              hero:
+                player.hero.name?.replace("npc_dota_hero_", "") || "Unknown",
               kills: player.kills || 0,
               deaths: player.deaths || 0,
               assists: player.assists || 0,
@@ -5546,7 +6884,7 @@ function updateDota2Scoreboard(data, currentMatch) {
               gpm: player.gpm || 0,
               xpm: player.xpm || 0,
               lastHits: player.last_hits || 0,
-              denies: player.denies || 0
+              denies: player.denies || 0,
             });
           }
         }
@@ -5558,10 +6896,11 @@ function updateDota2Scoreboard(data, currentMatch) {
 
     // Добавляем игроков Radiant
     radiantPlayers.forEach((player) => {
-      const kda = player.deaths > 0 
-        ? `${player.kills}/${player.deaths}/${player.assists}` 
-        : `${player.kills}/0/${player.assists}`;
-      
+      const kda =
+        player.deaths > 0
+          ? `${player.kills}/${player.deaths}/${player.assists}`
+          : `${player.kills}/0/${player.assists}`;
+
       playerRows += `
         <tr class="player-row radiant">
           <td>${radiantName}</td>
@@ -5583,10 +6922,11 @@ function updateDota2Scoreboard(data, currentMatch) {
 
     // Добавляем игроков Dire
     direPlayers.forEach((player) => {
-      const kda = player.deaths > 0 
-        ? `${player.kills}/${player.deaths}/${player.assists}` 
-        : `${player.kills}/0/${player.assists}`;
-      
+      const kda =
+        player.deaths > 0
+          ? `${player.kills}/${player.deaths}/${player.assists}`
+          : `${player.kills}/0/${player.assists}`;
+
       playerRows += `
         <tr class="player-row dire">
           <td>${direName}</td>
@@ -5651,7 +6991,6 @@ function updateDota2Scoreboard(data, currentMatch) {
 
     // Обновляем таблицу
     statsTable.innerHTML = newTableHTML;
-
   } catch (error) {
     console.error("Ошибка обновления Dota 2 скорборда:", error);
   }
