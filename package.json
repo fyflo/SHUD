@@ -1,6 +1,6 @@
 {
     "name": "cs2-team-manager",
-    "version": "1.1.3",
+    "version": "1.1.4",
     "main": "server/server.js",
     "scripts": {
         "desktop": "electron ./electron/main.js"
