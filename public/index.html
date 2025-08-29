@@ -156,6 +156,49 @@
             <option value="zh">中文</option>
           </select>
         </div>
+
+        <div class="social-links-container">
+          <a
+            href="https://discord.gg/7BtSdAmTf8"
+            target="_blank"
+            class="social-link discord"
+            title="Discord"
+          >
+            <i class="fab fa-discord"></i>
+          </a>
+          <a
+            href="https://www.twitch.tv/fyflo"
+            target="_blank"
+            class="social-link twitch"
+            title="Twitch"
+          >
+            <i class="fab fa-twitch"></i>
+          </a>
+          <a
+            href="https://kick.com/fyflo"
+            target="_blank"
+            class="social-link kick"
+            title="Kick"
+          >
+            <i class="fas fa-play"></i>
+          </a>
+          <a
+            href="https://t.me/CS_fyflo_stream"
+            target="_blank"
+            class="social-link telegram"
+            title="Telegram"
+          >
+            <i class="fab fa-telegram"></i>
+          </a>
+          <a
+            href="https://donatepay.ru/p/fyflo"
+            target="_blank"
+            class="social-link donate"
+            title="На чай"
+          >
+            <i class="fas fa-coffee"></i>
+          </a>
+        </div>
       </nav>
 
       <!-- Основной контент -->
@@ -194,6 +237,30 @@
           >
             Отправить скрытие Тренера в HUD
           </button>
+          <div id="spec-binds-block" style="margin-top: 12px">
+            <h4>
+              Бинды для выбора игроков (установка бинда: exec
+              observer_spec_binds | сброс биндов: exec default.cfg)
+            </h4>
+            <div style="display: flex; gap: 8px; margin-bottom: 8px">
+              <button id="refresh-binds" class="button-cs2">
+                Обновить список
+              </button>
+              <button id="copy-binds" class="button-cs2">
+                Скопировать все
+              </button>
+            </div>
+            <textarea
+              id="binds-output"
+              readonly
+              rows="10"
+              style="width: 100%; font-family: monospace"
+            ></textarea>
+            <div class="file-name-note">
+              Слоты: 1–9, 0, -, = по observer_slot 0–11. Исключаются Steam64 из
+              полей выше.
+            </div>
+          </div>
         </section>
 
         <script>
@@ -233,6 +300,113 @@
                 }
               });
             }
+
+            // ===== Блок генерации биндов для выбора игроков =====
+            const bindsOutput = document.getElementById("binds-output");
+            const refreshBindsBtn = document.getElementById("refresh-binds");
+            const copyBindsBtn = document.getElementById("copy-binds");
+
+            function mapSlotToKey(slot) {
+              const n = Number(slot);
+              if (!Number.isFinite(n)) return null;
+              if (n >= 0 && n <= 8) return String(n + 1);
+              if (n === 9) return "0";
+              if (n === 10) return "-";
+              if (n === 11) return "=";
+              return null;
+            }
+
+            function escapeQuotes(s) {
+              return String(s || "").replace(/"/g, '\\"');
+            }
+
+            function sortPlayers(players) {
+              const orderTeam = (t) => (t === "CT" ? 0 : t === "T" ? 1 : 2);
+              return players.slice().sort((a, b) => {
+                const ta = orderTeam(a.team);
+                const tb = orderTeam(b.team);
+                if (ta !== tb) return ta - tb;
+                const sa = a.observer_slot ?? 999;
+                const sb = b.observer_slot ?? 999;
+                return sa - sb;
+              });
+            }
+
+            async function fetchPlayers() {
+              try {
+                const resp = await fetch("/api/cs2/players");
+                if (!resp.ok) throw new Error("HTTP " + resp.status);
+                const data = await resp.json();
+                return Array.isArray(data?.players) ? data.players : [];
+              } catch (e) {
+                console.error("Failed to fetch players:", e);
+                return [];
+              }
+            }
+
+            async function renderSpecBinds() {
+              if (!bindsOutput) return;
+              bindsOutput.value = "Обновление списка игроков...";
+
+              const players = await fetchPlayers();
+              const s1 = (
+                document.getElementById("steamid1").value || ""
+              ).trim();
+              const s2 = (
+                document.getElementById("steamid2").value || ""
+              ).trim();
+              const excluded = new Set([s1, s2].filter(Boolean));
+
+              const filtered = players.filter(
+                (p) => !excluded.has(String(p.steamid || ""))
+              );
+              const sorted = sortPlayers(filtered);
+
+              const binds = [];
+              for (const p of sorted) {
+                const key = mapSlotToKey(p.observer_slot);
+                if (!key) continue;
+                const nick = p.name_ingame || p.name || "";
+                if (!nick) continue;
+                binds.push(
+                  `bind "${key}" "spec_player \"${escapeQuotes(nick)}\""`
+                );
+              }
+
+              const header = [
+                "// Бинды для выбора игроков (генерация SHUD)",
+                'echo "Paste / exec these binds in console"',
+              ];
+              const content = [...header, ...binds].join("\n");
+              bindsOutput.value = content;
+            }
+
+            if (refreshBindsBtn) {
+              refreshBindsBtn.addEventListener("click", () => {
+                renderSpecBinds();
+              });
+            }
+
+            if (copyBindsBtn && bindsOutput) {
+              copyBindsBtn.addEventListener("click", async () => {
+                try {
+                  await navigator.clipboard.writeText(bindsOutput.value);
+                } catch (_) {
+                  bindsOutput.select();
+                  document.execCommand("copy");
+                }
+              });
+            }
+
+            const steamid1Input = document.getElementById("steamid1");
+            const steamid2Input = document.getElementById("steamid2");
+            if (steamid1Input)
+              steamid1Input.addEventListener("change", renderSpecBinds);
+            if (steamid2Input)
+              steamid2Input.addEventListener("change", renderSpecBinds);
+
+            // Инициализируем показ биндов при загрузке
+            renderSpecBinds();
           });
         </script>
         <!-- Конец формы -->
@@ -318,7 +492,12 @@
                   </div>
                   <div class="form-group">
                     <label for="editMatchTime">Время матча</label>
-                    <input type="text" id="editMatchTime" name="matchTime" placeholder="Например, 18:00 или 2024-08-05 18:00">
+                    <input
+                      type="text"
+                      id="editMatchTime"
+                      name="matchTime"
+                      placeholder="Например, 18:00 или 2024-08-05 18:00"
+                    />
                   </div>
                 </div>
                 <div id="maps-save-btn" class="maps-save-btn">
@@ -438,7 +617,9 @@
               >
               <div id="player-avatar-filename" class="file-name-note"></div>
             </div>
-            <button data-i18n="addPlayer" type="submit" id="add-player-btn">Добавить игрока</button>
+            <button data-i18n="addPlayer" type="submit" id="add-player-btn">
+              Добавить игрока
+            </button>
           </form>
 
           <div id="players-list" class="players-container"></div>
@@ -459,6 +640,46 @@
         <section id="huds-section" class="content-section">
           <h2 data-i18n="hudsSection">Доступные HUD'ы</h2>
           <div id="huds-list" class="huds-grid"></div>
+          <!-- Модал настройки цветов HUD -->
+          <div id="hud-colors-modal" class="modal" style="display: none">
+            <div class="modal-content" style="max-width: 1200px; width: 95%">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                "
+              >
+                <h3 style="margin: 0">
+                  Цвета HUD: <span id="hud-colors-title"></span>
+                </h3>
+                <button id="hud-colors-close" class="btn btn-secondary">
+                  ×
+                </button>
+              </div>
+              <div
+                id="hud-colors-form"
+                style="
+                  margin-top: 12px;
+                  max-height: 60vh;
+                  overflow-y: auto;
+                  overflow-x: hidden;
+                  padding-right: 8px;
+                "
+              ></div>
+              <div style="display: flex; gap: 8px; margin-top: 12px">
+                <button id="hud-colors-save" class="btn btn-primary">
+                  Сохранить
+                </button>
+                <button id="hud-colors-reset" class="btn btn-warning">
+                  Сбросить к оригиналу
+                </button>
+                <button id="hud-colors-cancel" class="btn btn-secondary">
+                  Отмена
+                </button>
+              </div>
+            </div>
+          </div>
         </section>
         <section id="cs2-section" class="content-section">
           <div class="container mt-5">
@@ -475,148 +696,204 @@
                     </h5>
                   </div>
                   <div class="card-body">
-                    <div class="row mb-4">
-                      <div class="col-md-12">
-                        <h6
-                          id="cs2-configs-status"
-                          data-i18n="cs2ConfigsStatus"
-                        >
-                          Статус конфигов
-                        </h6>
-                        <p>
-                          <span
-                            id="cs2-config-path-label"
-                            data-i18n="cs2ConfigPath"
-                            >Путь к конфигам:</span
+                    <div class="cfg-block" id="block-cs2">
+                      <h5 class="mb-2">Интеграция CS2</h5>
+                      <div class="row mb-4">
+                        <div class="col-md-12">
+                          <h6
+                            id="cs2-configs-status"
+                            data-i18n="cs2ConfigsStatus"
                           >
-                          <span id="cs2-path"
-                            >E:\SteamLibrary\steamapps\common\Counter-Strike
-                            Global Offensive\game\csgo\cfg</span
+                            Статус конфигов
+                          </h6>
+                          <div class="status-list mb-2">
+                            <p
+                              id="cs2-gsi-status"
+                              class="text-success mb-1"
+                              data-i18n="cs2GsiInstalled"
+                            >
+                              <span class="status-dot green"></span>GSI конфиг
+                              установлен
+                            </p>
+                            <p
+                              id="cs2-observer-status"
+                              class="text-success mb-1"
+                              data-i18n="cs2ObserverInstalled"
+                            >
+                              <span class="status-dot green"></span>Observer
+                              конфиг установлен
+                            </p>
+                            <p
+                              id="cs2-observer_tools-status"
+                              class="text-success mb-1"
+                            >
+                              <span class="status-dot green"></span
+                              >observer_cs2_tools_killfeed установлен
+                            </p>
+                            <p
+                              id="cs2-observer2-status"
+                              class="text-danger mb-1"
+                              data-i18n="cs2Observer2NotInstalled"
+                            >
+                              <span class="status-dot red"></span
+                              >Observer_map_cs2_on конфиг не установлен
+                            </p>
+                            <p
+                              id="cs2-observer_off-status"
+                              class="text-success mb-1"
+                              data-i18n="cs2Observer_offInstalled"
+                            >
+                              <span class="status-dot green"></span>Observer_off
+                              конфиг установлен
+                            </p>
+                            <p
+                              id="cs2-observer_hlae_kill-status"
+                              class="text-success mb-1"
+                            >
+                              <span class="status-dot green"></span>
+                              observer_HLAE_kill.cfg установлен
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row mb-3">
+                        <div class="col-md-12">
+                          <input
+                            type="text"
+                            id="cs2-custom-path"
+                            class="form-control"
+                            placeholder="Путь к CS2 (без game/csgo/cfg)"
+                          />
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-12">
+                          <div class="button-row">
+                            <button
+                              id="check-cs2-path"
+                              class="btn btn-secondary"
+                              data-i18n="cs2CheckPath"
+                            >
+                              Проверить установку
+                            </button>
+                            <button
+                              id="install-cs2-configs"
+                              class="btn btn-primary"
+                              data-i18n="cs2InstallConfigs"
+                            >
+                              Установить конфиги CS2
+                            </button>
+                            <button
+                              id="remove-cs2-configs"
+                              class="btn btn-danger"
+                              data-i18n="cs2RemoveConfigs"
+                            >
+                              Удалить конфиги CS2
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row mt-3">
+                        <div class="col-md-12">
+                          <button
+                            id="launch-cs2-observer"
+                            class="btn btn-success btn-block"
                           >
-                        </p>
-                        <p id="cs2-gsi-status" data-i18n="cs2GsiInstalled">
-                          ? GSI конфиг установлен
-                        </p>
-                        <p
-                          id="cs2-observer-status"
-                          data-i18n="cs2ObserverInstalled"
-                        >
-                          ✓ Observer конфиг установлен
-                        </p>
-                        <p
-                          id="cs2-observer2-status"
-                          data-i18n="cs2Observer2NotInstalled"
-                        >
-                          ✗ Observer_map_cs2_on конфиг не установлен
-                        </p>
-                        <p
-                          id="cs2-observer_off-status"
-                          data-i18n="cs2Observer_offInstalled"
-                        >
-                          ✓ Observer_off конфиг установлен
-                        </p>
-                        <p id="cs2-observer_hlae_kill-status">
-                          ? Статус observer_HLAE_kill.cfg неизвестен
-                        </p>
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <div class="col-md-8">
-                        <input
-                          type="text"
-                          id="cs2-custom-path"
-                          class="form-control"
-                          placeholder="Путь к CS2 (без game/csgo/cfg)"
-                        />
-                      </div>
-                      <div class="col-md-4">
-                        <button
-                          id="check-cs2-path"
-                          class="btn btn-secondary"
-                          data-i18n="cs2CheckPath"
-                        >
-                          Проверить путь
-                        </button>
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="col-md-6">
-                        <button
-                          id="install-cs2-configs"
-                          class="btn btn-primary btn-block"
-                          data-i18n="cs2InstallConfigs"
-                        >
-                          Установить конфиги CS2
-                        </button>
-                      </div>
-                      <div class="col-md-6">
-                        <button
-                          id="remove-cs2-configs"
-                          class="btn btn-danger btn-block"
-                          data-i18n="cs2RemoveConfigs"
-                        >
-                          Удалить конфиги CS2
-                        </button>
-                      </div>
-                    </div>
-                    <div class="row" style="margin-top:12px;">
-                      <div class="col-md-12">
-                        <button id="launch-cs2-observer" class="btn btn-success btn-block">
-                          Запустить CS2 с exec observer
-                        </button>
-                        <button id="launch-hlae" class="btn btn-warning btn-block" style="margin-top:8px;">
-                          Запустить HLAE + CS2 с exec observer_HLAE_kill
-                        </button>
-                        <!-- Кнопка скрыта -->
-                        <!--                         <button id="launch-cs2-hlae-insecure" class="btn btn-info btn-block" style="margin-top:8px; display: none;">
-                          Запустить CS2 HLAE с -insecure
-                        </button> -->
-
+                            Запустить CS2 с exec observer
+                          </button>
+                          <button
+                            id="launch-hlae"
+                            class="btn btn-warning btn-block mt-2"
+                          >
+                            Запустить HLAE + CS2 с exec observer_HLAE_kill
+                          </button>
+                          <!-- Кнопка скрыта -->
+                          <button
+                            id="launch-cs2-hlae-insecure"
+                            class="btn btn-info btn-block mt-2"
+                          >
+                            Запустить CS2 + Tools + HLAE exec
+                            observer_cs2_tools_killfeed
+                          </button>
+                        </div>
                       </div>
                     </div>
 
                     <!-- Dota 2 CFG Интеграция -->
-                    <div class="row" style="margin-top:20px;">
-                      <div class="col-md-12">
-                        <h6>Dota 2 CFG Интеграция</h6>
-                        <div id="dota2-cfg-status" class="alert alert-info" style="display: none;">
-                          <strong>Статус:</strong> <span id="dota2-cfg-status-text">Проверка...</span>
-                        </div>
-                        <div id="dota2-cfg-details" style="display: none;">
-                          <p id="dota2-cfg-file-status">
-                            ? gamestate_integration_fhud_dota2.cfg статус неизвестен
-                          </p>
-                        </div>
-                        <div class="btn-group" role="group" style="margin-bottom: 10px;">
-                          <button id="check-dota2-cfg" class="btn btn-info">Проверить установку</button>
-                          <button id="install-dota2-cfg" class="btn btn-success">Установить CFG</button>
-                          <button id="remove-dota2-cfg" class="btn btn-danger">Удалить CFG</button>
-                        </div>
-                        <div id="dota2-cfg-info" style="margin-top:10px; display: none;">
-                          <small class="text-muted">
-                            <strong>Путь к Dota 2:</strong> <span id="dota2-path"></span><br>
-                            <strong>CFG директория:</strong> <span id="dota2-cfg-path"></span><br>
+                    <div class="cfg-block mt-4" id="block-dota2">
+                      <h5 class="mb-2">Интеграция Dota 2</h5>
+                      <div class="row">
+                        <div class="col-md-12">
+                          <h6>Статус конфигов</h6>
 
-                          </small>
+                          <div id="dota2-cfg-details" style="display: none">
+                            <p id="dota2-cfg-file-status">
+                              ? gamestate_integration_fhud_dota2.cfg статус
+                              неизвестен
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row mb-3">
+                        <div class="col-md-12">
+                          <input
+                            type="text"
+                            id="dota2-custom-path"
+                            class="form-control"
+                            placeholder="Путь к Dota 2 (без game/dota/cfg)"
+                          />
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-12">
+                          <div class="button-row mb-2" role="group">
+                            <button id="check-dota2-cfg" class="btn btn-info">
+                              Проверить установку
+                            </button>
+                            <button
+                              id="install-dota2-cfg"
+                              class="btn btn-success"
+                            >
+                              Установить CFG
+                            </button>
+                            <button
+                              id="remove-dota2-cfg"
+                              class="btn btn-danger"
+                            >
+                              Удалить CFG
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
 
                     <!-- Редактор cfg -->
-                    <div class="row" style="margin-top:20px;">
+                    <div class="cfg-block mt-4" id="block-cfg-editor">
+                      <h5 class="mb-2">Работа с cfg файлами</h5>
                       <div class="col-md-12">
-                        <h6>Редактор файлов cfg (project/cfg)</h6>
-                        <div class="form-group" style="margin-bottom:8px;">
+                        <div class="form-group mb-2">
                           <label for="cfg-file-select">Файл:</label>
-                          <select id="cfg-file-select" class="form-control"></select>
+                          <select
+                            id="cfg-file-select"
+                            class="form-control"
+                          ></select>
                         </div>
-                        <div class="form-group" style="margin-bottom:8px;">
+                        <div class="form-group mb-2">
                           <label for="cfg-editor">Содержимое:</label>
-                          <textarea id="cfg-editor" class="form-control" rows="12" style="font-family: monospace;"></textarea>
+                          <textarea
+                            id="cfg-editor"
+                            class="form-control"
+                            rows="12"
+                            style="font-family: monospace"
+                          ></textarea>
                         </div>
                         <div class="btn-group" role="group">
-                          <button id="cfg-load" class="btn btn-secondary">Отобразить содержимое файла</button>
-                          <button id="cfg-save" class="btn btn-primary">Сохранить</button>
+                          <button id="cfg-load" class="btn btn-secondary">
+                            Отобразить содержимое файла
+                          </button>
+                          <button id="cfg-save" class="btn btn-primary">
+                            Сохранить
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -687,7 +964,9 @@
           const input = document.getElementById(inputId);
           const container = document.getElementById(containerId);
           const label = document.getElementById(labelId);
-          const fileNameDisplay = fileNameDisplayId ? document.getElementById(fileNameDisplayId) : null;
+          const fileNameDisplay = fileNameDisplayId
+            ? document.getElementById(fileNameDisplayId)
+            : null;
 
           if (input && container && label) {
             input.addEventListener("change", function () {
@@ -710,11 +989,19 @@
         }
 
         // Функция для сброса формы файла
-        function resetFileInput(inputId, containerId, labelId, defaultText, fileNameDisplayId) {
+        function resetFileInput(
+          inputId,
+          containerId,
+          labelId,
+          defaultText,
+          fileNameDisplayId
+        ) {
           const input = document.getElementById(inputId);
           const container = document.getElementById(containerId);
           const label = document.getElementById(labelId);
-          const fileNameDisplay = fileNameDisplayId ? document.getElementById(fileNameDisplayId) : null;
+          const fileNameDisplay = fileNameDisplayId
+            ? document.getElementById(fileNameDisplayId)
+            : null;
 
           if (input) {
             input.value = "";
@@ -756,10 +1043,16 @@
         // Обработчик успешного добавления команды
         const teamForm = document.getElementById("team-form");
         if (teamForm) {
-          teamForm.addEventListener("submit", function(e) {
+          teamForm.addEventListener("submit", function (e) {
             // Сброс формы файла после успешного добавления
             setTimeout(() => {
-              resetFileInput("team-logo", "logo-input-container", "team-logo-label", "Загрузить логотип", "team-logo-filename");
+              resetFileInput(
+                "team-logo",
+                "logo-input-container",
+                "team-logo-label",
+                "Загрузить логотип",
+                "team-logo-filename"
+              );
               resetButtonToAdd("add-team-btn", "Добавить команду");
             }, 1000);
           });
@@ -768,10 +1061,16 @@
         // Обработчик успешного добавления игрока
         const playerForm = document.getElementById("player-form");
         if (playerForm) {
-          playerForm.addEventListener("submit", function(e) {
+          playerForm.addEventListener("submit", function (e) {
             // Сброс формы файла после успешного добавления
             setTimeout(() => {
-              resetFileInput("player-avatar", "avatar-input-container", "player-avatar-label", "Загрузить аватар", "player-avatar-filename");
+              resetFileInput(
+                "player-avatar",
+                "avatar-input-container",
+                "player-avatar-label",
+                "Загрузить аватар",
+                "player-avatar-filename"
+              );
               resetButtonToAdd("add-player-btn", "Добавить игрока");
             }, 1000);
           });
@@ -797,98 +1096,111 @@
         if (launchBtn) {
           launchBtn.addEventListener("click", async function () {
             try {
-              const resp = await fetch('/api/launch-cs2-exec', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ configName: 'observer' })
+              const resp = await fetch("/api/launch-cs2-exec", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ configName: "observer" }),
               });
               const data = await resp.json().catch(() => ({}));
               if (resp.ok) {
-                alert('CS2 запускается с exec observer');
+                alert("CS2 запускается с exec observer");
               } else {
-                alert(`Ошибка запуска: ${data.error || 'неизвестно'}`);
+                alert(`Ошибка запуска: ${data.error || "неизвестно"}`);
               }
             } catch (e) {
-              alert('Ошибка запроса к серверу запуска CS2');
+              alert("Ошибка запроса к серверу запуска CS2");
             }
           });
         }
 
         // Запуск HLAE
-        const launchHlaeBtn = document.getElementById('launch-hlae');
+        const launchHlaeBtn = document.getElementById("launch-hlae");
         if (launchHlaeBtn) {
-          launchHlaeBtn.addEventListener('click', async function () {
+          launchHlaeBtn.addEventListener("click", async function () {
             try {
-              const resp = await fetch('/api/launch-hlae', { method: 'POST' });
+              const resp = await fetch("/api/launch-hlae", { method: "POST" });
               const data = await resp.json().catch(() => ({}));
               if (resp.ok) {
-                alert('HLAE запускается');
+                alert("HLAE запускается");
               } else {
-                alert(`Ошибка запуска HLAE: ${data.error || 'неизвестно'}`);
+                alert(`Ошибка запуска HLAE: ${data.error || "неизвестно"}`);
               }
             } catch (e) {
-              alert('Ошибка запроса к серверу запуска HLAE');
+              alert("Ошибка запроса к серверу запуска HLAE");
             }
           });
         }
 
-        // Запуск CS2 HLAE с -insecure
-        const launchCs2HlaeInsecureBtn = document.getElementById('launch-cs2-hlae-insecure');
+        // Запуск CS2 HLAE
+        const launchCs2HlaeInsecureBtn = document.getElementById(
+          "launch-cs2-hlae-insecure"
+        );
         if (launchCs2HlaeInsecureBtn) {
-          launchCs2HlaeInsecureBtn.addEventListener('click', async function () {
+          launchCs2HlaeInsecureBtn.addEventListener("click", async function () {
+            const customPathInput = document.getElementById("cs2-custom-path");
+            const cs2Path =
+              (customPathInput && customPathInput.value.trim()) || undefined;
+            // Путь к interop (если есть локально)
+            const interopPath =
+              "H:/project/public/afx-cefhud-interop/afx-cefhud-interop.exe";
             try {
-              const resp = await fetch('/api/launch-cs2-hlae-insecure', { method: 'POST' });
+              const resp = await fetch("/api/launch-cs2-hlae-insecure", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ cs2Path, interopPath }),
+              });
               const data = await resp.json().catch(() => ({}));
               if (resp.ok) {
-                alert('CS2 запускается с HLAE и -insecure');
+                alert("CS2 + Tools + HLAE exec запускается");
               } else {
-                alert(`Ошибка запуска CS2 HLAE с -insecure: ${data.error || 'неизвестно'}`);
+                alert(`Ошибка запуска: ${data.error || "неизвестно"}`);
               }
             } catch (e) {
-              alert('Ошибка запроса к серверу запуска CS2 HLAE с -insecure');
+              alert("Ошибка запроса запуска через HLAE");
             }
           });
         }
 
         // Редактор cfg
-        const cfgSelect = document.getElementById('cfg-file-select');
-        const cfgEditor = document.getElementById('cfg-editor');
-        const cfgLoadBtn = document.getElementById('cfg-load');
-        const cfgSaveBtn = document.getElementById('cfg-save');
+        const cfgSelect = document.getElementById("cfg-file-select");
+        const cfgEditor = document.getElementById("cfg-editor");
+        const cfgLoadBtn = document.getElementById("cfg-load");
+        const cfgSaveBtn = document.getElementById("cfg-save");
 
         async function loadCfgList() {
           try {
-            const resp = await fetch('/api/cs2-config/list');
+            const resp = await fetch("/api/cs2-config/list");
             const data = await resp.json();
             if (resp.ok && data.success) {
-              cfgSelect.innerHTML = '';
+              cfgSelect.innerHTML = "";
               for (const f of data.files) {
-                const opt = document.createElement('option');
-                opt.value = f; opt.textContent = f;
+                const opt = document.createElement("option");
+                opt.value = f;
+                opt.textContent = f;
                 cfgSelect.appendChild(opt);
               }
             } else {
-              alert(`Ошибка списка файлов: ${data.error || 'неизвестно'}`);
+              alert(`Ошибка списка файлов: ${data.error || "неизвестно"}`);
             }
           } catch (e) {
-            alert('Ошибка запроса списка файлов');
+            alert("Ошибка запроса списка файлов");
           }
         }
 
         async function loadCfg() {
           const name = cfgSelect.value;
-          const url = new URL('/api/cs2-config', window.location.origin);
-          url.searchParams.set('name', name);
+          const url = new URL("/api/cs2-config", window.location.origin);
+          url.searchParams.set("name", name);
           try {
             const resp = await fetch(url.toString());
             const data = await resp.json();
             if (resp.ok && data.success) {
-              cfgEditor.value = data.content || '';
+              cfgEditor.value = data.content || "";
             } else {
-              alert(`Ошибка загрузки: ${data.error || 'неизвестно'}`);
+              alert(`Ошибка загрузки: ${data.error || "неизвестно"}`);
             }
           } catch (e) {
-            alert('Ошибка запроса при загрузке файла');
+            alert("Ошибка запроса при загрузке файла");
           }
         }
 
@@ -896,25 +1208,25 @@
           const name = cfgSelect.value;
           const body = { name, content: cfgEditor.value };
           try {
-            const resp = await fetch('/api/cs2-config', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(body)
+            const resp = await fetch("/api/cs2-config", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(body),
             });
             const data = await resp.json().catch(() => ({}));
             if (resp.ok && data.success) {
-              alert('Файл сохранён');
+              alert("Файл сохранён");
             } else {
-              alert(`Ошибка сохранения: ${data.error || 'неизвестно'}`);
+              alert(`Ошибка сохранения: ${data.error || "неизвестно"}`);
             }
           } catch (e) {
-            alert('Ошибка запроса при сохранении файла');
+            alert("Ошибка запроса при сохранении файла");
           }
         }
 
-        if (cfgLoadBtn) cfgLoadBtn.addEventListener('click', loadCfg);
-        if (cfgSaveBtn) cfgSaveBtn.addEventListener('click', saveCfg);
-        if (cfgSelect) cfgSelect.addEventListener('change', loadCfg);
+        if (cfgLoadBtn) cfgLoadBtn.addEventListener("click", loadCfg);
+        if (cfgSaveBtn) cfgSaveBtn.addEventListener("click", saveCfg);
+        if (cfgSelect) cfgSelect.addEventListener("change", loadCfg);
         // Инициализация: подтянуть список и после загрузить первый файл
         loadCfgList().then(() => {
           if (cfgSelect && cfgSelect.options.length > 0) {
@@ -923,141 +1235,113 @@
         });
 
         // Dota 2 CFG Integration
-        const checkDota2CfgBtn = document.getElementById('check-dota2-cfg');
-        const installDota2CfgBtn = document.getElementById('install-dota2-cfg');
-        const dota2CfgStatus = document.getElementById('dota2-cfg-status');
-        const dota2CfgStatusText = document.getElementById('dota2-cfg-status-text');
-        const dota2CfgInfo = document.getElementById('dota2-cfg-info');
-        const dota2Path = document.getElementById('dota2-path');
-        const dota2CfgPath = document.getElementById('dota2-cfg-path');
+        const checkDota2CfgBtn = document.getElementById("check-dota2-cfg");
+        const installDota2CfgBtn = document.getElementById("install-dota2-cfg");
+        // Убрали общую строку статуса, используем только детальную лампочку
+        const dota2CfgInfo = document.getElementById("dota2-cfg-info");
+        const dota2Path = document.getElementById("dota2-path");
+        const dota2CfgPath = document.getElementById("dota2-cfg-path");
 
         async function checkDota2CfgInstallation() {
           try {
-            dota2CfgStatus.style.display = 'block';
-            dota2CfgStatusText.textContent = 'Проверка установки...';
-            dota2CfgStatus.className = 'alert alert-info';
-
-            const response = await fetch('/api/dota2-cfg-check');
+            const customDotaPathInput =
+              document.getElementById("dota2-custom-path");
+            let url = "/api/dota2-cfg-check";
+            if (customDotaPathInput && customDotaPathInput.value) {
+              url += `?path=${encodeURIComponent(customDotaPathInput.value)}`;
+            }
+            const response = await fetch(url);
             const data = await response.json();
 
-            if (data.installed) {
-              dota2CfgStatusText.textContent = 'CFG файл Dota 2 установлен';
-              dota2CfgStatus.className = 'alert alert-success';
-            } else {
-              let statusText = data.error || 'CFG файл Dota 2 не установлен';
-              if (!data.gsiExists) statusText += ' (папка gamestate_integration не найдена)';
-              else if (!data.cfgExists) statusText += ' (файл gamestate_integration_fhud_dota2.cfg не найден)';
-              
-              dota2CfgStatusText.textContent = statusText;
-              dota2CfgStatus.className = 'alert alert-warning';
-            }
+            // Общую строку статуса не показываем; ниже выставляем лампочку в деталях
 
             // Показываем детальный статус
-            const detailsDiv = document.getElementById('dota2-cfg-details');
-            const fileStatus = document.getElementById('dota2-cfg-file-status');
+            const detailsDiv = document.getElementById("dota2-cfg-details");
+            const fileStatus = document.getElementById("dota2-cfg-file-status");
 
             if (detailsDiv) {
-              detailsDiv.style.display = 'block';
-              
+              detailsDiv.style.display = "block";
+
               if (fileStatus) {
                 if (data.cfgExists) {
-                  fileStatus.textContent = '✓ gamestate_integration_fhud_dota2.cfg установлен';
+                  fileStatus.innerHTML =
+                    '<span class="status-dot green"></span>gamestate_integration_fhud_dota2.cfg установлен';
                 } else {
-                  fileStatus.textContent = '✗ gamestate_integration_fhud_dota2.cfg не установлен';
+                  fileStatus.innerHTML =
+                    '<span class="status-dot red"></span>gamestate_integration_fhud_dота2.cfg не установлен';
                 }
               }
             }
 
-            // Показываем информацию о путях
-            if (data.cfgPath) {
-              dota2CfgInfo.style.display = 'block';
-              dota2Path.textContent = data.cfgPath.replace(/\\game\\dota\\cfg$/, '') || 'Не найден';
-              dota2CfgPath.textContent = data.cfgPath || 'Не найден';
-            }
-
+            // Информация о путях скрыта по ТЗ; ничего не показываем
           } catch (error) {
-            console.error('Error checking Dota 2 CFG:', error);
-            dota2CfgStatusText.textContent = 'Ошибка при проверке установки';
-            dota2CfgStatus.className = 'alert alert-danger';
+            console.error("Error checking Dota 2 CFG:", error);
+            const detailsDiv = document.getElementById("dota2-cfg-details");
+            const fileStatus = document.getElementById("dota2-cfg-file-status");
+            if (detailsDiv) detailsDiv.style.display = "block";
+            if (fileStatus)
+              fileStatus.innerHTML =
+                '<span class="status-dot red"></span>gamestate_integration_fhud_dota2.cfg не установлен';
           }
         }
 
         async function installDota2Cfg() {
           try {
-            dota2CfgStatus.style.display = 'block';
-            dota2CfgStatusText.textContent = 'Установка CFG файла...';
-            dota2CfgStatus.className = 'alert alert-info';
-
-            const response = await fetch('/api/dota2-cfg-install', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              }
+            const customDotaPathInput =
+              document.getElementById("dota2-custom-path");
+            const response = await fetch("/api/dota2-cfg-install", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ path: customDotaPathInput?.value || "" }),
             });
-            const data = await response.json();
-
-            if (data.success) {
-              dota2CfgStatusText.textContent = data.message || 'CFG файл Dota 2 успешно установлен';
-              dota2CfgStatus.className = 'alert alert-success';
-              // Обновляем статус после установки
-              setTimeout(() => {
-                checkDota2CfgInstallation();
-              }, 1000);
-            } else {
-              dota2CfgStatusText.textContent = data.error || 'Ошибка при установке CFG файла';
-              dota2CfgStatus.className = 'alert alert-danger';
-            }
-
+            await response.json();
           } catch (error) {
-            console.error('Error installing Dota 2 CFG:', error);
-            dota2CfgStatusText.textContent = 'Ошибка при установке CFG файла';
-            dota2CfgStatus.className = 'alert alert-danger';
+            console.error("Error installing Dota 2 CFG:", error);
+          } finally {
+            setTimeout(() => {
+              checkDota2CfgInstallation();
+            }, 500);
           }
         }
 
         async function removeDota2Cfg() {
-          if (!confirm('Вы уверены, что хотите удалить CFG файл Dota 2?')) {
+          if (!confirm("Вы уверены, что хотите удалить CFG файл Dota 2?")) {
             return;
           }
-          
+
           try {
-            dota2CfgStatus.style.display = 'block';
-            dota2CfgStatusText.textContent = 'Удаление CFG файла...';
-            dota2CfgStatus.className = 'alert alert-info';
-
-            const response = await fetch('/api/dota2-cfg-remove');
-            const data = await response.json();
-
-            if (data.success) {
-              dota2CfgStatusText.textContent = data.message || 'CFG файл Dota 2 успешно удален';
-              dota2CfgStatus.className = 'alert alert-success';
-              // Обновляем статус после удаления
-              setTimeout(() => {
-                checkDota2CfgInstallation();
-              }, 1000);
-            } else {
-              dota2CfgStatusText.textContent = data.error || 'Ошибка при удалении CFG файла';
-              dota2CfgStatus.className = 'alert alert-danger';
+            const customDotaPathInput =
+              document.getElementById("dota2-custom-path");
+            let url = "/api/dota2-cfg-remove";
+            if (customDotaPathInput && customDotaPathInput.value) {
+              url += `?path=${encodeURIComponent(customDotaPathInput.value)}`;
             }
-
+            await (await fetch(url)).json();
           } catch (error) {
-            console.error('Error removing Dota 2 CFG:', error);
-            dota2CfgStatusText.textContent = 'Ошибка при удалении CFG файла';
-            dota2CfgStatus.className = 'alert alert-danger';
+            console.error("Error removing Dota 2 CFG:", error);
+          } finally {
+            setTimeout(() => {
+              checkDota2CfgInstallation();
+            }, 500);
           }
         }
 
         // Добавляем обработчики событий
         if (checkDota2CfgBtn) {
-          checkDota2CfgBtn.addEventListener('click', checkDota2CfgInstallation);
+          checkDota2CfgBtn.addEventListener("click", async function () {
+            try {
+              await checkDota2CfgInstallation();
+            } finally {
+            }
+          });
         }
         if (installDota2CfgBtn) {
-          installDota2CfgBtn.addEventListener('click', installDota2Cfg);
+          installDota2CfgBtn.addEventListener("click", installDota2Cfg);
         }
-        
-        const removeDota2CfgBtn = document.getElementById('remove-dota2-cfg');
+
+        const removeDota2CfgBtn = document.getElementById("remove-dota2-cfg");
         if (removeDota2CfgBtn) {
-          removeDota2CfgBtn.addEventListener('click', removeDota2Cfg);
+          removeDota2CfgBtn.addEventListener("click", removeDota2Cfg);
         }
 
         // Автоматическая проверка при загрузке страницы
