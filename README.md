@@ -1,4 +1,4 @@
-[MY DISCORD](https://discord.gg/Kh5NMW3P ) We discuss, propose and try to implement together.
+[MY DISCORD](https://discord.gg/QDpuyJ4A) We discuss, propose and try to implement together.
 
 #SHUD - StreamHUD
 <img width="1000" height="367" alt="logo" src="https://github.com/user-attachments/assets/d984d9c2-645e-42a9-a0f7-a8786a00ca44" />
