@@ -100,7 +100,7 @@ Dota 2 - интеграция с игровыми данными
 ## Системные требования
 
 - Windows 10/11
-- Node.js 16+ [(Скачать и установить)](https://nodejs.org/en/download)
+- Node.js 18+ [(Скачать и установить)](https://nodejs.org/en/download)
 - Counter-Strike 2 & DOTA2
 - 3000 МБ свободного места на диске
 
@@ -206,9 +206,8 @@ Dota 2 - интеграция с игровыми данными
 
 1. Run `install.exe`
 2. Follow the instructions of the installer
-3. After installation, run the application via `start_fhud.exe`
-4. If the application does not start, use `start_spare_fhud.exe`
-5. In the menu, select the CS2 integration section and install CFG
+3. After installation, run the application via `SHUD.exe`
+4. In the menu, select the CFG integration section and install CFG
 
 ## Interface structure
 
