@@ -73,7 +73,7 @@ function createWindow() {
         resizable: false,           // ✅ Запрещаем изменение размера
         maximizable: false,         // ✅ Запрещаем максимизацию
         minimizable: false,         // ✅ Запрещаем минимизацию
-        closable: false,            // ✅ Запрещаем закрытие
+        closable: true,             // ✅ Разрешаем закрытие для Alt+Q
         webPreferences: {
             // devTools: true,
             nodeIntegration: true,
@@ -170,6 +170,24 @@ function registerShortcuts() {
 
     // Alt+Q для закрытия
     globalShortcut.register('Alt+Q', () => {
+        console.log('[SHORTCUT] Alt+Q нажата - закрываем приложение');
+        try {
+            app.quit();
+        } catch (error) {
+            console.error('[SHORTCUT] Ошибка при закрытии:', error);
+            // Принудительно закрываем все окна
+            BrowserWindow.getAllWindows().forEach(window => {
+                if (!window.isDestroyed()) {
+                    window.destroy();
+                }
+            });
+            app.quit();
+        }
+    });
+    
+    // Дополнительная горячая клавиша для закрытия (Ctrl+Q)
+    globalShortcut.register('CommandOrControl+Q', () => {
+        console.log('[SHORTCUT] Ctrl+Q нажата - закрываем приложение');
         app.quit();
     });
 
