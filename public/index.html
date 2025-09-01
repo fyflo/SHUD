@@ -85,13 +85,6 @@
         <div class="sidebar">
           <div class="logo">
             <img src="/images/logo.png" alt="SHUD Manager" />
-            <h1 data-i18n="appTitle">SHUD Manager</h1>
-            <span
-              class="region-flag app-flag"
-              onclick="changeLanguage('ru')"
-              title="Переключить на русский язык"
-              >🇷🇺</span
-            >
           </div>
           <ul class="nav-menu">
             <li class="nav-item">
@@ -139,7 +132,7 @@
             <li class="nav-item">
               <button class="nav-button" data-section="hide-players-section">
                 <i class="fas fa-user-slash"></i>
-                <span>Скрытие Тренера</span>
+                <span data-i18n="navCS2Couching">Скрытие Тренера</span>
               </button>
             </li>
           </ul>
@@ -205,7 +198,7 @@
       <main class="main-content">
         <!-- Форма для скрытия игроков по Steam64 ID -->
         <section id="hide-players-section" class="content-section panel-cs2">
-          <h3>Скрыть Тренера по Steam64 ID</h3>
+          <h3 data-i18n="hidePlayersTitle">Скрыть Тренера по Steam64 ID</h3>
           <form id="hidePlayersForm">
             <div class="form-group">
               <label for="steamid1">Steam64 ID 1:</label>
@@ -234,20 +227,21 @@
             id="sendHidePlayersToHUD"
             class="button-cs2"
             style="margin-top: 10px; width: 100%"
+            data-i18n="sendHidePlayersToHUD"
           >
             Отправить скрытие Тренера в HUD
           </button>
           <div id="spec-binds-block" style="margin-top: 12px">
-            <h4>
+            <h4 data-i18n="specBindsTitle">
               Бинды для выбора игроков (установка бинда: exec
               observer_spec_binds | сброс биндов: exec default.cfg)
             </h4>
             <div style="display: flex; gap: 8px; margin-bottom: 8px">
               <button id="refresh-binds" class="button-cs2">
-                Обновить список
+                <span data-i18n="refreshBinds"></span>
               </button>
               <button id="copy-binds" class="button-cs2">
-                Скопировать все
+                <span data-i18n="copyBinds"></span>
               </button>
             </div>
             <textarea
@@ -257,8 +251,7 @@
               style="width: 100%; font-family: monospace"
             ></textarea>
             <div class="file-name-note">
-              Слоты: 1–9, 0, -, = по observer_slot 0–11. Исключаются Steam64 из
-              полей выше.
+              <span data-i18n="slots"></span>
             </div>
           </div>
         </section>
@@ -491,12 +484,15 @@
                     </select>
                   </div>
                   <div class="form-group">
-                    <label for="editMatchTime">Время матча</label>
+                    <label for="editMatchTime" data-i18n="matchTime"
+                      >Время матча</label
+                    >
                     <input
                       type="text"
                       id="editMatchTime"
                       name="matchTime"
                       placeholder="Например, 18:00 или 2024-08-05 18:00"
+                      data-i18n="matchTimePlaceholder"
                     />
                   </div>
                 </div>
@@ -526,30 +522,10 @@
                 type="text"
                 name="short_name"
                 placeholder="Короткое название команды"
+                data-i18n="teamShortNamePlaceholder"
                 maxlength="10"
               />
-              <div class="team-region-with-flag">
-                <span class="region-flag">
-                  <!-- Здесь будет флаг -->
-                </span>
-                <select id="team-region" name="region" class="region-select">
-                  <option value="" data-i18n="selectRegion">
-                    Выберите регион
-                  </option>
-                  <option value="russia" data-flag="🇷🇺">🇷🇺 Россия</option>
-                  <option value="belarus" data-flag="🇧🇾">🇧🇾 Беларусь</option>
-                  <option value="kazakhstan" data-flag="🇰🇿">
-                    🇰🇿 Казахстан
-                  </option>
-                  <option value="europe" data-flag="🇪🇺">🇪🇺 Европа</option>
-                  <option value="usa" data-flag="🇺🇸">🇺🇸 США</option>
-                  <option value="canada" data-flag="🇨🇦">🇨🇦 Канада</option>
-                  <option value="china" data-flag="🇨🇳">🇨🇳 Китай</option>
-                  <option value="brazil" data-flag="🇧🇷">🇧🇷 Бразилия</option>
-                  <option value="ukraine" data-flag="🇺🇦">🇺🇦 Украина</option>
-                  <option value="other" data-flag="🌎">🌎 Другой регион</option>
-                </select>
-              </div>
+              <!-- Удалены регион и флаг из-за проблем совместимости в некоторых браузерах -->
               <div class="file-input-container" id="logo-input-container">
                 <input
                   id="team-logo"
@@ -651,7 +627,7 @@
                 "
               >
                 <h3 style="margin: 0">
-                  Цвета HUD: <span id="hud-colors-title"></span>
+                  Colors HUD: <span id="hud-colors-title"></span>
                 </h3>
                 <button id="hud-colors-close" class="btn btn-secondary">
                   ×
@@ -668,15 +644,21 @@
                 "
               ></div>
               <div style="display: flex; gap: 8px; margin-top: 12px">
-                <button id="hud-colors-save" class="btn btn-primary">
-                  Сохранить
-                </button>
-                <button id="hud-colors-reset" class="btn btn-warning">
-                  Сбросить к оригиналу
-                </button>
-                <button id="hud-colors-cancel" class="btn btn-secondary">
-                  Отмена
-                </button>
+                <button
+                  data-i18n="save"
+                  id="hud-colors-save"
+                  class="btn btn-primary"
+                ></button>
+                <button
+                  data-i18n="reset"
+                  id="hud-colors-reset"
+                  class="btn btn-warning"
+                ></button>
+                <button
+                  data-i18n="cancel"
+                  id="hud-colors-cancel"
+                  class="btn btn-secondary"
+                ></button>
               </div>
             </div>
           </div>
@@ -697,14 +679,16 @@
                   </div>
                   <div class="card-body">
                     <div class="cfg-block" id="block-cs2">
-                      <h5 class="mb-2">Интеграция CS2</h5>
+                      <h5 class="mb-2" data-i18n="cs2Integration">
+                        Интеграция CS2
+                      </h5>
                       <div class="row mb-4">
                         <div class="col-md-12">
                           <h6
                             id="cs2-configs-status"
                             data-i18n="cs2ConfigsStatus"
                           >
-                            Статус конфигов
+                            <span data-i18n="cs2ConfigsStatus"></span>
                           </h6>
                           <div class="status-list mb-2">
                             <p
@@ -712,23 +696,26 @@
                               class="text-success mb-1"
                               data-i18n="cs2GsiInstalled"
                             >
-                              <span class="status-dot green"></span>GSI конфиг
-                              установлен
+                              <span class="status-dot green"></span
+                              ><span data-i18n="cs2GsiInstalled"></span>
+                              <span data-i18n="cs2GsiInstalled"></span>
                             </p>
                             <p
                               id="cs2-observer-status"
                               class="text-success mb-1"
                               data-i18n="cs2ObserverInstalled"
                             >
-                              <span class="status-dot green"></span>Observer
-                              конфиг установлен
+                              <span class="status-dot green"></span
+                              ><span data-i18n="cs2ObserverInstalled"></span>
                             </p>
                             <p
                               id="cs2-observer_tools-status"
                               class="text-success mb-1"
                             >
                               <span class="status-dot green"></span
-                              >observer_cs2_tools_killfeed установлен
+                              ><span
+                                data-i18n="cs2ObserverToolsInstalled"
+                              ></span>
                             </p>
                             <p
                               id="cs2-observer2-status"
@@ -736,7 +723,9 @@
                               data-i18n="cs2Observer2NotInstalled"
                             >
                               <span class="status-dot red"></span
-                              >Observer_map_cs2_on конфиг не установлен
+                              ><span
+                                data-i18n="cs2Observer2NotInstalled"
+                              ></span>
                             </p>
                             <p
                               id="cs2-observer_off-status"
@@ -744,14 +733,25 @@
                               data-i18n="cs2Observer_offInstalled"
                             >
                               <span class="status-dot green"></span>Observer_off
-                              конфиг установлен
+                              ><span
+                                data-i18n="cs2Observer_offInstalled"
+                              ></span>
                             </p>
                             <p
                               id="cs2-observer_hlae_kill-status"
                               class="text-success mb-1"
                             >
                               <span class="status-dot green"></span>
-                              observer_HLAE_kill.cfg установлен
+                              ><span
+                                data-i18n="cs2ObserverHlaeKillInstalled"
+                              ></span>
+                            </p>
+                            <p
+                              id="cs2-shud_color-status"
+                              class="text-success mb-1"
+                            >
+                              <span class="status-dot green"></span>SHUD color
+                              cfg
                             </p>
                           </div>
                         </div>
@@ -762,6 +762,7 @@
                             type="text"
                             id="cs2-custom-path"
                             class="form-control"
+                            data-i18n="cs2CustomPath"
                             placeholder="Путь к CS2 (без game/csgo/cfg)"
                           />
                         </div>
@@ -774,21 +775,21 @@
                               class="btn btn-secondary"
                               data-i18n="cs2CheckPath"
                             >
-                              Проверить установку
+                              <span data-i18n="cs2CheckPath"></span>
                             </button>
                             <button
                               id="install-cs2-configs"
                               class="btn btn-primary"
                               data-i18n="cs2InstallConfigs"
                             >
-                              Установить конфиги CS2
+                              <span data-i18n="cs2InstallConfigs"></span>
                             </button>
                             <button
                               id="remove-cs2-configs"
                               class="btn btn-danger"
                               data-i18n="cs2RemoveConfigs"
                             >
-                              Удалить конфиги CS2
+                              <span data-i18n="cs2RemoveConfigs"></span>
                             </button>
                           </div>
                         </div>
@@ -798,22 +799,24 @@
                           <button
                             id="launch-cs2-observer"
                             class="btn btn-success btn-block"
+                            data-i18n="launch-cs2-observer"
                           >
-                            Запустить CS2 с exec observer
+                            <span data-i18n="cs2LaunchObserver"></span>
                           </button>
                           <button
                             id="launch-hlae"
                             class="btn btn-warning btn-block mt-2"
+                            data-i18n="launch-hlae"
                           >
-                            Запустить HLAE + CS2 с exec observer_HLAE_kill
+                            <span data-i18n="cs2LaunchHlae"></span>
                           </button>
                           <!-- Кнопка скрыта -->
                           <button
                             id="launch-cs2-hlae-insecure"
                             class="btn btn-info btn-block mt-2"
+                            data-i18n="launch-cs2-hlae-insecure"
                           >
-                            Запустить CS2 + Tools + HLAE exec
-                            observer_cs2_tools_killfeed
+                            <span data-i18n="cs2LaunchHlaeInsecure"></span>
                           </button>
                         </div>
                       </div>
@@ -821,15 +824,18 @@
 
                     <!-- Dota 2 CFG Интеграция -->
                     <div class="cfg-block mt-4" id="block-dota2">
-                      <h5 class="mb-2">Интеграция Dota 2</h5>
+                      <h5 class="mb-2" data-i18n="dota2Integration">
+                        Интеграция Dota 2
+                      </h5>
                       <div class="row">
                         <div class="col-md-12">
-                          <h6>Статус конфигов</h6>
+                          <h6 data-i18n="dota2ConfigsStatus">
+                            <span data-i18n="dota2ConfigsStatus"></span>
+                          </h6>
 
                           <div id="dota2-cfg-details" style="display: none">
                             <p id="dota2-cfg-file-status">
-                              ? gamestate_integration_fhud_dota2.cfg статус
-                              неизвестен
+                              ? <span data-i18n="dota2GsiStatus"></span>
                             </p>
                           </div>
                         </div>
@@ -840,6 +846,7 @@
                             type="text"
                             id="dota2-custom-path"
                             class="form-control"
+                            data-i18n="dota2CustomPath"
                             placeholder="Путь к Dota 2 (без game/dota/cfg)"
                           />
                         </div>
@@ -847,20 +854,26 @@
                       <div class="row">
                         <div class="col-md-12">
                           <div class="button-row mb-2" role="group">
-                            <button id="check-dota2-cfg" class="btn btn-info">
-                              Проверить установку
+                            <button
+                              id="check-dota2-cfg"
+                              class="btn btn-info"
+                              data-i18n="dota2CheckPath"
+                            >
+                              <span data-i18n="dota2CheckPath"></span>
                             </button>
                             <button
                               id="install-dota2-cfg"
                               class="btn btn-success"
+                              data-i18n="dota2InstallConfigs"
                             >
-                              Установить CFG
+                              <span data-i18n="dota2InstallConfigs"></span>
                             </button>
                             <button
                               id="remove-dota2-cfg"
                               class="btn btn-danger"
+                              data-i18n="dota2RemoveConfigs"
                             >
-                              Удалить CFG
+                              <span data-i18n="dota2RemoveConfigs"></span>
                             </button>
                           </div>
                         </div>
@@ -869,17 +882,23 @@
 
                     <!-- Редактор cfg -->
                     <div class="cfg-block mt-4" id="block-cfg-editor">
-                      <h5 class="mb-2">Работа с cfg файлами</h5>
+                      <h5 class="mb-2" data-i18n="cfgEditor">
+                        Работа с cfg файлами
+                      </h5>
                       <div class="col-md-12">
                         <div class="form-group mb-2">
-                          <label for="cfg-file-select">Файл:</label>
+                          <label for="cfg-file-select" data-i18n="cfgFile"
+                            >Файл:</label
+                          >
                           <select
                             id="cfg-file-select"
                             class="form-control"
                           ></select>
                         </div>
                         <div class="form-group mb-2">
-                          <label for="cfg-editor">Содержимое:</label>
+                          <label for="cfg-editor" data-i18n="cfgContent"
+                            >Содержимое:</label
+                          >
                           <textarea
                             id="cfg-editor"
                             class="form-control"
@@ -888,11 +907,19 @@
                           ></textarea>
                         </div>
                         <div class="btn-group" role="group">
-                          <button id="cfg-load" class="btn btn-secondary">
-                            Отобразить содержимое файла
+                          <button
+                            id="cfg-load"
+                            class="btn btn-secondary"
+                            data-i18n="cfgLoad"
+                          >
+                            <span data-i18n="cfgLoad"></span>
                           </button>
-                          <button id="cfg-save" class="btn btn-primary">
-                            Сохранить
+                          <button
+                            id="cfg-save"
+                            class="btn btn-primary"
+                            data-i18n="cfgSave"
+                          >
+                            <span data-i18n="cfgSave"></span>
                           </button>
                         </div>
                       </div>
@@ -905,28 +932,36 @@
         </section>
         <!-- Секция Камеры -->
         <section id="cameras-section" class="content-section">
-          <h2>Селектор камеры</h2>
+          <h2 data-i18n="cameraSelector">Селектор камеры</h2>
           <div id="camera-players-list">
-            <h3>Команда CT</h3>
+            <h3 data-i18n="teamCT">Команда CT</h3>
             <div class="camera-team-list">
               <div class="camera-player-row">
-                <span class="camera-player-name">MisTraLook</span>
+                <span class="camera-player-name" data-i18n="MisTraLook"
+                  >MisTraLook</span
+                >
                 <input ... />
-                <button ...>Сохранить</button>
+                <button ... data-i18n="save">
+                  <span data-i18n="save"></span>Сохранить
+                </button>
               </div>
               <!-- ... -->
             </div>
-            <h3>Команда T</h3>
+            <h3 data-i18n="teamT">Команда T</h3>
             <div class="camera-team-list">
               <div class="camera-player-row">
-                <span class="camera-player-name">dS</span>
+                <span class="camera-player-name" data-i18n="dS">dS</span>
                 <input ... />
-                <button ...>Сохранить</button>
+                <button ... data-i18n="save">
+                  <span data-i18n="save"></span> Сохранить
+                </button>
               </div>
               <!-- ... -->
             </div>
           </div>
-          <button id="refresh-cameras-btn">Обновить список игроков</button>
+          <button id="refresh-cameras-btn" data-i18n="refreshCameras">
+            <span data-i18n="refreshCameras"></span> Обновить список игроков
+          </button>
         </section>
       </main>
     </div>
@@ -1131,7 +1166,7 @@
           });
         }
 
-        // Запуск CS2 HLAE
+        // Запуск CS2 HLAE (LHM)
         const launchCs2HlaeInsecureBtn = document.getElementById(
           "launch-cs2-hlae-insecure"
         );
@@ -1151,7 +1186,7 @@
               });
               const data = await resp.json().catch(() => ({}));
               if (resp.ok) {
-                alert("CS2 + Tools + HLAE exec запускается");
+                alert("CS2 запускается через HLAE (LHM-старт)");
               } else {
                 alert(`Ошибка запуска: ${data.error || "неизвестно"}`);
               }
@@ -1265,10 +1300,10 @@
               if (fileStatus) {
                 if (data.cfgExists) {
                   fileStatus.innerHTML =
-                    '<span class="status-dot green"></span>gamestate_integration_fhud_dota2.cfg установлен';
+                    '<span class="status-dot green"></span><span data-i18n="dota2GsiInstalled"></span>';
                 } else {
                   fileStatus.innerHTML =
-                    '<span class="status-dot red"></span>gamestate_integration_fhud_dота2.cfg не установлен';
+                    '<span class="status-dot red"></span><span data-i18n="dota2GsiNotInstalled"></span>';
                 }
               }
             }
@@ -1281,7 +1316,7 @@
             if (detailsDiv) detailsDiv.style.display = "block";
             if (fileStatus)
               fileStatus.innerHTML =
-                '<span class="status-dot red"></span>gamestate_integration_fhud_dota2.cfg не установлен';
+                '<span class="status-dot red"></span><span data-i18n="dota2GsiNotInstalled"></span>';
           }
         }
 
