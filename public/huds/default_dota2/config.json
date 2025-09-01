@@ -1,0 +1,10 @@
+{
+  "name": "Default Dota 2 HUD",
+  "description": "Стандартный HUD для Dota 2",
+  "author": "System",
+  "version": "1.0.0",
+  "game": "dota2",
+  "radar": true,
+  "killfeed": true,
+  "gsi_filters": ["dota", "hero", "abilities", "items", "buildings", "minimap"]
+}
