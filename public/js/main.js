@@ -409,7 +409,7 @@ function updateMapsOrderDisplay() {
     .map(
       (map, index) => `
         <div class="map-slot" data-index="${index}">
-            <span data-i18n="mapNumber" class="map-number">Карта ${
+            <span data-i18n="mapNumber" class="map-number" data-i18n="mapNumberLabel" >Карта ${
               index + 1
             }</span>
             <div data-i18n="mapInfo" class="map-info">
@@ -2178,8 +2178,6 @@ async function loadHUDs() {
                 </div>
                 <h3 data-i18n="closeOverlayHint">ALT+Q - Закрыть оверлей</h3>
                 <h3 data-i18n="toggleOverlayHint">ALT+X - Свернуть/Развернуть оверлей</h3>
-                <h3 data-i18n="hlaeKillfeedHint">exec observer_HLAE_kill</h3>
-                <h3 data-i18n="cs2ToolsKillfeedHint">exec observer_cs2_tools_killfeed</h3>
                 <div class="players-table-container">
                     <table class="players-table">
                         <thead>
@@ -2227,9 +2225,9 @@ async function loadHUDs() {
                                         }" data-i18n="launchOverlay">
                                             ${i18n("launchOverlay")}
                                         </button>
-                                        <button class="colors-button" data-hud="${
+                                        <button class="colors-button" data-i18n="colors" data-hud="${
                                           hud.id
-                                        }">Цвета</button>
+                                        }">${i18n("colors")}Цвета</button>
 
                                     </td>
                                 </tr>
@@ -2254,43 +2252,37 @@ async function loadHUDs() {
       // Инициализируем поиск
       initializeHUDSearch();
 
-      // Подгружаем признаки поддержки фич из /huds/<id>/config.json
-      const renderHudFeatures = async (hud) => {
-        try {
-          const resp = await fetch(`/huds/${hud.id}/config.json`, {
-            cache: "no-store",
-          });
-          if (!resp.ok) return;
-          const cfg = await resp.json();
-          const container = document.getElementById(`hud-features-${hud.id}`);
-          if (!container) return;
-          const icons = [];
-          if (cfg && cfg.radar) {
-            icons.push(
-              '<i class="fas fa-map feature feature-radar" title="Кастомный радар"></i>'
-            );
-          } else if (cfg && cfg.radar === false) {
-            icons.push(
-              '<i class="fas fa-map-slash feature feature-radar-disabled" title="Радар отключен"></i>'
-            );
-          }
-          if (cfg && cfg.killfeed) {
-            icons.push(
-              '<i class="fas fa-skull feature feature-killfeed" title="Кастомный киллфид"></i>'
-            );
-          }
-          if (cfg && cfg.HLAE_killfeed) {
-            icons.push(
-              '<i class="fas fa-bolt feature feature-hlae" title="HLAE + Killfeed из CS2"></i>'
-            );
-          }
-          if (cfg && cfg.HLAE_killfeed_castom) {
-            icons.push(
-              '<i class="fas fa-tools feature feature-hlae-custom" title="HLAE + CS2 tools с кастомным killfeed"></i>'
-            );
-          }
-          container.innerHTML = icons.join(" ");
-        } catch {}
+      // Признаки поддержки фич берем из объекта HUD (/api/huds уже мержит config.json)
+      const renderHudFeatures = (hud) => {
+        const container = document.getElementById(`hud-features-${hud.id}`);
+        if (!container) return;
+        const cfg = hud || {};
+        const icons = [];
+        if (cfg.radar) {
+          icons.push(
+            '<i class="fas fa-map feature feature-radar" title="Кастомный радар"></i>'
+          );
+        } else if (cfg.radar === false) {
+          icons.push(
+            '<i class="fas fa-map-slash feature feature-radar-disabled" title="Радар отключен"></i>'
+          );
+        }
+        if (cfg.killfeed) {
+          icons.push(
+            '<i class="fas fa-skull feature feature-killfeed" title="Кастомный киллфид"></i>'
+          );
+        }
+        if (cfg.HLAE_killfeed) {
+          icons.push(
+            '<i class="fas fa-bolt feature feature-hlae" title="HLAE + Killfeed из CS2"></i>'
+          );
+        }
+        if (cfg.HLAE_killfeed_castom) {
+          icons.push(
+            '<i class="fas fa-tools feature feature-hlae-custom" title="HLAE + CS2 tools с кастомным killfeed"></i>'
+          );
+        }
+        container.innerHTML = icons.join(" ");
       };
       Array.isArray(huds) && huds.forEach((h) => renderHudFeatures(h));
 
@@ -2315,8 +2307,8 @@ async function loadHUDs() {
       async function updateHlaeConfigs(hlaeColors) {
         try {
           // Извлекаем цвета и альфа значения
-          const ctColor = hlaeColors.HLAE_CT_COLOR || "rgba(40, 120, 240, 1)";
-          const tColor = hlaeColors.HLAE_T_COLOR || "rgba(229, 11, 11, 1)";
+          const ctColor = hlaeColors.HLAE_CT_COLOR || "rgba(87, 136, 168, 1)";
+          const tColor = hlaeColors.HLAE_T_COLOR || "rgba(193, 149, 17, 1)";
           const ctAlpha = hlaeColors.HLAE_CT_ALPHA || "150";
           const tAlpha = hlaeColors.HLAE_T_ALPHA || "150";
           const glowAlpha = hlaeColors.HLAE_GLOW_ALPHA || "50";
@@ -2333,31 +2325,14 @@ async function loadHUDs() {
                 b: parseInt(match[3]),
               };
             }
-            return { r: 40, g: 120, b: 240 }; // fallback
+            return { r: 87, g: 136, b: 168 }; // fallback
           };
 
           const ctRgb = parseRgba(ctColor);
           const tRgb = parseRgba(tColor);
 
-          // Обновляем HLAE конфиг
-          const hlaeConfig = `sv_cheats 1
-cl_drawhud_force_teamid_overhead 1
-cl_draw_only_deathnotices 1
-cl_drawhud_force_deathnotices 1
-spec_show_xray 1
-cl_drawhud_force_radar 0
-cl_sanitize_muted_players 0
-spec_allow_roaming 1
-cl_drawhud 1
-voice_enable 0
-volume 0.3
-cl_obs_interp_enable 0
-fps_max 70.000000
-bind "/" "spec_autodirector 1"
-bind "." "spec_autodirector 0"
-safezonex 0.988
-safezoney 0.97
-mirv_deathmsg colors ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b} ${ctAlpha}
+          // Только цвета (для shud_color.cfg)
+          const shudColorConfig = `mirv_deathmsg colors ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b} ${ctAlpha}
 mirv_deathmsg colors t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${tAlpha}
 mirv_colors glow ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b} ${glowAlpha}
 mirv_colors glow t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${glowAlpha}
@@ -2366,89 +2341,16 @@ mirv_colors trails t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${trailsAlpha}
 mirv_colors smokes ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b}
 mirv_colors smokes t ${tRgb.r} ${tRgb.g} ${tRgb.b}
 mirv_colors teamid ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b} ${teamidAlpha}
-mirv_colors teamid t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${teamidAlpha}
+mirv_colors teamid t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${teamidAlpha}`;
 
-// HLAE PGL настройки для GSI
-mirv_pgl url "ws://localhost:1349/socket.io/?EIO=3&transport=websocket"
-mirv_pgl start
-
-// Дополнительные HLAE команды для расширенных данных
-mirv_pgl data "position"
-mirv_pgl data "forward"
-mirv_pgl data "camera"
-mirv_pgl data "weapons"
-mirv_pgl data "player"
-mirv_pgl data "allplayers"
-mirv_pgl data "bomb"
-mirv_pgl data "grenades"
-mirv_pgl data "round"
-mirv_pgl data "map"
-mirv_pgl data "previously"
-mirv_pgl data "provider"
-
-// Настройки для отправки данных каждые 100ms
-mirv_pgl interval 100`;
-
-          // Обновляем CS2 tools конфиг
-          const cs2ToolsConfig = `sv_cheats 1
-
-cl_drawhud_force_teamid_overhead 1
-cl_draw_only_deathnotices 1
-cl_drawhud_force_deathnotices 1
-spec_show_xray 1
-cl_drawhud_force_radar 0
-cl_sanitize_muted_players 0
-spec_allow_roaming 1
-cl_drawhud 1
-voice_enable 0
-volume 0.3
-cl_obs_interp_enable 0
-fps_max 70.000000
-r_always_render_all_windows 1
-bind "/" "spec_autodirector 1"
-bind "." "spec_autodirector 0"
-safezonex 0.988
-safezoney 0.97
-
-mirv_deathmsg colors ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b} ${ctAlpha}
-mirv_deathmsg colors t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${tAlpha}
-mirv_colors glow ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b} ${glowAlpha}
-mirv_colors glow t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${glowAlpha}
-mirv_colors trails ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b} ${trailsAlpha}
-mirv_colors trails t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${trailsAlpha}
-mirv_colors smokes ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b}
-mirv_colors smokes t ${tRgb.r} ${tRgb.g} ${tRgb.b}
-mirv_colors teamid ct ${ctRgb.r} ${ctRgb.g} ${ctRgb.b} ${teamidAlpha}
-mirv_colors teamid t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${teamidAlpha}
-
-// HLAE PGL настройки для GSI
-afx_interop connect 1
-cl_draw_only_deathnotices 1
-cl_obs_interp_enable 0
-cl_drawhud_force_teamid_overhead 1
-cl_teamid_overhead_always 2
-cl_drawhud_force_radar 0
-cl_drawhud_force_deathnotices -1
-cl_net_showevents 1
-mirv_pgl url "ws://localhost:1349/socket.io/?EIO=3&transport=websocket"
-mirv_pgl start`;
-
-          // Отправляем обновленные конфиги на сервер
+          // Сохраняем только файл цветов (не трогаем остальные cfg)
           await Promise.all([
             fetch("/api/update-hlae-config", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                config: "hlae",
-                content: hlaeConfig,
-              }),
-            }),
-            fetch("/api/update-hlae-config", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                config: "cs2tools",
-                content: cs2ToolsConfig,
+                config: "shud_color",
+                content: shudColorConfig,
               }),
             }),
           ]);
@@ -2543,26 +2445,28 @@ mirv_pgl start`;
                     <span style="display:inline-block;width:14px;height:14px;border-radius:2px;background:${
                       values.HLAE_CT_COLOR ||
                       values.COLOR_NEW_CT ||
-                      "rgba(40, 120, 240, 1)"
+                      "rgba(87, 136, 168, 1)"
                     };border:1px solid #555"></span>
                   </span>
                 </label>
                 <input type="text" data-key="HLAE_CT_COLOR" value="${
                   values.HLAE_CT_COLOR ||
                   values.COLOR_NEW_CT ||
-                  "rgba(40, 120, 240, 1)"
-                }" placeholder="rgba(r,g,b,a)" style="flex:1" />
+                  "rgba(87, 136, 168, 1)"
+                }" placeholder="${
+              values.COLOR_NEW_CT || "rgba(40, 120, 240, 1)"
+            }" style="flex:1" />
                 <span class="swatch-now" data-key-swatch="HLAE_CT_COLOR" data-default="${
-                  values.COLOR_NEW_CT || "rgba(40, 120, 240, 1)"
+                  values.COLOR_NEW_CT || "rgba(87, 136, 168, 1)"
                 }" title="Текущий цвет" style="display:inline-block;width:14px;height:14px;border-radius:2px;border:1px solid #555;background:${
               values.HLAE_CT_COLOR ||
               values.COLOR_NEW_CT ||
-              "rgba(40, 120, 240, 1)"
+              "rgba(87, 136, 168, 1)"
             }"></span>
                 
                 <div class="color-controls" data-key-color-controls="HLAE_CT_COLOR" style="display:flex; align-items:center; gap:6px;">
                   <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
-                    <input title="Палитра" type="color" data-key-color="HLAE_CT_COLOR" value="#2878f0" />
+                    <input title="Палитра" type="color" data-key-color="HLAE_CT_COLOR" value="#5788a8" />
                     <span style="font-size:12px;opacity:.75">палитра</span>
                   </label>
                   <div style="display:flex; align-items:center; gap:6px; min-width:150px;">
@@ -2580,17 +2484,19 @@ mirv_pgl start`;
                     <span style="display:inline-block;width:14px;height:14px;border-radius:2px;background:${
                       values.HLAE_T_COLOR ||
                       values.COLOR_NEW_T ||
-                      "rgba(229, 11, 11, 1)"
+                      "rgba(193, 149, 17, 1)"
                     };border:1px solid #555"></span>
                   </span>
                 </label>
                 <input type="text" data-key="HLAE_T_COLOR" value="${
                   values.HLAE_T_COLOR ||
                   values.COLOR_NEW_T ||
-                  "rgba(229, 11, 11, 1)"
-                }" placeholder="rgba(r,g,b,a)" style="flex:1" />
+                  "rgba(193, 149, 17, 1)"
+                }" placeholder="${
+              values.COLOR_NEW_T || "rgba(193, 149, 17, 1)"
+            }" style="flex:1" />
                 <span class="swatch-now" data-key-swatch="HLAE_T_COLOR" data-default="${
-                  values.COLOR_NEW_T || "rgba(229, 12, 11, 1)"
+                  values.COLOR_NEW_T || "rgba(193, 149, 17, 1)"
                 }" title="Текущий цвет" style="display:inline-block;width:14px;height:14px;border-radius:2px;border:1px solid #555;background:${
               values.HLAE_T_COLOR ||
               values.COLOR_NEW_T ||
@@ -3478,7 +3384,7 @@ mirv_pgl start`;
                     alert("Сохранено");
                   }
 
-                  closeColorsModal();
+                  // Не закрываем модалку автоматически
                 } else {
                   alert("Ошибка сохранения");
                 }
@@ -3499,7 +3405,199 @@ mirv_pgl start`;
                   body: JSON.stringify({}),
                 });
                 await resp.json().catch(() => ({}));
-                closeColorsModal();
+                // После сброса — перегенерация shud_color.cfg из оригинальных значений
+                try {
+                  const hudJsResp = await fetch(`/huds/${hudId}/index.js`, {
+                    cache: "no-store",
+                  }).catch(() => null);
+                  const hudJs =
+                    hudJsResp && hudJsResp.ok ? await hudJsResp.text() : "";
+                  const defaultsMap = {};
+                  if (hudJs) {
+                    try {
+                      const re = /([A-Z][A-Z0-9_]+)\s*=\s*(["'`])([\s\S]*?)\2/g;
+                      let m;
+                      while ((m = re.exec(hudJs))) {
+                        const k = m[1];
+                        const v = m[3];
+                        if (
+                          /rgba\(|rgb\(|linear-gradient|#([0-9a-f]{3}|[0-9a-f]{6})/i.test(
+                            v
+                          )
+                        ) {
+                          defaultsMap[k] = v;
+                        }
+                      }
+                    } catch {}
+                  }
+                  const parse = (rgba) => {
+                    const m = String(rgba).match(
+                      /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([0-9.]+))?\)/
+                    );
+                    if (!m) return { r: 40, g: 120, b: 240, a: 1 };
+                    return {
+                      r: +m[1],
+                      g: +m[2],
+                      b: +m[3],
+                      a: m[4] ? +m[4] : 1,
+                    };
+                  };
+                  const ct = parse(
+                    defaultsMap["COLOR_NEW_CT"] || "rgba(40,120,240,1)"
+                  );
+                  const t = parse(
+                    defaultsMap["COLOR_NEW_T"] || "rgba(229,11,11,1)"
+                  );
+                  const a255 = (a) =>
+                    Math.round((typeof a === "number" ? a : 1) * 255);
+                  const shudColorConfig = `mirv_deathmsg colors ct ${ct.r} ${
+                    ct.g
+                  } ${ct.b} ${a255(ct.a)}\nmirv_deathmsg colors t ${t.r} ${
+                    t.g
+                  } ${t.b} ${a255(t.a)}\nmirv_colors glow ct ${ct.r} ${ct.g} ${
+                    ct.b
+                  } 50\nmirv_colors glow t ${t.r} ${t.g} ${
+                    t.b
+                  } 50\nmirv_colors trails ct ${ct.r} ${ct.g} ${
+                    ct.b
+                  } 50\nmirv_colors trails t ${t.r} ${t.g} ${
+                    t.b
+                  } 50\nmirv_colors smokes ct ${ct.r} ${ct.g} ${
+                    ct.b
+                  }\nmirv_colors smokes t ${t.r} ${t.g} ${
+                    t.b
+                  }\nmirv_colors teamid ct ${ct.r} ${ct.g} ${
+                    ct.b
+                  } 80\nmirv_colors teamid t ${t.r} ${t.g} ${t.b} 80`;
+                  await fetch("/api/update-hlae-config", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      config: "shud_color",
+                      content: shudColorConfig,
+                    }),
+                  });
+                  // Обновляем отображение значков (swatch) и полей ввода к дефолту
+                  // Заполняем все input[data-key] дефолтами, если есть
+                  if (formEl) {
+                    formEl
+                      .querySelectorAll("input[data-key]")
+                      ?.forEach((inp) => {
+                        const k = inp.getAttribute("data-key");
+                        if (
+                          k &&
+                          Object.prototype.hasOwnProperty.call(defaultsMap, k)
+                        ) {
+                          inp.value = defaultsMap[k];
+                        } else if (k) {
+                          // Для отсутствующих дефолтов очищаем
+                          inp.value = "";
+                        }
+                      });
+                    // Обновляем swatch для ключевых HLAE цветов (и любых других, если есть дефолт)
+                    Object.keys(defaultsMap).forEach((k) => {
+                      const sw = formEl.querySelector(
+                        `[data-key-swatch="${k}"]`
+                      );
+                      if (sw) {
+                        sw.style.background = defaultsMap[k] || "transparent";
+                      }
+                    });
+                    // Явно обновляем HLAE_CT_COLOR и HLAE_T_COLOR из дефолтов
+                    const ctColorStr =
+                      defaultsMap["HLAE_CT_COLOR"] ||
+                      defaultsMap["COLOR_NEW_CT"] ||
+                      "rgba(87, 136, 168, 1)";
+                    const tColorStr =
+                      defaultsMap["HLAE_T_COLOR"] ||
+                      defaultsMap["COLOR_NEW_T"] ||
+                      "rgba(193, 149, 17, 1)";
+
+                    const rgbaToHex = (r, g, b) =>
+                      "#" +
+                      [r, g, b]
+                        .map((n) => {
+                          const s = Number(n).toString(16).padStart(2, "0");
+                          return s.length > 2 ? s.slice(0, 2) : s;
+                        })
+                        .join("");
+                    const parse = (rgba) => {
+                      const m = String(rgba).match(
+                        /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([0-9.]+))?\)/
+                      );
+                      if (!m) return { r: 40, g: 120, b: 240, a: 1 };
+                      return {
+                        r: +m[1],
+                        g: +m[2],
+                        b: +m[3],
+                        a: m[4] ? +m[4] : 1,
+                      };
+                    };
+                    const ctParsed = parse(ctColorStr);
+                    const tParsed = parse(tColorStr);
+
+                    const hlaeCtInput = formEl.querySelector(
+                      'input[data-key="HLAE_CT_COLOR"]'
+                    );
+                    const hlaeTInput = formEl.querySelector(
+                      'input[data-key="HLAE_T_COLOR"]'
+                    );
+                    if (hlaeCtInput) hlaeCtInput.value = ctColorStr;
+                    if (hlaeTInput) hlaeTInput.value = tColorStr;
+
+                    const hlaeCtSw = formEl.querySelector(
+                      '[data-key-swatch="HLAE_CT_COLOR"]'
+                    );
+                    const hlaeTSw = formEl.querySelector(
+                      '[data-key-swatch="HLAE_T_COLOR"]'
+                    );
+                    if (hlaeCtSw) hlaeCtSw.style.background = ctColorStr;
+                    if (hlaeTSw) hlaeTSw.style.background = tColorStr;
+
+                    // Обновим color picker и альфы рядом с полем
+                    const setColorControls = (key, parsed) => {
+                      const picker = formEl.querySelector(
+                        `input[data-key-color="${key}"]`
+                      );
+                      const alphaRange = formEl.querySelector(
+                        `input[data-key-alpha="${key}"]`
+                      );
+                      const alphaNum = formEl.querySelector(
+                        `input[data-key-alpha-num="${key}"]`
+                      );
+                      if (picker)
+                        picker.value = rgbaToHex(parsed.r, parsed.g, parsed.b);
+                      if (alphaRange) alphaRange.value = String(parsed.a);
+                      if (alphaNum) alphaNum.value = String(parsed.a);
+                    };
+                    setColorControls("HLAE_CT_COLOR", ctParsed);
+                    setColorControls("HLAE_T_COLOR", tParsed);
+
+                    // Вернём числовые альфы (0-255) в inputs и range
+                    const setNum = (key, val) => {
+                      const el = formEl.querySelector(
+                        `input[data-key="${key}"]`
+                      );
+                      if (el) el.value = String(val);
+                    };
+                    const setRangeAlpha255 = (key, val) => {
+                      const el = formEl.querySelector(
+                        `input[data-key-alpha-range="${key}"]`
+                      );
+                      if (el) el.value = String(val);
+                    };
+                    setNum("HLAE_CT_ALPHA", 150);
+                    setNum("HLAE_T_ALPHA", 150);
+                    setNum("HLAE_GLOW_ALPHA", 50);
+                    setNum("HLAE_TRAILS_ALPHA", 50);
+                    setNum("HLAE_TEAMID_ALPHA", 80);
+                    setRangeAlpha255("HLAE_CT_ALPHA", 150);
+                    setRangeAlpha255("HLAE_T_ALPHA", 150);
+                    setRangeAlpha255("HLAE_GLOW_ALPHA", 50);
+                    setRangeAlpha255("HLAE_TRAILS_ALPHA", 50);
+                    setRangeAlpha255("HLAE_TEAMID_ALPHA", 80);
+                  }
+                } catch {}
                 alert("Сброшено. Используются оригинальные цвета HUD.");
               } catch {
                 alert("Ошибка запроса");
@@ -3541,7 +3639,7 @@ function copyHUDUrl(hudId) {
     // Пытаемся скопировать
     const successful = document.execCommand("copy");
     if (successful) {
-      alert(i18n("copyHUDUrlSuccess"));
+      alert(i18n("Copy HUDUrlSuccess"));
     } else {
       throw new Error(i18n("copyHUDUrlError"));
     }
@@ -4619,6 +4717,9 @@ async function updateConfigsStatus() {
   const observerToolsStatusElement = document.getElementById(
     "cs2-observer_tools-status"
   );
+  const shudColorStatusElement = document.getElementById(
+    "cs2-shud_color-status"
+  );
   const customPathInput = document.getElementById("cs2-custom-path");
 
   // Проверяем только обязательные элементы
@@ -4647,6 +4748,10 @@ async function updateConfigsStatus() {
     observerHlaeKillStatusElement.innerHTML =
       '<span class="status-dot gray"></span>Проверка статуса observer_HLAE_kill.cfg...';
   }
+  if (shudColorStatusElement) {
+    shudColorStatusElement.innerHTML =
+      '<span class="status-dot gray"></span>Проверка статуса shud_color.cfg...';
+  }
 
   const data = await checkCS2Configs(
     customPathInput ? customPathInput.value : null
@@ -4655,72 +4760,86 @@ async function updateConfigsStatus() {
   if (data && data.success) {
     if (data.gsiInstalled) {
       gsiStatusElement.innerHTML =
-        '<span class="status-dot green"></span>GSI конфиг установлен';
+        '<span class="status-dot green"></span>GSI cfg status</span>';
     } else {
       gsiStatusElement.innerHTML =
-        '<span class="status-dot red"></span>GSI конфиг не установлен';
+        '<span class="status-dot red"></span>GSI cfg status</span>';
     }
 
     if (data.observerInstalled) {
       observerStatusElement.innerHTML =
-        '<span class="status-dot green"></span>Observer конфиг установлен';
+        '<span class="status-dot green"></span>Observer cfg status</span>';
     } else {
       if (data.sourceObserverExists === false) {
         observerStatusElement.innerHTML =
-          '<span class="status-dot gray"></span>Observer конфиг: файла нет в папке cfg для установки';
+          '<span class="status-dot gray"></span>Observer cfg: file not found in cfg folder for installation';
       } else {
         observerStatusElement.innerHTML =
-          '<span class="status-dot red"></span>Observer конфиг не установлен';
+          '<span class="status-dot red"></span>Observer cfg status';
       }
     }
 
     if (data.observer2Installed) {
       observer2StatusElement.innerHTML =
-        '<span class="status-dot green"></span>Observer2 конфиг установлен';
+        '<span class="status-dot green"></span>Observer2 cfg status</span>';
     } else {
       if (data.sourceObserver2Exists === false) {
         observer2StatusElement.innerHTML =
-          '<span class="status-dot gray"></span>Observer2 конфиг: файла нет в папке cfg для установки';
+          '<span class="status-dot gray"></span>Observer2 cfg: file not found in cfg folder for installation';
       } else {
         observer2StatusElement.innerHTML =
-          '<span class="status-dot red"></span>Observer2 конфиг не установлен';
+          '<span class="status-dot red"></span>Observer2 cfg status';
       }
     }
 
     if (data.observer_offInstalled) {
       observer_offStatusElement.innerHTML =
-        '<span class="status-dot green"></span>Observer_off конфиг установлен';
+        '<span class="status-dot green"></span>Observer_off cfg status</span>';
     } else {
       if (data.sourceObserverOffExists === false) {
         observer_offStatusElement.innerHTML =
-          '<span class="status-dot gray"></span>Observer_off конфиг: файла нет в папке cfg для установки';
+          '<span class="status-dot gray"></span>Observer_off cfg: file not found in cfg folder for installation';
       } else {
         observer_offStatusElement.innerHTML =
-          '<span class="status-dot red"></span>Observer_off конфиг не установлен';
+          '<span class="status-dot red"></span>Observer_off cfg status';
       }
     }
 
     if (observerToolsStatusElement) {
       if (data.observerToolsInstalled) {
         observerToolsStatusElement.innerHTML =
-          '<span class="status-dot green"></span>observer_cs2_tools_killfeed установлен';
+          '<span class="status-dot green"></span>observer_cs2_tools_killfeed cfg status</span>';
       } else {
         if (data.sourceObserverToolsExists === false) {
           observerToolsStatusElement.innerHTML =
-            '<span class="status-dot gray"></span>observer_cs2_tools_killfeed: файла нет в папке cfg для установки';
+            '<span class="status-dot gray"></span>observer_cs2_tools_killfeed cfg: file not found in cfg folder for installation';
         } else {
           observerToolsStatusElement.innerHTML =
-            '<span class="status-dot red"></span>observer_cs2_tools_killfeed не установлен';
+            '<span class="status-dot red"></span>observer_cs2_tools_killfeed cfg status';
         }
       }
     }
     if (observerHlaeKillStatusElement) {
       if (data.observerHlaeKillInstalled) {
         observerHlaeKillStatusElement.innerHTML =
-          '<span class="status-dot green"></span>observer_HLAE_kill.cfg установлен';
+          '<span class="status-dot green"></span>observer_HLAE_kill.cfg cfg status</span>';
       } else {
         observerHlaeKillStatusElement.innerHTML =
-          '<span class="status-dot red"></span>observer_HLAE_kill.cfg не установлен';
+          '<span class="status-dot red"></span>observer_HLAE_kill.cfg cfg status';
+      }
+    }
+    if (shudColorStatusElement) {
+      if (data.shudColorInstalled) {
+        shudColorStatusElement.innerHTML =
+          '<span class="status-dot green"></span>SHUD color cfg status</span>';
+      } else {
+        if (data.sourceShudColorExists === false) {
+          shudColorStatusElement.innerHTML =
+            '<span class="status-dot gray"></span>SHUD color cfg: file not found in cfg folder for installation';
+        } else {
+          shudColorStatusElement.innerHTML =
+            '<span class="status-dot red"></span>SHUD color cfg status</span>';
+        }
       }
     }
 
@@ -4735,25 +4854,29 @@ async function updateConfigsStatus() {
     }
   } else {
     gsiStatusElement.innerHTML =
-      '<span class="status-dot red"></span>GSI конфиг не установлен';
+      '<span class="status-dot red"></span>GSI cfg status</span>';
     observerStatusElement.innerHTML =
-      '<span class="status-dot red"></span>Observer конфиг не установлен';
+      '<span class="status-dot red"></span>Observer cfg status</span>';
     observer2StatusElement.innerHTML =
-      '<span class="status-dot red"></span>Observer2 конфиг не установлен';
+      '<span class="status-dot red"></span>Observer2 cfg status</span>';
     observer_offStatusElement.innerHTML =
-      '<span class="status-dot red"></span>Observer_off конфиг не установлен';
+      '<span class="status-dot red"></span>Observer_off cfg status</span>';
     if (observerToolsStatusElement) {
       observerToolsStatusElement.innerHTML =
-        '<span class="status-dot red"></span>observer_cs2_tools_killfeed не установлен';
+        '<span class="status-dot red"></span>observer_cs2_tools_killfeed cfg status</span>';
     }
     if (observerHlaeKillStatusElement) {
       observerHlaeKillStatusElement.innerHTML =
-        '<span class="status-dot red"></span>observer_HLAE_kill.cfg не установлен';
+        '<span class="status-dot red"></span>observer_HLAE_kill.cfg cfg status</span>';
+    }
+    if (shudColorStatusElement) {
+      shudColorStatusElement.innerHTML =
+        '<span class="status-dot red"></span>SHUD color cfg status</span>';
     }
 
     const pathElement = document.getElementById("cs2-path");
     if (pathElement) {
-      pathElement.textContent = data ? data.message : "Ошибка поиска CS2";
+      pathElement.textContent = data ? data.message : "Error finding CS2";
     }
   }
 }
@@ -4802,7 +4925,7 @@ async function loadTranslations(lang) {
     updateUI();
     return translations;
   } catch (error) {
-    console.error("Ошибка при загрузке переводов:", error);
+    console.error("Error loading translations:", error);
     return {};
   }
 }
@@ -4837,7 +4960,7 @@ async function changeLanguage(lang) {
       updateConfigsStatus();
     }
   } catch (error) {
-    console.error("Ошибка при изменении языка:", error);
+    console.error("Error changing language:", error);
   }
 }
 
@@ -4855,10 +4978,10 @@ async function loadLanguage(lang) {
     // Обновляем все элементы с data-i18n
     translatePage();
 
-    console.log(`Язык изменен на ${lang}`);
+    console.log(`Language changed to ${lang}`);
     return true;
   } catch (error) {
-    console.error("Ошибка при загрузке языка:", error);
+    console.error("Error loading language:", error);
     // Если загрузка не удалась, попробуем загрузить русский язык как резервный
     if (lang !== "ru") {
       return loadLanguage("ru");
@@ -4951,15 +5074,15 @@ async function removeCS2Configs() {
     const data = await response.json();
 
     if (data.success) {
-      alert("Конфиги успешно удалены");
+      alert("Configs successfully removed");
       // Обновляем статус конфигов после удаления
       await updateConfigsStatus();
     } else {
-      alert(data.message || "Ошибка при удалении конфигов");
+      alert(data.message || "Error removing configs");
     }
   } catch (error) {
-    console.error("Ошибка при удалении конфигов:", error);
-    alert("Ошибка при удалении конфигов");
+    console.error("Error removing configs:", error);
+    alert("Error removing configs");
   }
 }
 
@@ -5273,7 +5396,7 @@ function updateMapsContainerWithElements(
   if (pickedMapCount > 0) {
     const pickedSection = document.createElement("div");
     pickedSection.className = "maps-editor-section";
-    pickedSection.innerHTML = `<div class="maps-editor-header">Пикнутые карты (будут играться)</div>`;
+    pickedSection.innerHTML = `<div class="maps-editor-header" data-i18n="pickedMapsHeader">Пикнутые карты (будут играться)</div>`;
     mapsContent.appendChild(pickedSection);
 
     // Создаем грид для карт
@@ -5292,7 +5415,9 @@ function updateMapsContainerWithElements(
 
       // Создаем содержимое для элемента карты
       mapItem.innerHTML = `
-                <div class="maps-editor-number">Карта ${i + 1}</div>
+                <div class="maps-editor-number">${i18n(
+                  "mapNumberLabel"
+                ).replace("{0}", i + 1)}</div>
                 <select class="map-select">
                     <option value="" data-i18n="selectMap">Выберите карту</option>
                     <option value="de_dust2">Dust II</option>
@@ -5313,7 +5438,7 @@ function updateMapsContainerWithElements(
                     <option value="team2">${team2Name}</option>
                     <option value="DECIDER">DECIDER</option>
                 </select>
-                <button class="maps-editor-score-btn">Редактировать счет</button>
+                <button class="maps-editor-score-btn" data-i18n="editScoreButton">Редактировать счет</button>
             `;
 
       // Устанавливаем сохраненные значения, если они есть
@@ -5335,7 +5460,7 @@ function updateMapsContainerWithElements(
   if (bannedMapCount > 0) {
     const bannedSection = document.createElement("div");
     bannedSection.className = "maps-editor-section banned";
-    bannedSection.innerHTML = `<div class="maps-editor-header">Забаненные карты (не будут играться)</div>`;
+    bannedSection.innerHTML = `<div class="maps-editor-header" data-i18n="bannedMapsHeader">Забаненные карты (не будут играться)</div>`;
     mapsContent.appendChild(bannedSection);
 
     // Создаем грид для карт
@@ -5354,7 +5479,9 @@ function updateMapsContainerWithElements(
 
       // Создаем содержимое для элемента карты
       mapItem.innerHTML = `
-                <div class="maps-editor-number">Бан ${i + 1}</div>
+                <div class="maps-editor-number">${i18n(
+                  "banNumberLabel"
+                ).replace("{0}", i + 1)}</div>
                 <select class="map-select">
                     <option value="" data-i18n="selectMap">Выберите карту</option>
                     <option value="de_dust2">Dust II</option>
@@ -5415,7 +5542,7 @@ function updateMapsContainerWithElements(
   // Добавляем кнопку для сохранения изменений
   const saveButton = document.createElement("button");
   saveButton.className = "save-maps-btn";
-  saveButton.textContent = "Сохранить изменения";
+  saveButton.textContent = i18n("saveChanges");
   saveButton.style.cssText = `
         display: block;
         width: 100%;
@@ -5591,10 +5718,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Очищаем форму
         createMatchForm.reset();
-        alert("Матч успешно создан");
+        alert("Match successfully created");
       } catch (error) {
-        console.error("Ошибка:", error);
-        alert("Ошибка при создании матча: " + error.message);
+        console.error("Error:", error);
+        alert("Error creating match: " + error.message);
       }
     };
   }
@@ -5731,7 +5858,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Проверка наличия выбранных команд
       if (!team1Id || !team2Id) {
-        alert("Пожалуйста, выберите обе команды");
+        alert("Please select both teams");
         return;
       }
 
@@ -6486,7 +6613,7 @@ function initializeCamerasSection() {
     !gsiDataBuffer.allplayers ||
     Object.keys(gsiDataBuffer.allplayers).length === 0
   ) {
-    list.innerHTML = "<p>Ожидание данных от сервера...</p>";
+    list.innerHTML = "<p>" + i18n("waitingForServerData") + "</p>";
     return;
   }
 
@@ -6511,11 +6638,15 @@ function initializeCamerasSection() {
     players.forEach((player) => {
       html += `
                 <div class="camera-player-row" style="margin-bottom:8px;">
-                    <span class="camera-player-name" style="display:inline-block;width:120px;">${player.name}</span>
+                    <span class="camera-player-name" style="display:inline-block;width:120px;">${
+                      player.name
+                    }</span>
                     <input type="text" class="camera-link-input" 
                         data-steamid="${player.steamid}" 
                         placeholder="Ссылка/текст для камеры" style="width:220px;">
-                    <button class="camera-save-btn" data-steamid="${player.steamid}">Сохранить</button>
+                    <button class="camera-save-btn" data-steamid="${
+                      player.steamid
+                    }">${i18n("save")}</button>
                 </div>
             `;
     });
@@ -6524,8 +6655,8 @@ function initializeCamerasSection() {
   }
 
   list.innerHTML =
-    renderTeamBlock("Команда CT", ctPlayers) +
-    renderTeamBlock("Команда T", tPlayers);
+    renderTeamBlock(i18n("teamCT"), ctPlayers) +
+    renderTeamBlock(i18n("teamT"), tPlayers);
 
   // ОТЛАДКА
   console.log("HTML:", list.innerHTML);
@@ -6634,7 +6765,9 @@ async function loadPlayers() {
 
     playersList.innerHTML = `
             <div class="search-bar">
-                <input type="text" id="playerSearch" placeholder="Поиск по никнейму или Steam64" class="search-input">
+                <input type="text" id="playerSearch" placeholder="${i18n(
+                  "playerSearchPlaceholder"
+                )}" class="search-input">
             </div>
             <div class="players-grid">
                 ${players
@@ -6658,17 +6791,21 @@ async function loadPlayers() {
                                       player.nickname
                                     }</h3>
                                     <p class="player-team">${
-                                      player.teamName || "без команды"
+                                      player.teamName || i18n("noTeam")
                                     }</p>
                                 </div>
                             </div>
                             <div class="player-actions">
                                 <button class="edit-player-btn" data-id="${
                                   player.id
-                                }" title="Редактировать"><i class="fas fa-edit"></i></button>
+                                }" title="${i18n(
+                      "edit"
+                    )}"><i class="fas fa-edit"></i></button>
                                 <button class="delete-player-btn" data-id="${
                                   player.id
-                                }" title="Удалить"><i class="fas fa-trash"></i></button>
+                                }" title="${i18n(
+                      "delete"
+                    )}"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     `;
@@ -6698,7 +6835,7 @@ async function loadPlayers() {
     // Инициализируем поиск
     initializePlayerSearch();
   } catch (error) {
-    console.error("Ошибка при загрузке игроков:", error);
+    console.error(i18n("loadPlayersError") + ":", error);
   }
 }
 
@@ -6765,8 +6902,8 @@ function updateTeamNamesInSelects(team1Name, team2Name) {
     const team1Option = select.querySelector('option[value="team1"]');
     const team2Option = select.querySelector('option[value="team2"]');
 
-    if (team1Option) team1Option.textContent = team1Name || "Команда 1";
-    if (team2Option) team2Option.textContent = team2Name || "Команда 2";
+    if (team1Option) team1Option.textContent = team1Name || i18n("team1");
+    if (team2Option) team2Option.textContent = team2Name || i18n("team2");
   });
 }
 
@@ -6779,12 +6916,12 @@ if (launchHlaeBtn) {
       const resp = await fetch("/api/launch-hlae", { method: "POST" });
       const data = await resp.json().catch(() => ({}));
       if (resp.ok) {
-        alert("HLAE запускается");
+        alert(i18n("hlaeStarting"));
       } else {
-        alert(`Ошибка запуска HLAE: ${data.error || "неизвестно"}`);
+        alert(`${i18n("hlaeError")}: ${data.error || i18n("unknownError")}`);
       }
     } catch (e) {
-      alert("Ошибка запроса к серверу запуска HLAE");
+      alert(i18n("hlaeRequestError"));
     }
   });
 }
@@ -6804,11 +6941,13 @@ if (launchCs2HlaeInsecureBtn) {
         // success: no UI notification
       } else {
         alert(
-          `Ошибка запуска CS2 HLAE с -insecure: ${data.error || "неизвестно"}`
+          `${i18n("cs2HlaeInsecureError")}: ${
+            data.error || i18n("unknownError")
+          }`
         );
       }
     } catch (e) {
-      alert("Ошибка запроса к серверу запуска CS2 HLAE с -insecure");
+      alert(i18n("cs2HlaeInsecureRequestError"));
     }
   });
 }
