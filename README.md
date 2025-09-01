@@ -58,17 +58,14 @@ SHUD - это бесплатная профессиональная систем
 Counter-Strike 2 - полная поддержка GSI
 Dota 2 - интеграция с игровыми данными
 
-
-<img width="1619" height="802" alt="image" src="https://github.com/user-attachments/assets/e348ac17-4344-4beb-8c18-c7b14fe180c2" />
-<img width="1636" height="843" alt="image" src="https://github.com/user-attachments/assets/8758f8da-3974-4e1b-9ff4-9d6ac00b2d26" />
-<img width="1633" height="647" alt="image" src="https://github.com/user-attachments/assets/07c1cab3-0d45-4c5d-9432-f9a2288f2a09" />
-<img width="1654" height="718" alt="image" src="https://github.com/user-attachments/assets/134158e9-52b5-465e-8b29-c50a2c939781" />
-<img width="859" height="340" alt="image" src="https://github.com/user-attachments/assets/fc664299-da18-49da-b785-2a8800b89502" />
-<img width="526" height="806" alt="image" src="https://github.com/user-attachments/assets/fb62e33e-73f3-4fe2-8286-76f831dad638" />
-<img width="1648" height="225" alt="image" src="https://github.com/user-attachments/assets/83621c70-2558-419e-9f0d-fbb203ad208b" />
-<img width="161" height="153" alt="image" src="https://github.com/user-attachments/assets/615e992d-2833-45cd-9a87-95bcaa3c1924" />
-<img width="1618" height="809" alt="image" src="https://github.com/user-attachments/assets/8509ed0a-cdaa-48f3-a54e-4105cc6eaa92" />
-<img width="1167" height="828" alt="image" src="https://github.com/user-attachments/assets/2b5f8169-0ad3-425f-b215-9e591d1fffad" />
+<img width="1352" height="794" alt="image" src="https://github.com/user-attachments/assets/a4bc6c94-6e98-485e-b294-015f40dbf3a0" />
+<img width="1352" height="796" alt="image" src="https://github.com/user-attachments/assets/97412bef-8fec-454d-8584-0a3cf713e0c9" />
+<img width="1350" height="793" alt="image" src="https://github.com/user-attachments/assets/3f9ce6e0-61ec-4e67-a36d-13aeb16fc100" />
+<img width="1405" height="775" alt="image" src="https://github.com/user-attachments/assets/52ef3786-8295-47ae-85c5-568eafd29b1f" />
+<img width="1408" height="944" alt="image" src="https://github.com/user-attachments/assets/309d4996-0ff4-4c00-8df1-b5f14296dd1a" />
+<img width="479" height="755" alt="image" src="https://github.com/user-attachments/assets/e955e088-8d2d-4968-9bf2-917b35b86d77" />
+<img width="1402" height="612" alt="image" src="https://github.com/user-attachments/assets/7d5d3ffd-64a4-458b-9f36-4fcaec70ee2f" />
+<img width="1187" height="685" alt="image" src="https://github.com/user-attachments/assets/070be4ee-a40c-4531-baa4-39c5039048f9" />
 
 ## Возможности
 
@@ -165,7 +162,10 @@ Dota 2 - интеграция с игровыми данными
 
 ### Камеры Beta
 - Настроить камеру игрока
-=====================================================================================
+
+P.S. Вы также можете открыть приложение в браузере либо с другого устрйоства по локальному IP. Пример: http://192.168.0.103:2626/
+
+###
 ## Features
 
 - **Team and Player Management**
@@ -196,7 +196,7 @@ Dota 2 - интеграция с игровыми данными
 ## System requirements
 
 - Windows 10/11
-- Node.js 16+ (included in the installer)
+- Node.js 18+ (included in the installer)
 - Counter-Strike 2
 - 100 MB of free disk space
 
@@ -255,6 +255,8 @@ Dota 2 - интеграция с игровыми данными
 - **Launch overlay on main monitor** - launches the overlay on top of the game
 
 ### Hiding players
+
+P.S. You can also open the application in a browser or from another device via local IP. Example: http://192.168.0.103:2626/
 
 In the "Hiding players" section you can:
 - Hide individual players from being displayed on the HUD
