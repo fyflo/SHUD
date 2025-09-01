@@ -49,21 +49,23 @@ class HLAEManager {
       this.isAvailable = hlaeExists && afxExists && configExists;
 
       if (this.isAvailable) {
-        console.log("[HLAE] ✅ HLAE доступен");
-        console.log(`[HLAE] Путь к HLAE: ${this.hlaeExe}`);
-        console.log(`[HLAE] Путь к AfxHook: ${this.afxHookDll}`);
-        console.log(`[HLAE] Путь к конфигу: ${this.configPath}`);
+        //console.log("[HLAE] ✅ HLAE доступен");
+        //console.log(`[HLAE] Путь к HLAE: ${this.hlaeExe}`);
+        //console.log(`[HLAE] Путь к AfxHook: ${this.afxHookDll}`);
+        //console.log(`[HLAE] Путь к конфигу: ${this.configPath}`);
       } else {
         console.log("[HLAE] ❌ HLAE недоступен");
-        if (!hlaeExists) console.log("[HLAE] Не найден HLAE.exe");
-        if (!afxExists) console.log("[HLAE] Не найден AfxHookSource2.dll");
-        if (!configExists)
-          console.log("[HLAE] Не найден конфиг fyflo_observer_killfeed.cfg");
+        if (!hlaeExists)
+          if (!afxExists)
+            if (!configExists)
+              //console.log("[HLAE] Не найден HLAE.exe");
+              console.log("[HLAE] Не найден AfxHookSource2.dll");
+        //console.log("[HLAE] Не найден конфиг fyflo_observer_killfeed.cfg");
       }
 
       return this.isAvailable;
     } catch (error) {
-      console.error("[HLAE] Ошибка проверки доступности:", error);
+      //console.error("[HLAE] Ошибка проверки доступности:", error);
       this.isAvailable = false;
       return false;
     }
@@ -72,7 +74,7 @@ class HLAEManager {
   // Запуск WebSocket сервера для получения данных от HLAE
   startWebSocketServer(port = 31337) {
     if (this.wsServer) {
-      console.log("[HLAE] WebSocket сервер уже запущен");
+      //console.log("[HLAE] WebSocket сервер уже запущен");
       return;
     }
 
@@ -83,9 +85,9 @@ class HLAEManager {
       });
 
       this.wsServer.on("connection", (ws, req) => {
-        console.log("[HLAE] Новое WebSocket подключение от HLAE");
-        console.log("[HLAE] IP адрес клиента:", req.socket.remoteAddress);
-        console.log("[HLAE] User-Agent:", req.headers["user-agent"]);
+        //console.log("[HLAE] Новое WebSocket подключение от HLAE");
+        //console.log("[HLAE] IP адрес клиента:", req.socket.remoteAddress);
+        //console.log("[HLAE] User-Agent:", req.headers["user-agent"]);
         this.connectedClients.add(ws);
 
         // Отправляем тестовое сообщение клиенту
@@ -99,39 +101,39 @@ class HLAEManager {
 
         ws.on("message", (data) => {
           try {
-            console.log(
-              "[HLAE] Получены сырые данные:",
-              data.toString().substring(0, 200) + "..."
-            );
+            //console.log(
+            //"[HLAE] Получены сырые данные:",
+            data.toString().substring(0, 200) + "...";
+            //);
             const event = JSON.parse(data.toString());
-            console.log("[HLAE] ws event type:", event?.type || typeof event);
+            //console.log("[HLAE] ws event type:", event?.type || typeof event);
             this.processHLAEEvent(event);
           } catch (error) {
-            console.error("[HLAE] Ошибка парсинга события:", error);
-            console.error("[HLAE] Сырые данные:", data.toString());
+            //console.error("[HLAE] Ошибка парсинга события:", error);
+            //console.error("[HLAE] Сырые данные:", data.toString());
           }
         });
 
         ws.on("close", () => {
-          console.log("[HLAE] WebSocket соединение с HLAE закрыто");
+          //console.log("[HLAE] WebSocket соединение с HLAE закрыто");
           this.connectedClients.delete(ws);
         });
 
         ws.on("error", (error) => {
-          console.error("[HLAE] WebSocket ошибка:", error);
+          //console.error("[HLAE] WebSocket ошибка:", error);
           this.connectedClients.delete(ws);
         });
       });
 
       this.wsServer.on("listening", () => {
-        console.log(`[HLAE] WebSocket сервер запущен на порту ${port}`);
+        //console.log(`[HLAE] WebSocket сервер запущен на порту ${port}`);
       });
 
       this.wsServer.on("error", (error) => {
-        console.error("[HLAE] Ошибка WebSocket сервера:", error);
+        //console.error("[HLAE] Ошибка WebSocket сервера:", error);
       });
     } catch (error) {
-      console.error("[HLAE] Ошибка запуска WebSocket сервера:", error);
+      //console.error("[HLAE] Ошибка запуска WebSocket сервера:", error);
     }
   }
 
@@ -142,7 +144,7 @@ class HLAEManager {
       this.ioAliasPort = port;
       this.ioAliasServerHttp = http.createServer((req, res) => {
         try {
-          console.log("[HLAE] alias HTTP request:", req.method, req.url);
+          //console.log("[HLAE] alias HTTP request:", req.method, req.url);
         } catch {}
         res.statusCode = 200;
         res.end("HLAE Socket.IO alias running\n");
@@ -150,7 +152,7 @@ class HLAEManager {
       // Логируем upgrade (WebSocket) попытки
       try {
         this.ioAliasServerHttp.on("upgrade", (req) => {
-          console.log("[HLAE] alias HTTP upgrade:", req.url);
+          //console.log("[HLAE] alias HTTP upgrade:", req.url);
         });
       } catch {}
       this.ioHlaeAlias = new IOServer(this.ioAliasServerHttp, {
@@ -160,7 +162,7 @@ class HLAEManager {
       });
 
       this.ioHlaeAlias.on("connection", (socket) => {
-        console.log("[HLAE] Socket.IO alias: клиент подключился");
+        //console.log("[HLAE] Socket.IO alias: клиент подключился");
         if (typeof socket.onAny === "function") {
           socket.onAny((event, ...args) => {
             try {
@@ -168,9 +170,9 @@ class HLAEManager {
                 args && args.length > 0
                   ? JSON.stringify(args[0]).substring(0, 200)
                   : "(no args)";
-              console.log(`[HLAE] alias onAny → ${event}:`, preview);
+              //console.log(`[HLAE] alias onAny → ${event}:`, preview);
             } catch {
-              console.log(`[HLAE] alias onAny → ${event} (unserializable)`);
+              //console.log(`[HLAE] alias onAny → ${event} (unserializable)`);
             }
           });
         }
@@ -186,18 +188,18 @@ class HLAEManager {
         });
         socket.on("message", (data) => {
           try {
-            console.log("[HLAE] alias/message:", typeof data);
+            //console.log("[HLAE] alias/message:", typeof data);
           } catch {}
         });
         socket.on("disconnect", (reason) => {
-          console.log("[HLAE] alias disconnect:", reason);
+          //console.log("[HLAE] alias disconnect:", reason);
         });
         socket.on("error", (err) => {
-          console.log("[HLAE] alias error:", err?.message || err);
+          //console.log("[HLAE] alias error:", err?.message || err);
         });
         socket.on("mirv", (event) => {
           try {
-            console.log("[HLAE] alias/mirv:", event?.type || typeof event);
+            //console.log("[HLAE] alias/mirv:", event?.type || typeof event);
             global.gameState = global.gameState || {};
             global.gameState.hlae = global.gameState.hlae || {};
             global.gameState.hlae.mirv_last = event;
@@ -208,16 +210,16 @@ class HLAEManager {
               const kfLen = Array.isArray(global.gameState.killfeed)
                 ? global.gameState.killfeed.length
                 : 0;
-              console.log(`[HLAE] alias -> gsi broadcast (killfeed=${kfLen})`);
+              //console.log(`[HLAE] alias -> gsi broadcast (killfeed=${kfLen})`);
             } catch {}
           } catch {}
         });
         socket.on("update_mirv", (event) => {
           try {
-            console.log(
-              "[HLAE] alias/update_mirv:",
-              event?.type || typeof event
-            );
+            //console.log(
+            //"[HLAE] alias/update_mirv:",
+            event?.type || typeof event;
+            //);
             global.gameState = global.gameState || {};
             global.gameState.hlae = global.gameState.hlae || {};
             global.gameState.hlae.death_last = event;
@@ -228,14 +230,14 @@ class HLAEManager {
               const kfLen = Array.isArray(global.gameState.killfeed)
                 ? global.gameState.killfeed.length
                 : 0;
-              console.log(`[HLAE] alias -> gsi broadcast (killfeed=${kfLen})`);
+              //console.log(`[HLAE] alias -> gsi broadcast (killfeed=${kfLen})`);
             } catch {}
           } catch {}
         });
 
         socket.on("mirv_pgl", (payload) => {
           try {
-            console.log("[HLAE] alias/mirv_pgl", typeof payload);
+            //console.log("[HLAE] alias/mirv_pgl", typeof payload);
             global.gameState = global.gameState || {};
             global.gameState.hlae = global.gameState.hlae || {};
             global.gameState.hlae.mirv_pgl = payload;
@@ -247,12 +249,12 @@ class HLAEManager {
       });
 
       this.ioAliasServerHttp.listen(this.ioAliasPort, () => {
-        console.log(
-          `[HLAE] Socket.IO alias listening on ${this.ioAliasPort} (EIO3 allowed)`
-        );
+        //console.log(
+        //`[HLAE] Socket.IO alias listening on ${this.ioAliasPort} (EIO3 allowed)`
+        //);
       });
     } catch (error) {
-      console.error("[HLAE] Ошибка запуска Socket.IO алиаса:", error);
+      //console.error("[HLAE] Ошибка запуска Socket.IO алиаса:", error);
     }
   }
 
@@ -272,7 +274,7 @@ class HLAEManager {
   // Обработка событий от HLAE
   processHLAEEvent(event) {
     try {
-      console.log("[HLAE] Получено событие:", event.type);
+      //console.log("[HLAE] Получено событие:", event.type);
 
       // Добавляем в буфер событий
       this.eventBuffer.push({
@@ -288,7 +290,7 @@ class HLAEManager {
       // Отправляем событие в csgogsi для обработки
       this.sendToCSGOGSI(event);
     } catch (error) {
-      console.error("[HLAE] Ошибка обработки события:", error);
+      //console.error("[HLAE] Ошибка обработки события:", error);
     }
   }
 
@@ -297,7 +299,7 @@ class HLAEManager {
     try {
       // Проверяем, доступен ли csgogsi
       if (global.GSI && global.GSI.digestMIRV) {
-        console.log("[HLAE] Отправляем событие в csgogsi:", event.type);
+        //console.log("[HLAE] Отправляем событие в csgogsi:", event.type);
 
         // Определяем тип события для digestMIRV
         let eventType = "player_death"; // по умолчанию
@@ -320,14 +322,14 @@ class HLAEManager {
         // Отправляем в csgogsi
         global.GSI.digestMIRV(event, eventType);
 
-        console.log("[HLAE] Событие отправлено в csgogsi:", eventType);
+        //console.log("[HLAE] Событие отправлено в csgogsi:", eventType);
       } else {
-        console.log(
-          "[HLAE] csgogsi недоступен, событие будет обработано позже в GSI цикле"
-        );
+        //console.log(
+        //"[HLAE] csgogsi недоступен, событие будет обработано позже в GSI цикле"
+        //);
       }
     } catch (error) {
-      console.error("[HLAE] Ошибка отправки в csgogsi:", error);
+      //console.error("[HLAE] Ошибка отправки в csgogsi:", error);
     }
   }
 
@@ -337,7 +339,7 @@ class HLAEManager {
       throw new Error("HLAE недоступен");
     }
     if (this.isActive || this.hlaeProcess) {
-      console.log("[HLAE] Запуск отклонен: уже активен");
+      //console.log("[HLAE] Запуск отклонен: уже активен");
       return true;
     }
 
@@ -348,7 +350,7 @@ class HLAEManager {
       // Команда для запуска HLAE с CS2
       const cmd = `"${this.hlaeExe}" -customLoader -autoStart -hookDllPath "${this.afxHookDll}" -programPath "${cs2Path}" -cmdLine "-steam -insecure -console -tools -noassetbrowser -novid +hideconsole +mirv_cvar_unhide_all +exec ${execCfgName} -netconport 2121"`;
 
-      console.log("[HLAE] Запуск команды:", cmd);
+      //console.log("[HLAE] Запуск команды:", cmd);
 
       this.hlaeProcess = exec(cmd, {
         windowsHide: true,
@@ -360,11 +362,11 @@ class HLAEManager {
       }
 
       this.isActive = true;
-      console.log("[HLAE] CS2 с HLAE запущен");
+      //console.log("[HLAE] CS2 с HLAE запущен");
 
       return true;
     } catch (error) {
-      console.error("[HLAE] Ошибка запуска CS2 с HLAE:", error);
+      //console.error("[HLAE] Ошибка запуска CS2 с HLAE:", error);
       this.isActive = false;
       throw error;
     }
@@ -375,11 +377,11 @@ class HLAEManager {
     try {
       const exePath = overridePath || this.interopExe;
       if (!exePath || !fs.existsSync(exePath)) {
-        console.warn("[HLAE] afx-cefhud-interop.exe не найден:", exePath);
+        //console.warn("[HLAE] afx-cefhud-interop.exe не найден:", exePath);
         return false;
       }
       if (this.interopProcess) return true;
-      console.log("[HLAE] Запуск afx-cefhud-interop:", exePath);
+      //console.log("[HLAE] Запуск afx-cefhud-interop:", exePath);
       this.interopProcess = exec(`"${exePath}"`, {
         windowsHide: true,
         detached: true,
@@ -415,9 +417,9 @@ class HLAEManager {
 
       this.isActive = false;
       this.connectedClients.clear();
-      console.log("[HLAE] HLAE остановлен");
+      //console.log("[HLAE] HLAE остановлен");
     } catch (error) {
-      console.error("[HLAE] Ошибка остановки HLAE:", error);
+      //console.error("[HLAE] Ошибка остановки HLAE:", error);
     }
   }
 
@@ -452,7 +454,7 @@ class HLAEManager {
   clearEventBuffer() {
     this.eventBuffer = [];
     this.killEvents = [];
-    console.log("[HLAE] Буфер событий очищен");
+    //console.log("[HLAE] Буфер событий очищен");
   }
 
   // Генерация CFG
@@ -517,7 +519,7 @@ class HLAEManager {
       );
       if (fs.existsSync(preferCfg)) {
         cfgToExec = "hud_radar_killfeed_aco_interop";
-        console.log("[HLAE] Найден prefer cfg, используем +exec", cfgToExec);
+        //console.log("[HLAE] Найден prefer cfg, используем +exec", cfgToExec);
       }
     }
     if (!cfgToExec) {

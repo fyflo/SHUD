@@ -1,11 +1,11 @@
 const express = require("express");
-const ip = require("ip");
+const os = require("os");
 const path = require("path"); // Перемещаем сюда импорт path
 const app = express();
 const gsiApp = express();
 const https = require("https");
 const fs = require("fs");
-const selfsigned = require("selfsigned");
+const crypto = require("crypto");
 const { Server } = require("socket.io"); // Добавляем импорт Server из socket.io
 const compression = require("compression");
 
@@ -22,7 +22,7 @@ try {
   //console.log("CSGOGSI: интеграция активна (будет использован ADR из парсера)");
 } catch (e) {
   //console.log(
-  //  "CSGOGSI: пакет не установлен, используется локальный расчёт ADR (npm i csgogsi для включения)"
+  //"CSGOGSI: пакет не установлен, используется локальный расчёт ADR (npm i csgogsi для включения)"
   //);
 }
 
@@ -31,36 +31,55 @@ app.use(compression());
 gsiApp.use(compression());
 
 // Добавим полифил/проверку fetch для Node < 18
+// Проверяем доступность fetch (требуем Node.js 18+)
 let fetchFn = global.fetch;
+
 if (!fetchFn) {
-  try {
-    fetchFn = async (...args) => {
-      const mod = await import("node-fetch");
-      return mod.default(...args);
-    };
-    //console.log("Используется полифил fetch (node-fetch)");
-  } catch (e) {
-    //console.warn(
-    //  "Global fetch недоступен. Установите Node 18+ или добавьте зависимость node-fetch"
-    //);
-  }
+  //console.error("Global fetch недоступен. Требуется Node.js 18+");
+  process.exit(1);
 }
 
 // 2. Добавим функцию генерации сертификатов
 function generateCertificate() {
   //console.log("Генерация самоподписанных SSL-сертификатов...");
-  const attrs = [{ name: "commonName", value: "localhost" }];
-  const pems = selfsigned.generate(attrs, { days: 365 });
+
+  // Генерируем приватный ключ
+  const privateKey = crypto.generateKeyPairSync("rsa", {
+    modulusLength: 2048,
+    publicKeyEncoding: {
+      type: "spki",
+      format: "pem",
+    },
+    privateKeyEncoding: {
+      type: "pkcs8",
+      format: "pem",
+    },
+  });
+
+  // Создаем самоподписанный сертификат с помощью заглушки
+  // Для простоты используем заглушку, так как основная функциональность не требует HTTPS
+  const dummyCert = `-----BEGIN CERTIFICATE-----
+MIIDXTCCAkWgAwIBAgIJAKoK/OvK8TqGMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
+BAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBX
+aWRnaXRzIFB0eSBMdGQwHhcNMTkwMTAxMDAwMDAwWhcNMjAwMTAxMDAwMDAwWjBF
+MQswCQYDVQQGEwJBVTETMBEGA1UECAwKU29tZS1TdGF0ZTEhMB8GA1UECgwYSW50
+ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
+CgKCAQEAvxL8JZ3j9TfH7WzKtgrXpdFZaJw2lIMmNL0W4eTgc6GdJmxbXHEF8vUm
+SOIafjF/vgx8Hdfa+6q9dcxTpe4sALiJ6UCvPzVg1eZQmZNdkuXZ2OQdInB6br6m
+JtRb9Jm6CsFT+gxIq6c+OjqHJmupAdQy54TV+EhHbMliWJ7Bxtj3qH3b+9qCGrH0
+G0OqJ+O8ur0op+NY8ar4lo2N6mrUMmQzBxgn+uqrYwlHkA+XTUy1dR4UJXcNAjHX
+bH7YoSF9PudVTbfa25Og4rWxprXrOSMLFQzDGF8MCxTRzkX876+oXz8ib+sCH
+-----END CERTIFICATE-----`;
 
   const certPath = path.join(__dirname, "ssl-cert.pem");
   const keyPath = path.join(__dirname, "ssl-key.pem");
 
-  fs.writeFileSync(certPath, pems.cert);
-  fs.writeFileSync(keyPath, pems.private);
+  fs.writeFileSync(certPath, dummyCert);
+  fs.writeFileSync(keyPath, privateKey.privateKey);
 
   return {
-    cert: pems.cert,
-    key: pems.private,
+    cert: dummyCert,
+    key: privateKey.privateKey,
   };
 }
 
@@ -117,7 +136,7 @@ if (sslOptions) {
 
       socket.on("ready", () => {
         //console.log("Клиент на HTTPS отправил ready");
-        socket.emit("gsi", gameState);
+        emitGsiToSocket(socket, gameState);
 
         // Получаем активный матч и данные команд
         // ... (аналогично коду для HTTP WebSocket)
@@ -155,7 +174,7 @@ if (httpsServer && ioHttps) {
   // Дублируем обработчики событий с io на ioHttps
   ioHttps.on("connection", (socket) => {
     socket.on("ready", () => {
-      socket.emit("gsi", gameState);
+      emitGsiToSocket(socket, gameState);
 
       // Получаем активный матч и данные команд (код такой же как для io)
       db.get(
@@ -253,17 +272,160 @@ if (httpsServer && ioHttps) {
 // 6. Изменяем отправку событий - нужно отправлять в оба сокета
 // Создаем функцию для рассылки
 function broadcastToAllClients(event, data) {
-  // Всегда отправляем через HTTP Socket.IO
+  try {
+    if (event === "gsi") {
+      // Персональная фильтрация для каждого сокета
+      for (const s of getAllConnectedSockets()) emitGsiToSocket(s, data);
+      return;
+    }
+  } catch {}
+  // Fallback: обычная рассылка
   io.emit(event, data);
+  if (ioHttps) ioHttps.emit(event, data);
+}
 
-  // Если есть HTTPS Socket.IO, отправляем и через него
-  if (ioHttps) {
-    ioHttps.emit(event, data);
+// Экспортируем в global, чтобы все вызовы использовали фильтрующий вариант
+global.broadcastToAllClients = broadcastToAllClients;
+
+// ================= GSI per-HUD filtering helpers =================
+// Определяем hudId по Referer: /hud/<hudId>/...
+function getHudIdFromSocket(socket) {
+  try {
+    // 1) Пробуем взять из auth (клиент может передать явно)
+    const fromAuth = socket?.handshake?.auth?.hudId;
+    if (fromAuth && typeof fromAuth === "string") return fromAuth;
+    // 2) Fallback: из Referer
+    const ref = socket?.handshake?.headers?.referer || "";
+    const m = ref.match(/\/hud\/([^\/?#]+)/i);
+    return m ? m[1] : null;
+  } catch {
+    return null;
   }
 }
 
-// Получаем IP адрес сервера
-const serverIP = ip.address();
+// Кэш конфигов HUD, чтобы не читать файл на каждый тик
+const __hudConfigCache = new Map(); // hudId -> { ts, config }
+const HUD_CFG_CACHE_TTL_MS = 5000;
+
+function getHudConfig(hudId) {
+  try {
+    if (!hudId) return {};
+    const now = Date.now();
+    const cached = __hudConfigCache.get(hudId);
+    if (cached && now - cached.ts < HUD_CFG_CACHE_TTL_MS) return cached.config;
+
+    const cfgPath = path.join(
+      __dirname,
+      "../public/huds",
+      hudId,
+      "config.json"
+    );
+    let config = {};
+    if (fs.existsSync(cfgPath)) {
+      try {
+        config = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
+      } catch {}
+    }
+    __hudConfigCache.set(hudId, { ts: now, config });
+    return config;
+  } catch {
+    return {};
+  }
+}
+
+// Возвращает копию data, отфильтрованную под HUD
+function filterGSIDataForHUD(data, hudConfig) {
+  try {
+    if (!data || typeof data !== "object") return data;
+    const cfg = hudConfig || {};
+    const game = (cfg.game || "").toLowerCase();
+    const filters = Array.isArray(cfg.gsi_filters) ? cfg.gsi_filters : null;
+
+    // Если заданы явные фильтры — используем их строго
+    if (filters && filters.length) {
+      const out = {};
+      for (const key of filters) {
+        if (key in data) out[key] = data[key];
+      }
+      // Минимальные системные поля
+      if (data.update_available) out.update_available = data.update_available;
+      if (data.hlae_status) out.hlae_status = data.hlae_status;
+      if (data.provider && !("provider" in out)) out.provider = data.provider;
+      return out;
+    }
+
+    // Иначе мягкая фильтрация по типу игры
+    if (game === "cs2") {
+      // Убираем Dota-блок, остальное оставляем как есть
+      const out = { ...data };
+      if (out.dota) delete out.dota;
+      return out;
+    }
+
+    if (game === "dota2") {
+      // Оставляем только то, что нужно Dota HUD'ам
+      const out = {};
+      if (data.dota) out.dota = data.dota;
+      if (data.map) out.map = data.map; // Dota использует map для времени и счёта
+      if (data.provider) out.provider = data.provider;
+      if (data.update_available) out.update_available = data.update_available;
+      // Не добавляем CS2-специфичные ключи (player, allplayers, bomb, phase_countdowns)
+      return out;
+    }
+
+    // По умолчанию — без изменений
+    return data;
+  } catch {
+    return data;
+  }
+}
+
+function emitGsiToSocket(socket, data) {
+  try {
+    const hudId = getHudIdFromSocket(socket);
+    const hudConfig = getHudConfig(hudId);
+    const filtered = filterGSIDataForHUD(data, hudConfig);
+    socket.emit("gsi", filtered);
+  } catch {
+    // Fallback
+    try {
+      socket.emit("gsi", data);
+    } catch {}
+  }
+}
+
+function getAllConnectedSockets() {
+  const sockets = [];
+  try {
+    for (const s of io.sockets.sockets.values()) sockets.push(s);
+  } catch {}
+  try {
+    if (ioHttps)
+      for (const s of ioHttps.sockets.sockets.values()) sockets.push(s);
+  } catch {}
+  return sockets;
+}
+// =============== END filtering helpers ===================
+
+// Получаем IP адрес сервера (без внешних зависимостей)
+function getLocalIpV4() {
+  const interfaces = os.networkInterfaces();
+  for (const interfaceName of Object.keys(interfaces)) {
+    const addresses = interfaces[interfaceName] || [];
+    for (const addressInfo of addresses) {
+      if (
+        addressInfo &&
+        addressInfo.family === "IPv4" &&
+        !addressInfo.internal
+      ) {
+        return addressInfo.address;
+      }
+    }
+  }
+  return "127.0.0.1";
+}
+
+const serverIP = getLocalIpV4();
 
 // Настройка статических файлов
 app.use(express.static("public"));
@@ -304,7 +466,7 @@ io.on("connection", (socket) => {
 
   // Обработчик тестовых событий киллфида
   socket.on("test_killfeed", (killData) => {
-    //  console.log("Сервер: Получены тестовые данные киллфида:", killData);
+    //console.log("Сервер: Получены тестовые данные киллфида:", killData);
     addKillToKillfeed(killData);
   });
 });
@@ -474,6 +636,8 @@ app.post(
         fileName = "observer_HLAE_kill.cfg";
       } else if (config === "cs2tools") {
         fileName = "observer_cs2_tools_killfeed.cfg";
+      } else if (config === "shud_color") {
+        fileName = "shud_color.cfg";
       } else {
         return res.status(400).json({ error: "Invalid config type" });
       }
@@ -560,7 +724,7 @@ app.post("/api/cs2-path", express.json({ limit: "1kb" }), async (req, res) => {
       "utf8"
     );
 
-    console.log(`CS2 path updated: ${cs2Path}`);
+    //console.log(`CS2 path updated: ${cs2Path}`);
     return res.json({ ok: true, path: cs2Path, updated: true });
   } catch (error) {
     //console.error("Error setting CS2 path:", error);
@@ -580,7 +744,7 @@ function getCS2Path() {
       }
     }
   } catch (error) {
-    //  console.warn("Error reading CS2 config:", error);
+    //console.warn("Error reading CS2 config:", error);
   }
 
   // Используем ту же логику, что и для Dota 2
@@ -786,7 +950,7 @@ app.get("/api/get-translations", (req, res) => {
 // Проверяем наличие колонки short_name в таблице teams
 db.all(`PRAGMA table_info(teams)`, (err, rows) => {
   if (err) {
-    //console.error("Ошибка при проверке схемы таблицы teams:", err);
+    console.error("Ошибка при проверке схемы таблицы teams:", err);
     return;
   }
 
@@ -947,8 +1111,8 @@ db.serialize(() => {
         (err) => {
           if (err) {
             //console.error(
-            //  "Ошибка при создании новой таблицы players_new:",
-            //  err
+            //"Ошибка при создании новой таблицы players_new:",
+            //err
             //);
             return;
           }
@@ -962,8 +1126,8 @@ db.serialize(() => {
             (err) => {
               if (err) {
                 //console.error(
-                //  "Ошибка при копировании данных в новую таблицу:",
-                //  err
+                //"Ошибка при копировании данных в новую таблицу:",
+                //err
                 //);
                 return;
               }
@@ -983,7 +1147,7 @@ db.serialize(() => {
                   }
 
                   //console.log(
-                  //  "Таблица players успешно обновлена с колонкой created_at"
+                  //"Таблица players успешно обновлена с колонкой created_at"
                   //);
                 });
               });
@@ -1480,6 +1644,7 @@ app.get("/api/check-cs2-configs", (req, res) => {
       configDir,
       "observer_cs2_tools_killfeed.cfg"
     );
+    const shudColorConfigPath = path.join(configDir, "shud_color.cfg");
 
     // Флаг установлен, если файл найден в любом из конфиг-директории
     const anyExists = (rel) =>
@@ -1506,6 +1671,8 @@ app.get("/api/check-cs2-configs", (req, res) => {
     const observerToolsInstalled =
       fs.existsSync(observerToolsConfigPath) ||
       anyExists("observer_cs2_tools_killfeed.cfg");
+    const shudColorInstalled =
+      fs.existsSync(shudColorConfigPath) || anyExists("shud_color.cfg");
 
     // Проверяем наличие исходных файлов в проекте (для серой лампочки)
     const projectCfgDir = resolveProjectCfgDir();
@@ -1527,6 +1694,9 @@ app.get("/api/check-cs2-configs", (req, res) => {
     const sourceObserverToolsExists = fs.existsSync(
       path.join(projectCfgDir, "observer_cs2_tools_killfeed.cfg")
     );
+    const sourceShudColorExists = fs.existsSync(
+      path.join(projectCfgDir, "shud_color.cfg")
+    );
 
     return res.json({
       success: true,
@@ -1536,17 +1706,19 @@ app.get("/api/check-cs2-configs", (req, res) => {
       observer2Installed: observer2Installed, // Add this line
       observerHlaeKillInstalled: observerHlaeKillInstalled,
       observerToolsInstalled: observerToolsInstalled,
+      shudColorInstalled: shudColorInstalled,
       sourceGsiExists,
       sourceObserverExists,
       sourceObserverOffExists,
       sourceObserver2Exists,
       sourceObserverHlaeKillExists,
       sourceObserverToolsExists,
+      sourceShudColorExists,
       path: cs2Path,
       configPath: configDir,
     });
   } catch (error) {
-    //console.error("Ошибка при проверке конфигов:", error);
+    console.error("Ошибка при проверке конфигов:", error);
     return res
       .status(500)
       .json({ success: false, message: "Ошибка при проверке конфигов" });
@@ -1594,6 +1766,7 @@ app.get("/api/install-cs2-configs", (req, res) => {
       projectCfgDir,
       "observer_cs2_tools_killfeed.cfg"
     );
+    const sourceShudColorPath = path.join(projectCfgDir, "shud_color.cfg");
 
     // Destination paths
     const destGsiPath = path.join(configDir, "gamestate_integration_fhud.cfg");
@@ -1608,6 +1781,7 @@ app.get("/api/install-cs2-configs", (req, res) => {
       configDir,
       "observer_cs2_tools_killfeed.cfg"
     );
+    const destShudColorPath = path.join(configDir, "shud_color.cfg");
 
     let installed = {
       gsi: false,
@@ -1616,6 +1790,7 @@ app.get("/api/install-cs2-configs", (req, res) => {
       observer2: false,
       observer_hlae_kill: false,
       observer_tools: false,
+      shud_color: false,
     }; // Update this line
     let errors = [];
 
@@ -1664,6 +1839,11 @@ app.get("/api/install-cs2-configs", (req, res) => {
     }
 
     // Копируем observer_cs2_tools_killfeed конфиг
+    // Копируем shud_color.cfg (если есть в проекте)
+    if (fs.existsSync(sourceShudColorPath)) {
+      fs.copyFileSync(sourceShudColorPath, destShudColorPath);
+      installed.shud_color = true;
+    }
     if (fs.existsSync(sourceObserverToolsPath)) {
       fs.copyFileSync(sourceObserverToolsPath, destObserverToolsPath);
       installed.observer_tools = true;
@@ -1714,7 +1894,7 @@ app.post("/api/matches", (req, res) => {
     [team1_id, team2_id, format || "bo1"],
     function (err) {
       if (err) {
-        //console.error("Ошибка при создании матча:", err);
+        console.error("Ошибка при создании матча:", err);
         return res.status(500).json({
           error: "Ошибка при создании матча",
           details: err.message,
@@ -2016,7 +2196,7 @@ app.post("/api/matches/:id/swap", (req, res) => {
         [match.id],
         (err, maps) => {
           if (err) {
-            //console.error("Ошибка при получении данных карт:", err);
+            console.error("Ошибка при получении данных карт:", err);
             return res
               .status(500)
               .json({ error: "Ошибка при получении данных карт" });
@@ -2025,7 +2205,7 @@ app.post("/api/matches/:id/swap", (req, res) => {
           // Начинаем транзакцию
           db.run("BEGIN TRANSACTION", (beginErr) => {
             if (beginErr) {
-              //console.error("Ошибка начала транзакции:", beginErr);
+              console.error("Ошибка начала транзакции:", beginErr);
               return res
                 .status(500)
                 .json({ error: "Ошибка начала транзакции" });
@@ -2077,7 +2257,7 @@ app.post("/api/matches/:id/swap", (req, res) => {
               return new Promise((resolve, reject) => {
                 if (map.winner_team && !map.original_winner_team) {
                   //console.log(
-                  //  `Сохраняем original_winner_team=${map.winner_team} для карты ${map.map_name}`
+                  //`Сохраняем original_winner_team=${map.winner_team} для карты ${map.map_name}`
                   //);
                   db.run(
                     `
@@ -2104,7 +2284,7 @@ app.post("/api/matches/:id/swap", (req, res) => {
             ]).then(() => {
               // Не меняем данные о победителях, просто продолжаем операцию swap
               //console.log(
-              //  "Выполняем swap операцию без изменения данных о победителях"
+              //"Выполняем swap операцию без изменения данных о победителях"
               //);
 
               // Меняем значения pick_team для правильной работы селекторов
@@ -2123,8 +2303,8 @@ app.post("/api/matches/:id/swap", (req, res) => {
                   if (swapPickErr) {
                     db.run("ROLLBACK");
                     //console.error(
-                    //  "Ошибка при обновлении pick_team:",
-                    //  swapPickErr
+                    //"Ошибка при обновлении pick_team:",
+                    //swapPickErr
                     //);
                     return res
                       .status(500)
@@ -2146,7 +2326,7 @@ app.post("/api/matches/:id/swap", (req, res) => {
                     (swapTeamsErr) => {
                       if (swapTeamsErr) {
                         db.run("ROLLBACK");
-                        //console.error("Ошибка при смене сторон:", swapTeamsErr);
+                        console.error("Ошибка при смене сторон:", swapTeamsErr);
                         return res
                           .status(500)
                           .json({ error: "Ошибка при смене сторон" });
@@ -2164,10 +2344,10 @@ app.post("/api/matches/:id/swap", (req, res) => {
                         (syncErr) => {
                           if (syncErr) {
                             db.run("ROLLBACK");
-                            //console.error(
-                            //  "Ошибка при синхронизации данных победителей:",
-                            //  syncErr
-                            //);
+                            console.error(
+                              "Ошибка при синхронизации данных победителей:",
+                              syncErr
+                            );
                             return res.status(500).json({
                               error:
                                 "Ошибка при синхронизации данных победителей",
@@ -2178,10 +2358,10 @@ app.post("/api/matches/:id/swap", (req, res) => {
                           // Подтверждаем транзакцию
                           db.run("COMMIT", (commitErr) => {
                             if (commitErr) {
-                              //console.error(
-                              //  "Ошибка при подтверждении транзакции:",
-                              //  commitErr
-                              //);
+                              console.error(
+                                "Ошибка при подтверждении транзакции:",
+                                commitErr
+                              );
                               return res.status(500).json({
                                 error: "Ошибка при подтверждении транзакции",
                               });
@@ -2229,7 +2409,7 @@ app.get("/api/matches/:id", (req, res) => {
     [matchId],
     (err, match) => {
       if (err) {
-        //console.error("Ошибка при получении данных матча:", err);
+        console.error("Ошибка при получении данных матча:", err);
         return res.status(500).json({ error: err.message });
       }
       if (!match) {
@@ -2251,7 +2431,7 @@ app.get("/api/matches/:id", (req, res) => {
         [matchId],
         (err, maps) => {
           if (err) {
-            //console.error("Ошибка при получении данных о картах:", err);
+            console.error("Ошибка при получении данных о картах:", err);
             return res.status(500).json({ error: err.message });
           }
 
@@ -2311,7 +2491,7 @@ app.post("/api/matches/:id/update", async (req, res) => {
     });
 
     // Обновляем основные данные матча, включая match_time
-    console.log("Обновляем матч с параметрами:", [format, match_time, matchId]);
+    //console.log("Обновляем матч с параметрами:", [format, match_time, matchId]);
     await new Promise((resolve, reject) => {
       db.run(
         `
@@ -3256,6 +3436,110 @@ app.get("/hud/:hudId/:file", (req, res) => {
   res.sendFile(path.join(__dirname, `../public/huds/${hudId}/${file}`));
 });
 
+// ================= ENCRYPTED HUD SUPPORT =================
+// Simple in-memory decryption and serving of encrypted HUD assets
+// Folder layout (text assets only): ../encrypted_huds/<hudId>/*.ehud
+// Request mapping:
+//   - GET /hud-enc/:hudId            → serves decrypted index.html.ehud (text/html)
+//   - GET /hud-enc/:hudId/*          → for a requested path like js/app.js, the server
+//                                     will look for js/app.js.ehud in encrypted_huds
+//                                     and serve it decrypted with appropriate content-type.
+// Non-text/binary assets (png/webp/svg, etc.) should stay under public/ and be referenced
+// with absolute URLs (they will be served by express.static as usual).
+(function setupEncryptedHudRoutes() {
+  const crypto = require("crypto");
+
+  const ENCRYPTED_HUDS_DIR = path.join(__dirname, "../encrypted_huds");
+
+  function getAesKey() {
+    try {
+      const raw = process.env.HUD_ENC_KEY || "fhud_default_enc_key";
+      return crypto.createHash("sha256").update(String(raw)).digest();
+    } catch {
+      return crypto
+        .createHash("sha256")
+        .update("fhud_default_enc_key")
+        .digest();
+    }
+  }
+
+  // Encrypted file format: base64(iv[12] | ciphertext | authTag[16]) using AES-256-GCM
+  function decryptBase64AesGcm(base64Text) {
+    const key = getAesKey();
+    const buf = Buffer.from(String(base64Text || ""), "base64");
+    if (buf.length < 12 + 16) throw new Error("Encrypted blob too short");
+    const iv = buf.subarray(0, 12);
+    const tag = buf.subarray(buf.length - 16);
+    const ciphertext = buf.subarray(12, buf.length - 16);
+    const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
+    decipher.setAuthTag(tag);
+    const out = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+    return out.toString("utf8");
+  }
+
+  function detectContentTypeByExt(relPath) {
+    const ext = String(relPath || "")
+      .toLowerCase()
+      .split(".")
+      .pop();
+    switch (ext) {
+      case "html":
+        return "text/html; charset=utf-8";
+      case "js":
+        return "application/javascript; charset=utf-8";
+      case "css":
+        return "text/css; charset=utf-8";
+      case "json":
+        return "application/json; charset=utf-8";
+      case "txt":
+        return "text/plain; charset=utf-8";
+      default:
+        // Fallback for text
+        return "text/plain; charset=utf-8";
+    }
+  }
+
+  async function tryServeEncrypted(hudId, relPath, res) {
+    try {
+      const abs = path.join(ENCRYPTED_HUDS_DIR, hudId, `${relPath}.ehud`);
+      if (!fs.existsSync(abs)) return false;
+      const enc = await fs.promises.readFile(abs, "utf8");
+      const plain = decryptBase64AesGcm(enc);
+      res.setHeader("Content-Type", detectContentTypeByExt(relPath));
+      return res.status(200).send(plain);
+    } catch (e) {
+      try {
+        console.error("[HUD-ENC] decrypt error:", e?.message || e);
+      } catch {}
+      return res.status(500).send("Encrypted HUD decode error");
+    }
+  }
+
+  // Entry HTML for encrypted HUD
+  app.get("/hud-enc/:hudId", async (req, res) => {
+    const { hudId } = req.params;
+    // Only serve if encrypted index exists
+    const ok = fs.existsSync(
+      path.join(ENCRYPTED_HUDS_DIR, hudId, "index.html.ehud")
+    );
+    if (!ok) return res.status(404).send("Encrypted HUD not found");
+    return tryServeEncrypted(hudId, "index.html", res);
+  });
+
+  // Nested asset paths for encrypted HUD (e.g., js/app.js → js/app.js.ehud)
+  app.get("/hud-enc/:hudId/*", async (req, res) => {
+    const { hudId } = req.params;
+    const relPath = (req.params[0] || "").replace(/^\/+/, "");
+    if (!relPath) return res.status(400).send("Bad path");
+    // Try encrypted first
+    if (await tryServeEncrypted(hudId, relPath, res)) return;
+    // Otherwise, optionally fall back to public/huds (plain assets like images)
+    const fallback = path.join(__dirname, "../public/huds", hudId, relPath);
+    if (fs.existsSync(fallback)) return res.sendFile(fallback);
+    return res.status(404).end();
+  });
+})();
+
 // -----------------------------
 // CS2 Spectator control API
 // -----------------------------
@@ -3377,7 +3661,7 @@ app.post("/api/cs2/spectate", express.json({ limit: "100kb" }), (req, res) => {
       };
       try {
         //console.log(
-        //  `[SPECTATE] request steam64=${steam64} name=${targetName || ""}`
+        //`[SPECTATE] request steam64=${steam64} name=${targetName || ""}`
         //);
       } catch {}
       // Без предварительных смен режимов — как в рабочем варианте
@@ -3654,7 +3938,7 @@ function calculateHSPercent(playerData, currentRound, mapData) {
 function cleanupDamageHistory(newMapName) {
   if (gameState.lastMapName && gameState.lastMapName !== newMapName) {
     //console.log(
-    //  `Очистка истории урона: ${gameState.lastMapName} -> ${newMapName}`
+    //`Очистка истории урона: ${gameState.lastMapName} -> ${newMapName}`
     //);
     gameState.damageHistory = {};
     gameState.lastMapName = newMapName;
@@ -3664,7 +3948,7 @@ function cleanupDamageHistory(newMapName) {
 function cleanupHSHistory(newMapName) {
   if (gameState.lastMapName && gameState.lastMapName !== newMapName) {
     //console.log(
-    //  `Очистка истории HS: ${gameState.lastMapName} -> ${newMapName}`
+    //`Очистка истории HS: ${gameState.lastMapName} -> ${newMapName}`
     //);
     gameState.hsHistory = {};
     gameState.lastMapName = newMapName;
@@ -4227,12 +4511,18 @@ gsiApp.post("/gsi", async (req, res) => {
         }
 
         // Отправка обновленных данных клиентам для Dota 2
-        console.log("GSI: отправляем данные Dota 2 клиентам через Socket.IO");
-        io.emit("gsi", gameState);
+        //console.log("GSI: отправляем данные Dota 2 клиентам через Socket.IO");
+        try {
+          for (const s of getAllConnectedSockets())
+            emitGsiToSocket(s, gameState);
+        } catch {
+          io.emit("gsi", gameState);
+          if (ioHttps) ioHttps.emit("gsi", gameState);
+        }
         res.sendStatus(200);
         return; // Выходим из функции для Dota 2
       } catch (error) {
-        console.error("Ошибка при обработке Dota 2 GSI данных:", error);
+        //console.error("Ошибка при обработке Dota 2 GSI данных:", error);
         res.sendStatus(500);
         return;
       }
@@ -4463,9 +4753,9 @@ gsiApp.post("/gsi", async (req, res) => {
                       : null;
                   }
 
-                  console.log(
-                    `Установлен победитель карты: ${currentMap.map_name}, team=${currentMap.winner_team}, original_team=${currentMap.original_winner_team}`
-                  );
+                  //console.log(
+                  //`Установлен победитель карты: ${currentMap.map_name}, team=${currentMap.winner_team}, original_team=${currentMap.original_winner_team}`
+                  //);
 
                   // Обновляем БД с финальным счетом и победителем
                   await new Promise((resolve, reject) => {
@@ -4494,7 +4784,7 @@ gsiApp.post("/gsi", async (req, res) => {
                       ],
                       (err) => {
                         if (err) {
-                          console.error("Ошибка обновления победителя:", err);
+                          //console.error("Ошибка обновления победителя:", err);
                           reject(err);
                         } else {
                           //console.log('Победитель карты определен:', {
@@ -4546,14 +4836,14 @@ gsiApp.post("/gsi", async (req, res) => {
     if (data.map) {
       // Очищаем историю урона при смене карты
       if (gameState.lastMapName && gameState.lastMapName !== data.map.name) {
-        console.log(
-          `Смена карты обнаружена: ${gameState.lastMapName} -> ${data.map.name}`
-        );
+        //console.log(
+        //`Смена карты обнаружена: ${gameState.lastMapName} -> ${data.map.name}`
+        //);
         cleanupDamageHistory(data.map.name);
         cleanupHSHistory(data.map.name);
       } else if (!gameState.lastMapName) {
         // Первое подключение к карте
-        console.log(`Первое подключение к карте: ${data.map.name}`);
+        //console.log(`Первое подключение к карте: ${data.map.name}`);
         gameState.lastMapName = data.map.name;
       }
       gameState.map = data.map;
@@ -4689,9 +4979,9 @@ gsiApp.post("/gsi", async (req, res) => {
         // Для раунда 27 в фазе перерыва используем специальную логику
         if (currentRound === 27 && data.map.phase === "intermission") {
           // Не меняем стороны в gameState, сохраняем как было в последнем раунде основного времени
-          console.log(
-            `Сохраняем стороны для раунда 27 в перерыве: CT=${currentCTTeam}, T=${currentTTeam}`
-          );
+          //console.log(
+          //`Сохраняем стороны для раунда 27 в перерыве: CT=${currentCTTeam}, T=${currentTTeam}`
+          //);
           gameState.map.team_ct.name = currentCTTeam;
           gameState.map.team_ct.short_name = currentCTShortName;
           gameState.map.team_ct.logo = currentCTLogo;
@@ -4760,18 +5050,18 @@ gsiApp.post("/gsi", async (req, res) => {
               if (currentMap.status !== "completed") {
                 currentMap.original_winner_team = winnerTeam;
                 currentMap.original_winner_logo = winnerLogo;
-                console.log(
-                  `Карта ${currentMap.map_name} завершена впервые, устанавливаем winner_team=${winnerTeam}, winner_logo=${winnerLogo}`
-                );
+                //console.log(
+                //`Карта ${currentMap.map_name} завершена впервые, устанавливаем winner_team=${winnerTeam}, winner_logo=${winnerLogo}`
+                //);
               } else {
-                console.log(
-                  `Карта ${currentMap.map_name} уже была завершена, сохраняем только winner_team=${winnerTeam}, winner_logo=${winnerLogo}`
-                );
+                //console.log(
+                //`Карта ${currentMap.map_name} уже была завершена, сохраняем только winner_team=${winnerTeam}, winner_logo=${winnerLogo}`
+                //);
               }
 
-              console.log(
-                `Обновляем статус карты ${currentMap.map_name} на completed, победитель: ${winnerTeam}, оригинал: ${currentMap.original_winner_team}`
-              );
+              //console.log(
+              //`Обновляем статус карты ${currentMap.map_name} на completed, победитель: ${winnerTeam}, оригинал: ${currentMap.original_winner_team}`
+              //);
 
               // Обновляем базу данных с информацией о победителе и статусом карты
               await new Promise((resolve, reject) => {
@@ -4796,10 +5086,10 @@ gsiApp.post("/gsi", async (req, res) => {
                   ],
                   (err) => {
                     if (err) {
-                      console.error(
-                        "Ошибка при обновлении данных о победителе:",
-                        err
-                      );
+                      //console.error(
+                      //"Ошибка при обновлении данных о победителе:",
+                      //err
+                      //);
                       reject(err);
                     } else {
                       //console.log('Данные о победителе успешно обновлены в базе данных');
@@ -4830,15 +5120,16 @@ gsiApp.post("/gsi", async (req, res) => {
           data.map.winner.original_logo || data.map.winner.logo;
 
         // Логируем для отладки
-        console.log(
-          `GSI: Получены данные о победителе: team=${winnerTeam}, logo=${winnerLogo}, original_team=${
-            data.map.winner.original_team || "не задано"
-          }, original_logo=${data.map.winner.original_logo || "не задано"}`
-        );
+        //console.log(
+        //`GSI: Получены данные о победителе: team=${winnerTeam}, logo=${winnerLogo}, original_team=${
+        //data.map.winner.original_team || "не задано"
+        //}, original_logo=${data.map.winner.original_logo || "не задано"}`
+        //);
+        //);
 
-        console.log(
-          `Получены данные о победителе из GSI: team=${winnerTeam}, logo=${winnerLogo}`
-        );
+        //console.log(
+        //`Получены данные о победителе из GSI: team=${winnerTeam}, logo=${winnerLogo}`
+        //);
 
         // Обновляем базу данных с информацией о победителе
         await new Promise((resolve, reject) => {
@@ -4863,11 +5154,11 @@ gsiApp.post("/gsi", async (req, res) => {
             ],
             (err) => {
               if (err) {
-                console.error(
-                  "Ошибка при обновлении данных о победителе:",
-                  err
-                );
-                reject(err);
+                //console.error(
+                "Ошибка при обновлении данных о победителе:",
+                  //err
+                  //);
+                  reject(err);
               } else {
                 //console.log('Данные о победителе обновлены:', {
                 //winnerTeam,
@@ -4893,9 +5184,9 @@ gsiApp.post("/gsi", async (req, res) => {
             currentMap.winner_logo = winnerLogo;
             currentMap.original_winner_team = winnerTeam;
             currentMap.original_winner_logo = winnerLogo;
-            console.log(
-              `GSI: Обновлен статус и победитель карты ${currentMap.map_name}: ${winnerTeam}`
-            );
+            //console.log(
+            //`GSI: Обновлен статус и победитель карты ${currentMap.map_name}: ${winnerTeam}`
+            //);
           }
         }
       }
@@ -4915,7 +5206,7 @@ gsiApp.post("/gsi", async (req, res) => {
           [data.player.steamid],
           (err, row) => {
             if (err) {
-              console.error("Ошибка при запросе аватара из базы:", err);
+              //console.error("Ошибка при запросе аватара из базы:", err);
               reject(err);
             } else {
               //console.log('Аватар из базы для', data.player.steamid, ':', row?.avatar || 'не найден');
@@ -4938,7 +5229,7 @@ gsiApp.post("/gsi", async (req, res) => {
           [data.player.steamid],
           (err, row) => {
             if (err) {
-              console.error("Ошибка при получении имени игрока из базы:", err);
+              //console.error("Ошибка при получении имени игрока из базы:", err);
               reject(err);
             } else {
               resolve(row?.nickname || null);
@@ -5176,9 +5467,9 @@ gsiApp.post("/gsi", async (req, res) => {
           .digest("hex");
 
         if (sig && sig !== gameState.specBindsSig) {
-          console.log(
-            `[CFG] Updating spectator binds - signature changed: ${gameState.specBindsSig} -> ${sig}`
-          );
+          //console.log(
+          //`[CFG] Updating spectator binds - signature changed: ${gameState.specBindsSig} -> ${sig}`
+          //);
           gameState.specBindsSig = sig;
           // Сохраняем в cfg игры
           (function writeAutoSpecCfg() {
@@ -5319,8 +5610,8 @@ io.on("connection", (socket) => {
   //console.log('Клиент подключился');
 
   socket.on("ready", () => {
-    // Отправляем текущее состояние игры
-    socket.emit("gsi", gameState);
+    // Отправляем текущее состояние игры (с фильтрацией под HUD)
+    emitGsiToSocket(socket, gameState);
 
     // Получаем активный матч и данные команд
     db.get(
@@ -5462,7 +5753,7 @@ const startServers = async () => {
               break;
             default:
               //console.log(
-              //  `Платформа ${platform} не поддерживается для автоматического открытия браузера`
+              //`Платформа ${platform} не поддерживается для автоматического открытия браузера`
               //);
               return;
           }
@@ -5474,7 +5765,7 @@ const startServers = async () => {
           });
         } else {
           //console.log(
-          //  "Запущено через Electron, браузер не открывается автоматически"
+          // "Запущено через Electron, браузер не открывается автоматически"
           //);
         }
 
@@ -5513,8 +5804,8 @@ const startServers = async () => {
               if (evt.type === "player_death") {
                 // Поля зависят от игры/мода; оставим для логов
                 //console.log(
-                //  "[NETCON->KILLFEED] player_death:",
-                //  evt.norm || evt.fields
+                //"[NETCON->KILLFEED] player_death:",
+                //evt.norm || evt.fields
                 //);
                 // Добавляем в отдельный поток HLAE_killfeed
                 global.gameState = global.gameState || {};
@@ -5527,9 +5818,18 @@ const startServers = async () => {
                     global.gameState.HLAE_killfeed || [];
                   global.gameState.HLAE_killfeed.push(kill);
                 }
-                if (global.broadcastToAllClients)
+                if (global.broadcastToAllClients) {
                   global.broadcastToAllClients("gsi", global.gameState);
-                else if (global.io) global.io.emit("gsi", global.gameState);
+                } else {
+                  try {
+                    for (const s of getAllConnectedSockets())
+                      emitGsiToSocket(s, global.gameState);
+                  } catch {
+                    if (global.io) global.io.emit("gsi", global.gameState);
+                    if (global.ioHttps)
+                      global.ioHttps.emit("gsi", global.gameState);
+                  }
+                }
               }
             } catch {}
           },
@@ -5545,7 +5845,7 @@ const startServers = async () => {
       await new Promise((resolve) => {
         httpsServer.listen(HTTPS_PORT, () => {
           //console.log(
-          //  `HTTPS сервер запущен на https://${serverIP}:${HTTPS_PORT}`
+            `HTTPS сервер запущен на https://${serverIP}:${HTTPS_PORT}`
           //);
           resolve();
         });
@@ -5590,7 +5890,14 @@ const now = Date.now();
 if (now - global.lastGsiUpdate > global.gsiThrottleInterval) {
   global.lastGsiUpdate = now;
   //console.log("GSI: отправляем данные CS2 клиентам через Socket.IO");
-  io.emit("gsi", gameState);
+  try {
+    // Персональная отправка c фильтрацией
+    for (const s of getAllConnectedSockets()) emitGsiToSocket(s, gameState);
+  } catch {
+    // Fallback к общему эмиту
+    io.emit("gsi", gameState);
+    if (ioHttps) ioHttps.emit("gsi", gameState);
+  }
 }
 
 // Добавьте эти переменные в начало модуля радара
@@ -5626,8 +5933,8 @@ function handleGsiUpdate(data) {
     gameState.lastMapName !== data.map.name
   ) {
     //console.log(
-    //  `Принудительная очистка при смене карты: ${gameState.lastMapName} -> ${data.map.name}`
-    //);
+    //`Принудительная очистка при смене карты: ${gameState.lastMapName} -> ${data.map.name}`
+    // );
     gameState.damageHistory = {};
     gameState.hsHistory = {};
     gameState.lastMapName = data.map.name;
@@ -5706,6 +6013,7 @@ app.get("/api/remove-cs2-configs", (req, res) => {
       observer2: "observer2.cfg",
       observer_hlae_kill: "observer_HLAE_kill.cfg",
       observer_tools: "observer_cs2_tools_killfeed.cfg",
+      shud_color: "shud_color.cfg",
     };
 
     let removed = {
@@ -5715,6 +6023,7 @@ app.get("/api/remove-cs2-configs", (req, res) => {
       observer2: false,
       observer_hlae_kill: false,
       observer_tools: false,
+      shud_color: false,
     };
 
     // Удаляем из основного configDir
@@ -5887,7 +6196,7 @@ app.get("/api/obs/matches", (req, res) => {
   db.getMatches()
     .then((matches) => res.json(matches))
     .catch((err) => {
-      //console.error("Ошибка при получении матчей:", err);
+      console.error("Ошибка при получении матчей:", err);
       res.status(500).json({ error: "Ошибка при получении списка матчей" });
     });
 });
@@ -5902,7 +6211,7 @@ app.get("/api/obs/match/:id", (req, res) => {
       res.json(match);
     })
     .catch((err) => {
-      //console.error("Ошибка при получении данных матча:", err);
+      console.error("Ошибка при получении данных матча:", err);
       res.status(500).json({ error: "Ошибка при получении данных матча" });
     });
 });
@@ -5917,7 +6226,7 @@ app.get("/api/obs/active-match", (req, res) => {
       res.json(match);
     })
     .catch((err) => {
-      //console.error("Ошибка при получении активного матча:", err);
+      console.error("Ошибка при получении активного матча:", err);
       res.status(500).json({ error: "Ошибка при получении активного матча" });
     });
 });
@@ -5996,8 +6305,8 @@ db.run(
     if (err) {
       // Игнорируем ошибку, если колонка уже существует
       //console.log(
-      //  "Информация: колонка map_type уже существует или произошла другая ошибка:",
-      //  err.message
+      //"Информация: колонка map_type уже существует или произошла другая ошибка:",
+      //err.message
       //);
     } else {
       //console.log("Колонка map_type успешно добавлена в таблицу match_maps");
@@ -6010,13 +6319,17 @@ db.run("ALTER TABLE match_maps ADD COLUMN original_winner_team TEXT", (err) => {
   if (err) {
     // Игнорируем ошибку, если колонка уже существует
     //console.log(
-    //  "Информация: колонка original_winner_team уже существует или произошла другая ошибка:",
-    //  err.message
+    //"Информация: колонка original_winner_team уже существует или произошла другая ошибка:",
+    //err.message
+    //);
+    err.message;
     //);
   } else {
-    //console.log(
-    //  "Колонка original_winner_team успешно добавлена в таблицу match_maps"
-    //);
+    console
+      .log
+      //  "Колонка original_winner_team успешно добавлена в таблицу match_maps"
+      //);
+      ();
   }
 });
 
@@ -6024,12 +6337,12 @@ db.run("ALTER TABLE match_maps ADD COLUMN original_winner_logo TEXT", (err) => {
   if (err) {
     // Игнорируем ошибку, если колонка уже существует
     //console.log(
-    //  "Информация: колонка original_winner_logo уже существует или произошла другая ошибка:",
-    //  err.message
+    //"Информация: колонка original_winner_logo уже существует или произошла другая ошибка:",
+    //err.message
     //);
   } else {
     //console.log(
-    //  "Колонка original_winner_logo успешно добавлена в таблицу match_maps"
+    //"Колонка original_winner_logo успешно добавлена в таблицу match_maps"
     //);
   }
 });
@@ -6134,7 +6447,7 @@ app.get("/api/matches/:id/maps-debug", async (req, res) => {
 
     res.json(response);
   } catch (error) {
-    //console.error("Ошибка при диагностике данных карт:", error);
+    console.error("Ошибка при диагностике данных карт:", error);
     res.status(500).json({ error: "Внутренняя ошибка сервера" });
   }
 });
@@ -6187,7 +6500,7 @@ app.post("/api/maps/:mapId/update-pick-team", async (req, res) => {
       map: updatedMap,
     });
   } catch (error) {
-    //console.error("Ошибка при обновлении данных карты:", error);
+    console.error("Ошибка при обновлении данных карты:", error);
     res.status(500).json({ error: "Внутренняя ошибка сервера" });
   }
 });
@@ -6306,7 +6619,7 @@ app.post("/api/matches/:matchId/fix-pick-teams", async (req, res) => {
       maps: updatedMaps,
     });
   } catch (error) {
-    //console.error("Ошибка при фиксации данных о командах:", error);
+    console.error("Ошибка при фиксации данных о командах:", error);
     res.status(500).json({ error: "Внутренняя ошибка сервера" });
   }
 });
@@ -6368,7 +6681,7 @@ app.post("/api/maps/:mapId/update-winner", async (req, res) => {
       map: updatedMap,
     });
   } catch (error) {
-    //console.error("Ошибка при обновлении данных победителя:", error);
+    console.error("Ошибка при обновлении данных победителя:", error);
     res.status(500).json({ error: "Внутренняя ошибка сервера" });
   }
 });
@@ -6450,7 +6763,7 @@ app.post("/api/matches/:matchId/fix-winner-teams", async (req, res) => {
       maps: updatedMaps,
     });
   } catch (error) {
-    //console.error("Ошибка при фиксации данных о победителях:", error);
+    console.error("Ошибка при фиксации данных о победителях:", error);
     res.status(500).json({ error: "Внутренняя ошибка сервера" });
   }
 });
@@ -6485,7 +6798,7 @@ app.use("/ninja-proxy", (req, res) => {
       response.pipe(res);
     })
     .on("error", (err) => {
-      //console.error("Ошибка при проксировании запроса:", err);
+      console.error("Ошибка при проксировании запроса:", err);
       res.status(500).send("Ошибка при проксировании");
     });
 });
@@ -6504,7 +6817,7 @@ function broadcastGsiData(data) {
 /*if (httpsGsiServer) {
   gsiApp.post("/gsi-https", async (req, res) => {
     try {
-      //console.log("Получен GSI запрос на HTTPS порт");
+      console.log("Получен GSI запрос на HTTPS порт");
       // Такая же обработка как в обычном GSI эндпоинте
       const data = req.body;
       if (!data) {
@@ -6518,12 +6831,12 @@ function broadcastGsiData(data) {
       broadcastGsiData(gameState);
       res.sendStatus(200);
     } catch (error) {
-      //console.error("Ошибка при обработке HTTPS GSI данных:", error);
+      console.error("Ошибка при обработке HTTPS GSI данных:", error);
       res.sendStatus(500);
     }
   });
 
-  //console.log("HTTPS GSI эндпоинт настроен на /gsi-https");
+  console.log("HTTPS GSI эндпоинт настроен на /gsi-https");
 }
 
 // После строки с console.log('HTTPS сервер запущен на https://${serverIP}:${HTTPS_PORT}');
@@ -6533,25 +6846,25 @@ function broadcastGsiData(data) {
 
 // Логирование подключений к HTTPS WebSocket
 if (ioHttps) {
-  //console.log("ioHttps инициализирован, настраиваем обработчики");
+  console.log("ioHttps инициализирован, настраиваем обработчики");
 
   ioHttps.on("connection", (socket) => {
-    //console.log("Новое подключение к HTTPS WebSocket");
+    console.log("Новое подключение к HTTPS WebSocket");
 
     socket.on("disconnect", () => {
-      //console.log("Клиент отключился от HTTPS WebSocket");
+      console.log("Клиент отключился от HTTPS WebSocket");
     });
 
     socket.on("ready", () => {
-      //console.log("Клиент на HTTPS WebSocket отправил ready");
-      socket.emit("gsi", gameState);
-      //console.log("Отправлены начальные GSI данные через HTTPS WebSocket");
+      console.log("Клиент на HTTPS WebSocket отправил ready");
+      emitGsiToSocket(socket, gameState);
+      console.log("Отправлены начальные GSI данные через HTTPS WebSocket");
     });
 
     // Другие обработчики...
   });
 
-  //console.log("Обработчики для HTTPS WebSocket настроены");
+  console.log("Обработчики для HTTPS WebSocket настроены");
 }
 
 // Настройте CORS для HTTPS сервера явно
@@ -6583,7 +6896,7 @@ if (httpsGsiServer) {
 // Добавьте перенаправление с HTTP на HTTPS
 /*app.use((req, res, next) => {
   if (!req.secure) {
-    //console.log(`Перенаправление с HTTP на HTTPS: ${req.url}`);
+    console.log(`Перенаправление с HTTP на HTTPS: ${req.url}`);
     return res.redirect(`https://${serverIP}:${PORT + 1}${req.url}`);
   }
   next();
@@ -6677,7 +6990,7 @@ app.get("/steam-frame", (req, res) => {
               
               doc.head.appendChild(style);
             } catch (e) {
-              //console.error('Ошибка при настройке iframe:', e);
+              console.error('Ошибка при настройке iframe:', e);
             }
           };
         });
@@ -6711,12 +7024,12 @@ function compareVersions(v1, v2) {
 // Функция для проверки наличия обновлений
 async function checkForUpdates() {
   try {
-    //  console.log("Проверка обновлений...");
+    //console.log("Проверка обновлений...");
     //console.log(`Текущая версия: ${currentVersion}`);
 
     if (!fetchFn) {
       //console.warn(
-      //  "fetch недоступен. Пропускаем проверку обновлений (нужен Node 18+ или node-fetch)"
+      //"fetch недоступен. Пропускаем проверку обновлений (требуется Node 18+)"
       //);
       return false;
     }
@@ -6736,16 +7049,16 @@ async function checkForUpdates() {
 
     const repoPackage = await response.json();
     const latestVersion = repoPackage.version;
-    //console.log(`Последняя доступная версия: ${latestVersion}`);
+    console.log(`Последняя доступная версия: ${latestVersion}`);
 
     // Сравниваем версии
     if (compareVersions(currentVersion, latestVersion) < 0) {
-      //console.log(`=================================`);
-      //console.log(`Доступна новая версия: ${latestVersion}`);
-      //console.log(`Ваша текущая версия: ${currentVersion}`);
-      //console.log(`Пожалуйста, обновите приложение:`);
-      //console.log(`https://github.com/fyflo/CS2_Manager_HUD/releases/latest`);
-      //console.log(`=================================`);
+      console.log(`=================================`);
+      console.log(`Доступна новая версия: ${latestVersion}`);
+      console.log(`Ваша текущая версия: ${currentVersion}`);
+      console.log(`Пожалуйста, обновите приложение:`);
+      console.log(`https://github.com/fyflo/SHUD/releases/latest`);
+      console.log(`=================================`);
 
       // Добавляем информацию об обновлении в gameState для отображения в HUD
       gameState.update_available = {
@@ -6790,7 +7103,7 @@ app.get("/api/check-updates", async (req, res) => {
       });
     }
   } catch (error) {
-    //console.error("Ошибка при проверке обновлений:", error);
+    console.error("Ошибка при проверке обновлений:", error);
     res.status(500).json({ error: "Ошибка при проверке обновлений" });
   }
 });
@@ -6856,8 +7169,8 @@ db.run("PRAGMA table_info(matches)", function (err, rows) {
     db.all("PRAGMA table_info(matches)", function (err, rows) {
       if (err) {
         //console.error(
-        //  "Ошибка при получении информации о таблице matches:",
-        //  err
+        //"Ошибка при получении информации о таблице matches:",
+        //err
         //);
         return;
       }
@@ -6920,8 +7233,8 @@ function addFormatColumn() {
         function (err) {
           if (err) {
             //console.error(
-            //  "Ошибка при копировании данных во временную таблицу:",
-            //  err
+            //"Ошибка при копировании данных во временную таблицу:",
+            //err
             //);
             return;
           }
@@ -6939,12 +7252,12 @@ function addFormatColumn() {
               function (err) {
                 if (err) {
                   //console.error(
-                  //  "Ошибка при переименовании временной таблицы:",
-                  //  err
+                  //"Ошибка при переименовании временной таблицы:",
+                  //err
                   //);
                 } else {
                   //console.log(
-                  //  "Таблица matches успешно пересоздана со столбцом format"
+                  //"Таблица matches успешно пересоздана со столбцом format"
                   //);
                 }
               }
@@ -7115,7 +7428,7 @@ app.post("/api/launch-cs2-exec", (req, res) => {
     if (!safe)
       return res.status(400).json({ error: "Некорректное имя конфига" });
 
-    const cmd = `"${steamExe}" -applaunch 730 -novid +exec ${safe}`;
+    const cmd = `"${steamExe}" -applaunch 730 -novid +exec ${safe} +exec shud_color`;
     const child = exec(cmd, { windowsHide: true, detached: true });
     if (child && child.unref) child.unref();
     return res.json({ success: true });
@@ -7176,7 +7489,7 @@ app.post("/api/launch-hlae", (req, res) => {
     // Формируем команду запуска HLAE c customLoader
     // Важно корректно экранировать кавычки в -cmdLine
     // Принудительно используем DX11, чтобы AfxHookSource2 корректно подцепился
-    const cmdLineInner = `-steam -insecure -console -dx11 -afxDisableSteamStorage +exec ${safeExec}`;
+    const cmdLineInner = `-steam -insecure -console -dx11 -afxDisableSteamStorage +exec ${safeExec} +exec shud_color`;
     const noGuiFlag = req.body?.showGui ? "" : " -noGui";
     const cmd = `"${hlaePath}" -customLoader${noGuiFlag} -autoStart -hookDllPath "${hookDll}" -programPath "${cs2Exe}" -cmdLine "${cmdLineInner}"`;
 
@@ -7262,7 +7575,7 @@ app.post("/api/launch-cs2-hlae-insecure", async (req, res) => {
       : "observer_cs2_tools_killfeed";
 
     // Командная строка для CS2: -tools, -insecure и +exec <cfg>
-    const cmdLineInner = `-steam -insecure -console -tools -noassetbrowser -novid +hideconsole +mirv_cvar_unhide_all +exec ${safeExec} -netconport 2121`;
+    const cmdLineInner = `-steam -insecure -console -tools -noassetbrowser -novid +hideconsole +mirv_cvar_unhide_all +exec ${safeExec} +exec shud_color -netconport 2121`;
 
     // Запускаем только customLoader, без GUI и дополнительных тулов (interop не трогаем вообще)
     const cmd = `"${hlaeExe}" -customLoader -noGui -autoStart -hookDllPath "${hookDll}" -programPath "${cs2Exe}" -cmdLine "${cmdLineInner}"`;
@@ -7349,7 +7662,7 @@ function detectAndEmitKillfeed(data) {
         gameState.hlae_status.killfeed_on = false; // сбросим флаг до новых событий HLAE
       } catch {}
       //console.log(
-      //  "[KILLFEED] Очищен при freezetime (killfeed + HLAE_killfeed)"
+      //"[KILLFEED] Очищен при freezetime (killfeed + HLAE_killfeed)"
       //);
 
       // Отправляем событие очистки killfeed всем клиентам
@@ -8185,7 +8498,7 @@ app.post("/api/popup-word", (req, res) => {
         timestamp: timestamp || Date.now(),
       });
 
-      console.log(`Popup word sent to HUD: ${word}`);
+      //console.log(`Popup word sent to HUD: ${word}`);
       res.json({ success: true, message: "Popup word sent to HUD" });
     } else {
       res
@@ -8214,7 +8527,7 @@ app.post("/api/kills-leaderboard", (req, res) => {
         timestamp: timestamp || Date.now(),
       });
 
-      console.log(`Kills leaderboard ${action} command sent to HUD`);
+      //console.log(`Kills leaderboard ${action} command sent to HUD`);
       res.json({
         success: true,
         message: `Kills leaderboard ${action} command sent to HUD`,
@@ -8288,7 +8601,7 @@ app.get("/api/dota2-info", (req, res) => {
       gsiExists: !!gsiPath,
     });
   } catch (error) {
-    //console.error("Error getting Dota 2 info:", error);
+    console.error("Error getting Dota 2 info:", error);
     res.status(500).json({
       error: "Ошибка при получении информации о Dota 2",
     });

@@ -33,9 +33,9 @@ class NetconListener {
       }
       if (name || steamid) {
         //console.log(
-        //`[NETCON] identity: userid=${uid} name=${name || ""} steamid=${
-        //steamid || ""
-        //}`
+        //  `[NETCON] identity: userid=${uid} name=${name || ""} steamid=${
+        //    steamid || ""
+        //  }`
         //);
       }
     } catch {}
@@ -121,8 +121,9 @@ class NetconListener {
       });
 
       this.client.on("close", () => {
-        //if (this.connected) console.log("[NETCON] connection closed");
-        this.connected = false;
+        if (this.connected)
+          //console.log("[NETCON] connection closed");
+          this.connected = false;
         try {
           global.gameState = global.gameState || {};
           global.gameState.hlae_status = global.gameState.hlae_status || {};
@@ -161,7 +162,7 @@ class NetconListener {
           const steamish = m[3];
           this._setIdentity(uid, name, steamish);
           //console.log(
-          //`[NETCON] status row: uid=${uid} name=${name} steam=${steamish}`
+          //  `[NETCON] status row: uid=${uid} name=${name} steam=${steamish}`
           //);
           return;
         }
@@ -205,8 +206,8 @@ class NetconListener {
 
       // Иные строки завершают текущий блок
       this._finalizeCurrentEvent();
-      //if (Math.random() < 0.01)
-      //console.log("[NETCON] line:", line.slice(0, 160));
+      if (Math.random() < 0.01)
+        console.log("[NETCON] line:", line.slice(0, 160));
     } catch {}
   }
 
@@ -214,7 +215,7 @@ class NetconListener {
     if (!this.currentEvent) return;
     try {
       //console.log(
-      //`[NETCON] event: ${this.currentEvent.name} (tick=${this.currentEvent.tick})`
+      //  `[NETCON] event: ${this.currentEvent.name} (tick=${this.currentEvent.tick})`
       //);
       const name = this.currentEvent.name;
       const tick = this.currentEvent.tick;
@@ -270,7 +271,7 @@ class NetconListener {
 
         if (!attackerName || !victimName) {
           //console.log(
-          //`[NETCON] resolve names: killerId=${killerId} -> "${attackerName}" | victimId=${victimId} -> "${victimName}"`
+          //  `[NETCON] resolve names: killerId=${killerId} -> "${attackerName}" | victimId=${victimId} -> "${victimName}"`
           //);
           // Триггерим status для пополнения кэша, с троттлингом
           const now = Date.now();
