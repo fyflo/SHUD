@@ -1,26 +1,26 @@
 {
   "appTitle": "SHUD 管理器",
-  
+
   "navCreateMatch": "创建比赛",
   "navCreateTeam": "创建团队",
   "navCreatePlayer": "创建选手",
   "navScoreboard": "计分板",
   "navHuds": "HUD",
   "navCS2Integration": "CFG 集成",
-  
+
   "matchSection": "创建比赛",
   "teamSection": "团队管理",
   "playerSection": "选手管理",
   "scoreboardSection": "计分板",
   "hudsSection": "可用 HUD",
-  
+
   "selectTeam": "选择队伍",
   "createMatch": "创建比赛",
   "currentMatches": "当前比赛",
   "matchEditor": "比赛编辑器",
   "format": "比赛格式:",
   "save": "保存",
-  
+
   "teamShortName": "队伍简称（最多10字符）",
   "teamRegion": "地区",
   "selectRegion": "选择地区",
@@ -32,7 +32,7 @@
   "regionNotSpecified": "未指定地区",
   "edit": "编辑",
   "delete": "删除",
-  
+
   "playerNickname": "昵称",
   "playerRealName": "真实姓名",
   "playerSteam64": "Steam64 ID",
@@ -43,7 +43,7 @@
   "avatar": "头像",
   "actions": "操作",
   "playerManagement": "选手管理",
-  
+
   "preview": "预览",
   "description": "描述",
   "copyUrl": "复制 OBS 链接",
@@ -53,7 +53,7 @@
   "hudSearchPlaceholder": "按 HUD 名称搜索",
   "closeOverlayHint": "ALT+Q - 关闭叠加层",
   "toggleOverlayHint": "ALT+X - 切换叠加层",
-  
+
   "cs2Integration": "CFG 集成",
   "cs2ConfigsStatus": "配置状态",
   "cs2ConfigPath": "配置路径：",
@@ -65,14 +65,6 @@
   "cs2CheckPath": "检查路径",
   "cs2InstallConfigs": "安装 CS2 配置",
   "cs2RemoveConfigs": "移除 CS2 配置",
-  "cs2GsiInstalled": "✓ GSI 配置已安装",
-  "cs2GsiNotInstalled": "✗ GSI 配置未安装",
-  "cs2ObserverInstalled": "✓ Observer 配置已安装",
-  "cs2ObserverNotInstalled": "✗ Observer 配置未安装",
-  "cs2Observer2Installed": "✓ Observer_map_cs2_on 配置已安装",
-  "cs2Observer2NotInstalled": "✗ Observer_map_cs2_on 配置未安装",
-  "cs2Observer_offInstalled": "✓ Observer_off 已安装",
-  "cs2Observer_offNotInstalled": "✗ Observer_off 未安装",
   "cs2CheckingStatus": "正在检查...",
   "cs2ErrorMessage": "查找 CS2 时出错",
   "cs2InstallSuccess": "CS2 配置成功安装！",
@@ -121,7 +113,7 @@
   "mapText": "地图",
   "winnerSelect": "选择获胜者",
   "languageSelector": "语言",
-  
+
   "team1": "队伍 1",
   "team2": "队伍 2",
   "saveChanges": "保存更改",
@@ -137,7 +129,62 @@
   "banningTeamOption": "禁用地图的队伍",
   "team1_select": "选择队伍 1",
   "team2_select": "选择队伍 2",
-  
+
   "matchStatus": "比赛状态",
-  "nickname": "昵称"
+  "nickname": "昵称",
+  "navCS2Cameras": "摄像头 BETA",
+  "navCS2Couching": "Clash Couching",
+  "hidePlayersTitle": "隐藏玩家 by Steam64 ID",
+  "specBindsTitle": "绑定选择玩家（绑定：exec observer_spec_binds | 重置绑定：exec default.cfg）",
+  "refreshBinds": "刷新列表",
+  "copyBinds": "复制所有",
+  "slots": "插槽：1–9, 0, -, = 通过 observer_slot 0–11。排除上方字段中的 Steam64。",
+  "updateAvailable": "更新可用！",
+  "currentVersion": "当前版本：",
+  "latestVersion": "最新版本：",
+  "downloadUpdate": "下载更新",
+  "close": "关闭",
+  "sendHidePlayersToHUD": "发送隐藏玩家到 HUD",
+  "sendHidePlayersToHUDAlert": "隐藏玩家发送给 HUD!",
+  "teamUpdateSuccessAlert": "队伍成功更新！",
+  "playerUpdateSuccessAlert": "玩家成功更新！",
+  "playerUpdateErrorAlert": "更新玩家时出错：",
+  "playerDeleteSuccessAlert": "玩家成功删除！",
+  "playerDeleteErrorAlert": "删除玩家时出错：",
+  "matchTime": "比赛时间",
+  "matchTimePlaceholder": "例如, 18:00 或 2024-08-05 18:00",
+  "teamShortNamePlaceholder": "例如, TL 或 ATR",
+  "cameraSelector": "摄像头 (BETA)",
+  "teamCT": "队伍 CT",
+  "teamT": "队伍 T",
+  "refreshCameras": "刷新摄像头",
+  "playerSearchPlaceholder": "按昵称或 Steam64 搜索",
+  "noTeam": "无队伍",
+  "hlaeStarting": "HLAE 正在启动",
+  "hlaeError": "启动 HLAE 时出错",
+  "hlaeRequestError": "启动 HLAE 时出错",
+  "cs2HlaeInsecureError": "启动 CS2 HLAE 时出错",
+  "cs2HlaeInsecureRequestError": "启动 CS2 HLAE 时出错",
+  "dota2Integration": "Dota 2 集成",
+  "dota2GsiStatus": "Dota 2 GSI 状态未知",
+  "dota2CustomPath": "Dota 2 路径（不含 game/dota/cfg）",
+  "dota2CheckPath": "检查路径",
+  "dota2InstallConfigs": "安装 CFG",
+  "dota2RemoveConfigs": "删除 CFG",
+  "cfgEditor": "CFG 编辑器",
+  "cfgEditorContent": "内容",
+  "cfgLoad": "加载",
+  "cfgSave": "保存",
+  "dota2GsiInstalled": "Dota 2 GSI 配置已安装",
+  "dota2GsiNotInstalled": "Dota 2 GSI 配置未安装",
+  "dota2ConfigsStatus": "Dota 2 配置状态",
+  "launch-cs2-observer": "启动 CS2 Observer",
+  "launch-hlae": "启动 HLAE",
+  "launch-cs2-hlae-insecure": "启动 CS2 HLAE (不安全)",
+  "cs2ShudColorMissingSource": "SHUD color cfg 缺失源文件",
+  "cs2ShudColorNotInstalled": "SHUD color cfg 未安装",
+  "reset": "重置到原始",
+  "cancel": "取消",
+  "hudColors": "HUD颜色",
+  "colors": "颜色"
 }
