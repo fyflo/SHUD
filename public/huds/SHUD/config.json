@@ -6,8 +6,6 @@
   "game": "cs2",
   "radar": true,
   "killfeed": true,
-  "HLAE_killfeed": true,
-  "HLAE_killfeed_castom": true,
   "drop_hlae_status_in_gsi": true,
   "gsi_filters": [
     "allplayers",
@@ -52,3 +50,4 @@
     "update_available"
   ]
 }
+
