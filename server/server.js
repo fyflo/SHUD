@@ -1,11 +1,11 @@
 const express = require("express");
-const os = require("os");
+const ip = require("ip");
 const path = require("path"); // Перемещаем сюда импорт path
 const app = express();
 const gsiApp = express();
 const https = require("https");
 const fs = require("fs");
-const crypto = require("crypto");
+const selfsigned = require("selfsigned");
 const { Server } = require("socket.io"); // Добавляем импорт Server из socket.io
 const compression = require("compression");
 
@@ -19,11 +19,11 @@ try {
   GSI.on("data", (parsed) => {
     lastCsgogsiParsed = parsed;
   });
-  //console.log("CSGOGSI: интеграция активна (будет использован ADR из парсера)");
+  console.log("CSGOGSI: интеграция активна (будет использован ADR из парсера)");
 } catch (e) {
-  //console.log(
-  //"CSGOGSI: пакет не установлен, используется локальный расчёт ADR (npm i csgogsi для включения)"
-  //);
+  console.log(
+    "CSGOGSI: пакет не установлен, используется локальный расчёт ADR (npm i csgogsi для включения)"
+  );
 }
 
 // Включаем сжатие для всех ответов
@@ -31,55 +31,36 @@ app.use(compression());
 gsiApp.use(compression());
 
 // Добавим полифил/проверку fetch для Node < 18
-// Проверяем доступность fetch (требуем Node.js 18+)
 let fetchFn = global.fetch;
-
 if (!fetchFn) {
-  //console.error("Global fetch недоступен. Требуется Node.js 18+");
-  process.exit(1);
+  try {
+    fetchFn = async (...args) => {
+      const mod = await import("node-fetch");
+      return mod.default(...args);
+    };
+    console.log("Используется полифил fetch (node-fetch)");
+  } catch (e) {
+    console.warn(
+      "Global fetch недоступен. Установите Node 18+ или добавьте зависимость node-fetch"
+    );
+  }
 }
 
 // 2. Добавим функцию генерации сертификатов
 function generateCertificate() {
-  //console.log("Генерация самоподписанных SSL-сертификатов...");
-
-  // Генерируем приватный ключ
-  const privateKey = crypto.generateKeyPairSync("rsa", {
-    modulusLength: 2048,
-    publicKeyEncoding: {
-      type: "spki",
-      format: "pem",
-    },
-    privateKeyEncoding: {
-      type: "pkcs8",
-      format: "pem",
-    },
-  });
-
-  // Создаем самоподписанный сертификат с помощью заглушки
-  // Для простоты используем заглушку, так как основная функциональность не требует HTTPS
-  const dummyCert = `-----BEGIN CERTIFICATE-----
-MIIDXTCCAkWgAwIBAgIJAKoK/OvK8TqGMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
-BAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBX
-aWRnaXRzIFB0eSBMdGQwHhcNMTkwMTAxMDAwMDAwWhcNMjAwMTAxMDAwMDAwWjBF
-MQswCQYDVQQGEwJBVTETMBEGA1UECAwKU29tZS1TdGF0ZTEhMB8GA1UECgwYSW50
-ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
-CgKCAQEAvxL8JZ3j9TfH7WzKtgrXpdFZaJw2lIMmNL0W4eTgc6GdJmxbXHEF8vUm
-SOIafjF/vgx8Hdfa+6q9dcxTpe4sALiJ6UCvPzVg1eZQmZNdkuXZ2OQdInB6br6m
-JtRb9Jm6CsFT+gxIq6c+OjqHJmupAdQy54TV+EhHbMliWJ7Bxtj3qH3b+9qCGrH0
-G0OqJ+O8ur0op+NY8ar4lo2N6mrUMmQzBxgn+uqrYwlHkA+XTUy1dR4UJXcNAjHX
-bH7YoSF9PudVTbfa25Og4rWxprXrOSMLFQzDGF8MCxTRzkX876+oXz8ib+sCH
------END CERTIFICATE-----`;
+  console.log("Генерация самоподписанных SSL-сертификатов...");
+  const attrs = [{ name: "commonName", value: "localhost" }];
+  const pems = selfsigned.generate(attrs, { days: 365 });
 
   const certPath = path.join(__dirname, "ssl-cert.pem");
   const keyPath = path.join(__dirname, "ssl-key.pem");
 
-  fs.writeFileSync(certPath, dummyCert);
-  fs.writeFileSync(keyPath, privateKey.privateKey);
+  fs.writeFileSync(certPath, pems.cert);
+  fs.writeFileSync(keyPath, pems.private);
 
   return {
-    cert: dummyCert,
-    key: privateKey.privateKey,
+    cert: pems.cert,
+    key: pems.private,
   };
 }
 
@@ -90,7 +71,7 @@ try {
   const keyPath = path.join(__dirname, "ssl-key.pem");
 
   if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
-    //console.log("Загружаем существующие SSL-сертификаты");
+    console.log("Загружаем существующие SSL-сертификаты");
     sslOptions = {
       cert: fs.readFileSync(certPath),
       key: fs.readFileSync(keyPath),
@@ -99,7 +80,7 @@ try {
     sslOptions = generateCertificate();
   }
 } catch (error) {
-  //console.error("Ошибка при подготовке SSL:", error);
+  console.error("Ошибка при подготовке SSL:", error);
   // В случае ошибки продолжаем работу в HTTP режиме
   sslOptions = null;
 }
@@ -119,7 +100,7 @@ if (sslOptions) {
   try {
     httpsServer = https.createServer(sslOptions, app);
     httpsGsiServer = https.createServer(sslOptions, gsiApp);
-    //console.log("HTTPS серверы созданы успешно");
+    console.log("HTTPS серверы созданы успешно");
 
     // Инициализация Socket.IO для HTTPS - теперь переменная уже объявлена
     ioHttps = new Server(httpsServer, {
@@ -128,31 +109,31 @@ if (sslOptions) {
         methods: ["GET", "POST"],
       },
     });
-    //console.log("ioHttps (Socket.IO для HTTPS) инициализирован");
+    console.log("ioHttps (Socket.IO для HTTPS) инициализирован");
 
     // Настройка обработчиков событий
     ioHttps.on("connection", function (socket) {
-      //console.log("Новое подключение к HTTPS WebSocket");
+      console.log("Новое подключение к HTTPS WebSocket");
 
       socket.on("ready", () => {
-        //console.log("Клиент на HTTPS отправил ready");
-        emitGsiToSocket(socket, gameState);
+        console.log("Клиент на HTTPS отправил ready");
+        socket.emit("gsi", gameState);
 
         // Получаем активный матч и данные команд
         // ... (аналогично коду для HTTP WebSocket)
       });
 
       socket.on("disconnect", () => {
-        //console.log("Клиент отключился от HTTPS WebSocket");
+        console.log("Клиент отключился от HTTPS WebSocket");
       });
 
       socket.on("hud_data", (data) => {
-        //console.log("Получены hud_data через HTTPS WebSocket:", data.type);
+        console.log("Получены hud_data через HTTPS WebSocket:", data.type);
         ioHttps.emit("hud_data", data);
       });
     });
   } catch (error) {
-    //console.error("Ошибка при создании HTTPS серверов:", error);
+    console.error("Ошибка при создании HTTPS серверов:", error);
     httpsServer = null;
     httpsGsiServer = null;
     ioHttps = null; // Теперь это нормально, т.к. переменная уже объявлена
@@ -174,7 +155,7 @@ if (httpsServer && ioHttps) {
   // Дублируем обработчики событий с io на ioHttps
   ioHttps.on("connection", (socket) => {
     socket.on("ready", () => {
-      emitGsiToSocket(socket, gameState);
+      socket.emit("gsi", gameState);
 
       // Получаем активный матч и данные команд (код такой же как для io)
       db.get(
@@ -272,160 +253,36 @@ if (httpsServer && ioHttps) {
 // 6. Изменяем отправку событий - нужно отправлять в оба сокета
 // Создаем функцию для рассылки
 function broadcastToAllClients(event, data) {
+  // Всегда отправляем через HTTP Socket.IO
   try {
     if (event === "gsi") {
-      // Персональная фильтрация для каждого сокета
-      for (const s of getAllConnectedSockets()) emitGsiToSocket(s, data);
+      const finalData = { ...data };
+      try {
+        const nc = global.netcon;
+        finalData.netcon_active = Boolean(
+          nc &&
+            nc.connected === true &&
+            String(nc.host) === "127.0.0.1" &&
+            Number(nc.port) === 2121
+        );
+      } catch {}
+      // Убрано: hlae_cs2_tools_active больше не включаем в GSI
+      if (finalData.hlae_status) delete finalData.hlae_status;
+      io.emit(event, finalData);
+      if (ioHttps) ioHttps.emit(event, finalData);
       return;
     }
   } catch {}
-  // Fallback: обычная рассылка
   io.emit(event, data);
-  if (ioHttps) ioHttps.emit(event, data);
-}
 
-// Экспортируем в global, чтобы все вызовы использовали фильтрующий вариант
-global.broadcastToAllClients = broadcastToAllClients;
-
-// ================= GSI per-HUD filtering helpers =================
-// Определяем hudId по Referer: /hud/<hudId>/...
-function getHudIdFromSocket(socket) {
-  try {
-    // 1) Пробуем взять из auth (клиент может передать явно)
-    const fromAuth = socket?.handshake?.auth?.hudId;
-    if (fromAuth && typeof fromAuth === "string") return fromAuth;
-    // 2) Fallback: из Referer
-    const ref = socket?.handshake?.headers?.referer || "";
-    const m = ref.match(/\/hud\/([^\/?#]+)/i);
-    return m ? m[1] : null;
-  } catch {
-    return null;
+  // Если есть HTTPS Socket.IO, отправляем и через него
+  if (ioHttps) {
+    ioHttps.emit(event, data);
   }
 }
 
-// Кэш конфигов HUD, чтобы не читать файл на каждый тик
-const __hudConfigCache = new Map(); // hudId -> { ts, config }
-const HUD_CFG_CACHE_TTL_MS = 5000;
-
-function getHudConfig(hudId) {
-  try {
-    if (!hudId) return {};
-    const now = Date.now();
-    const cached = __hudConfigCache.get(hudId);
-    if (cached && now - cached.ts < HUD_CFG_CACHE_TTL_MS) return cached.config;
-
-    const cfgPath = path.join(
-      __dirname,
-      "../public/huds",
-      hudId,
-      "config.json"
-    );
-    let config = {};
-    if (fs.existsSync(cfgPath)) {
-      try {
-        config = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
-      } catch {}
-    }
-    __hudConfigCache.set(hudId, { ts: now, config });
-    return config;
-  } catch {
-    return {};
-  }
-}
-
-// Возвращает копию data, отфильтрованную под HUD
-function filterGSIDataForHUD(data, hudConfig) {
-  try {
-    if (!data || typeof data !== "object") return data;
-    const cfg = hudConfig || {};
-    const game = (cfg.game || "").toLowerCase();
-    const filters = Array.isArray(cfg.gsi_filters) ? cfg.gsi_filters : null;
-
-    // Если заданы явные фильтры — используем их строго
-    if (filters && filters.length) {
-      const out = {};
-      for (const key of filters) {
-        if (key in data) out[key] = data[key];
-      }
-      // Минимальные системные поля
-      if (data.update_available) out.update_available = data.update_available;
-      if (data.hlae_status) out.hlae_status = data.hlae_status;
-      if (data.provider && !("provider" in out)) out.provider = data.provider;
-      return out;
-    }
-
-    // Иначе мягкая фильтрация по типу игры
-    if (game === "cs2") {
-      // Убираем Dota-блок, остальное оставляем как есть
-      const out = { ...data };
-      if (out.dota) delete out.dota;
-      return out;
-    }
-
-    if (game === "dota2") {
-      // Оставляем только то, что нужно Dota HUD'ам
-      const out = {};
-      if (data.dota) out.dota = data.dota;
-      if (data.map) out.map = data.map; // Dota использует map для времени и счёта
-      if (data.provider) out.provider = data.provider;
-      if (data.update_available) out.update_available = data.update_available;
-      // Не добавляем CS2-специфичные ключи (player, allplayers, bomb, phase_countdowns)
-      return out;
-    }
-
-    // По умолчанию — без изменений
-    return data;
-  } catch {
-    return data;
-  }
-}
-
-function emitGsiToSocket(socket, data) {
-  try {
-    const hudId = getHudIdFromSocket(socket);
-    const hudConfig = getHudConfig(hudId);
-    const filtered = filterGSIDataForHUD(data, hudConfig);
-    socket.emit("gsi", filtered);
-  } catch {
-    // Fallback
-    try {
-      socket.emit("gsi", data);
-    } catch {}
-  }
-}
-
-function getAllConnectedSockets() {
-  const sockets = [];
-  try {
-    for (const s of io.sockets.sockets.values()) sockets.push(s);
-  } catch {}
-  try {
-    if (ioHttps)
-      for (const s of ioHttps.sockets.sockets.values()) sockets.push(s);
-  } catch {}
-  return sockets;
-}
-// =============== END filtering helpers ===================
-
-// Получаем IP адрес сервера (без внешних зависимостей)
-function getLocalIpV4() {
-  const interfaces = os.networkInterfaces();
-  for (const interfaceName of Object.keys(interfaces)) {
-    const addresses = interfaces[interfaceName] || [];
-    for (const addressInfo of addresses) {
-      if (
-        addressInfo &&
-        addressInfo.family === "IPv4" &&
-        !addressInfo.internal
-      ) {
-        return addressInfo.address;
-      }
-    }
-  }
-  return "127.0.0.1";
-}
-
-const serverIP = getLocalIpV4();
+// Получаем IP адрес сервера
+const serverIP = ip.address();
 
 // Настройка статических файлов
 app.use(express.static("public"));
@@ -466,7 +323,7 @@ io.on("connection", (socket) => {
 
   // Обработчик тестовых событий киллфида
   socket.on("test_killfeed", (killData) => {
-    //console.log("Сервер: Получены тестовые данные киллфида:", killData);
+    console.log("Сервер: Получены тестовые данные киллфида:", killData);
     addKillToKillfeed(killData);
   });
 });
@@ -659,15 +516,15 @@ app.post(
       try {
         await fs.promises.mkdir(path.dirname(backupPath), { recursive: true });
         await fs.promises.writeFile(backupPath, content, "utf8");
-        //console.log(`Backup created: ${backupPath}`);
+        console.log(`Backup created: ${backupPath}`);
       } catch (backupError) {
-        //console.warn("Failed to create backup:", backupError);
+        console.warn("Failed to create backup:", backupError);
       }
 
-      //console.log(`HLAE config updated: ${config} -> ${filePath}`);
+      console.log(`HLAE config updated: ${config} -> ${filePath}`);
       return res.json({ ok: true, config, updated: true, cs2Path, filePath });
     } catch (error) {
-      //console.error("Error updating HLAE config:", error);
+      console.error("Error updating HLAE config:", error);
       return res.status(500).json({ error: "Failed to update HLAE config" });
     }
   }
@@ -697,7 +554,7 @@ app.get("/api/cs2-path", (req, res) => {
 
     return res.json({ ok: true, path: cs2Path, autoDetected });
   } catch (error) {
-    //console.error("Error getting CS2 path:", error);
+    console.error("Error getting CS2 path:", error);
     return res.status(500).json({ error: "Failed to get CS2 path" });
   }
 });
@@ -724,10 +581,10 @@ app.post("/api/cs2-path", express.json({ limit: "1kb" }), async (req, res) => {
       "utf8"
     );
 
-    //console.log(`CS2 path updated: ${cs2Path}`);
+    console.log(`CS2 path updated: ${cs2Path}`);
     return res.json({ ok: true, path: cs2Path, updated: true });
   } catch (error) {
-    //console.error("Error setting CS2 path:", error);
+    console.error("Error setting CS2 path:", error);
     return res.status(500).json({ error: "Failed to set CS2 path" });
   }
 });
@@ -739,12 +596,12 @@ function getCS2Path() {
     if (fs.existsSync(configPath)) {
       const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
       if (config.cs2Path && fs.existsSync(config.cs2Path)) {
-        //console.log(`CS2 path from config: ${config.cs2Path}`);
+        console.log(`CS2 path from config: ${config.cs2Path}`);
         return config.cs2Path;
       }
     }
   } catch (error) {
-    //console.warn("Error reading CS2 config:", error);
+    console.warn("Error reading CS2 config:", error);
   }
 
   // Используем ту же логику, что и для Dota 2
@@ -752,7 +609,7 @@ function getCS2Path() {
   if (cs2Path) {
     const cfgPath = path.join(cs2Path, "game", "csgo", "cfg");
     if (fs.existsSync(cfgPath)) {
-      //console.log(`CS2 path auto-detected: ${cfgPath}`);
+      console.log(`CS2 path auto-detected: ${cfgPath}`);
       return cfgPath;
     }
   }
@@ -767,7 +624,7 @@ function getCS2Path() {
 
   for (const testPath of possiblePaths) {
     if (fs.existsSync(testPath)) {
-      //console.log(`CS2 path from fallback: ${testPath}`);
+      console.log(`CS2 path from fallback: ${testPath}`);
       return testPath;
     }
   }
@@ -775,7 +632,7 @@ function getCS2Path() {
   // Если ничего не нашли, возвращаем путь по умолчанию
   const defaultPath =
     "E:\\SteamLibrary\\steamapps\\common\\Counter-Strike Global Offensive\\game\\csgo\\cfg";
-  //console.log(`CS2 path default: ${defaultPath}`);
+  console.log(`CS2 path default: ${defaultPath}`);
   return defaultPath;
 }
 
@@ -790,7 +647,7 @@ const dbPath = process.env.ELECTRON_APP
   ? path.join(__dirname, "../database.db") // Путь для Electron приложения
   : "database.db"; // Стандартный путь
 
-//console.log("Используется база данных:", dbPath);
+console.log("Используется база данных:", dbPath);
 const db = new sqlite3.Database(dbPath); // Изменить с database.sqlite на database.db
 
 // Загрузка локализаций (устойчиво к отсутствию файлов)
@@ -834,7 +691,7 @@ app.use("/huds", express.static(path.join(__dirname, "../public/huds")));
 app.use("/obs", express.static(path.join(__dirname, "../public/obs")));
 app.get("/obs/hlae-control.html", (req, res) => {
   try {
-    //console.log("GET /obs/hlae-control.html => sending file");
+    console.log("GET /obs/hlae-control.html => sending file");
     return res.sendFile(
       path.join(__dirname, "../public/obs/hlae-control.html")
     );
@@ -960,13 +817,13 @@ db.all(`PRAGMA table_info(teams)`, (err, rows) => {
   if (!hasShortName) {
     db.run(`ALTER TABLE teams ADD COLUMN short_name TEXT`, (err) => {
       if (err) {
-        //console.error("Ошибка при добавлении колонки short_name:", err);
+        console.error("Ошибка при добавлении колонки short_name:", err);
       } else {
-        //console.log("Колонка short_name успешно добавлена в таблицу teams");
+        console.log("Колонка short_name успешно добавлена в таблицу teams");
       }
     });
   } else {
-    //console.log("Колонка short_name уже существует в таблице teams");
+    console.log("Колонка short_name уже существует в таблице teams");
   }
 });
 
@@ -1044,7 +901,7 @@ db.serialize(() => {
   // Проверяем наличие столбца format
   db.all("PRAGMA table_info(matches)", [], (err, rows) => {
     if (err) {
-      //console.error("Ошибка при проверке структуры таблицы:", err);
+      console.error("Ошибка при проверке структуры таблицы:", err);
       return;
     }
 
@@ -1058,10 +915,10 @@ db.serialize(() => {
         [],
         (err) => {
           if (err) {
-            //console.error("Ошибка при добавлении столбца format:", err);
+            console.error("Ошибка при добавлении столбца format:", err);
             return;
           }
-          //console.log("Столбец format успешно добавлен в таблицу matches");
+          console.log("Столбец format успешно добавлен в таблицу matches");
         }
       );
     }
@@ -1070,7 +927,7 @@ db.serialize(() => {
   // Проверяем наличие колонки cameraLink в таблице players
   db.all("PRAGMA table_info(players)", [], (err, rows) => {
     if (err) {
-      //console.error("Ошибка при проверке структуры таблицы players:", err);
+      console.error("Ошибка при проверке структуры таблицы players:", err);
       return;
     }
 
@@ -1080,10 +937,10 @@ db.serialize(() => {
     if (!hasCameraLinkColumn) {
       db.run("ALTER TABLE players ADD COLUMN cameraLink TEXT", [], (err) => {
         if (err) {
-          //console.error("Ошибка при добавлении столбца cameraLink:", err);
+          console.error("Ошибка при добавлении столбца cameraLink:", err);
           return;
         }
-        //console.log("Столбец cameraLink успешно добавлен в таблицу players");
+        console.log("Столбец cameraLink успешно добавлен в таблицу players");
       });
     }
 
@@ -1092,7 +949,7 @@ db.serialize(() => {
       Array.isArray(rows) && rows.some((row) => row.name === "created_at");
 
     if (!hasCreatedAtColumn) {
-      //console.log("Добавляем колонку created_at в таблицу players...");
+      console.log("Добавляем колонку created_at в таблицу players...");
       // Создаем новую таблицу с нужной структурой
       db.run(
         `
@@ -1110,10 +967,10 @@ db.serialize(() => {
       `,
         (err) => {
           if (err) {
-            //console.error(
-            //"Ошибка при создании новой таблицы players_new:",
-            //err
-            //);
+            console.error(
+              "Ошибка при создании новой таблицы players_new:",
+              err
+            );
             return;
           }
 
@@ -1125,30 +982,30 @@ db.serialize(() => {
           `,
             (err) => {
               if (err) {
-                //console.error(
-                //"Ошибка при копировании данных в новую таблицу:",
-                //err
-                //);
+                console.error(
+                  "Ошибка при копировании данных в новую таблицу:",
+                  err
+                );
                 return;
               }
 
               // Удаляем старую таблицу
               db.run("DROP TABLE players", (err) => {
                 if (err) {
-                  //console.error("Ошибка при удалении старой таблицы:", err);
+                  console.error("Ошибка при удалении старой таблицы:", err);
                   return;
                 }
 
                 // Переименовываем новую таблицу
                 db.run("ALTER TABLE players_new RENAME TO players", (err) => {
                   if (err) {
-                    //console.error("Ошибка при переименовании таблицы:", err);
+                    console.error("Ошибка при переименовании таблицы:", err);
                     return;
                   }
 
-                  //console.log(
-                  //"Таблица players успешно обновлена с колонкой created_at"
-                  //);
+                  console.log(
+                    "Таблица players успешно обновлена с колонкой created_at"
+                  );
                 });
               });
             }
@@ -1200,7 +1057,7 @@ db.serialize(() => {
   // Удаляем временную таблицу
   db.run("DROP TABLE IF EXISTS matches_temp");
 
-  //console.log("Таблица matches успешно пересоздана со столбцом format");
+  console.log("Таблица matches успешно пересоздана со столбцом format");
 });
 
 // Стандартные пути установки Steam
@@ -1271,7 +1128,7 @@ function findCS2Path() {
             }
           }
         } catch (err) {
-          //console.error("Ошибка при чтении libraryfolders.vdf:", err);
+          console.error("Ошибка при чтении libraryfolders.vdf:", err);
         }
       }
     }
@@ -1327,7 +1184,7 @@ function findDota2Path(overridePath) {
             }
           }
         } catch (err) {
-          //console.error("Ошибка при чтении libraryfolders.vdf:", err);
+          console.error("Ошибка при чтении libraryfolders.vdf:", err);
         }
       }
     }
@@ -1442,12 +1299,12 @@ function installDota2Cfg(overridePath) {
     // Создаем папку gamestate_integration, если её нет
     if (!fs.existsSync(gsiPath)) {
       fs.mkdirSync(gsiPath, { recursive: true });
-      //console.log("Создана папка gamestate_integration:", gsiPath);
+      console.log("Создана папка gamestate_integration:", gsiPath);
     }
 
     // Копируем CFG файл из project/cfg в Dota 2
     fs.copyFileSync(sourceCfgFile, targetCfgFile);
-    //console.log("CFG файл скопирован:", sourceCfgFile, "->", targetCfgFile);
+    console.log("CFG файл скопирован:", sourceCfgFile, "->", targetCfgFile);
 
     return {
       success: true,
@@ -1457,7 +1314,7 @@ function installDota2Cfg(overridePath) {
       targetFile: targetCfgFile,
     };
   } catch (error) {
-    //console.error("Ошибка при установке CFG файла Dota 2:", error);
+    console.error("Ошибка при установке CFG файла Dota 2:", error);
     return {
       success: false,
       error: `Ошибка при установке: ${error.message}`,
@@ -1488,7 +1345,7 @@ function removeDota2Cfg(overridePath) {
     if (fs.existsSync(cfgFile)) {
       fs.unlinkSync(cfgFile);
       removed.cfgFile = true;
-      //console.log("Удален CFG файл:", cfgFile);
+      console.log("Удален CFG файл:", cfgFile);
     }
 
     // Удаляем папку gamestate_integration, если она пустая
@@ -1497,7 +1354,7 @@ function removeDota2Cfg(overridePath) {
       if (files.length === 0) {
         fs.rmdirSync(gsiPath);
         removed.gsiFolder = true;
-        //console.log("Удалена пустая папка gamestate_integration");
+        console.log("Удалена пустая папка gamestate_integration");
       }
     }
 
@@ -1509,7 +1366,7 @@ function removeDota2Cfg(overridePath) {
       gsiPath: gsiPath,
     };
   } catch (error) {
-    //console.error("Ошибка при удалении CFG файла Dota 2:", error);
+    console.error("Ошибка при удалении CFG файла Dota 2:", error);
     return {
       success: false,
       error: `Ошибка при удалении: ${error.message}`,
@@ -1839,17 +1696,20 @@ app.get("/api/install-cs2-configs", (req, res) => {
     }
 
     // Копируем observer_cs2_tools_killfeed конфиг
-    // Копируем shud_color.cfg (если есть в проекте)
-    if (fs.existsSync(sourceShudColorPath)) {
-      fs.copyFileSync(sourceShudColorPath, destShudColorPath);
-      installed.shud_color = true;
-    }
     if (fs.existsSync(sourceObserverToolsPath)) {
       fs.copyFileSync(sourceObserverToolsPath, destObserverToolsPath);
       installed.observer_tools = true;
     } else {
       // не критично, добавим как предупреждение
       errors.push("Не найден исходный файл observer_cs2_tools_killfeed.cfg");
+    }
+
+    // Копируем SHUD color конфиг
+    if (fs.existsSync(sourceShudColorPath)) {
+      fs.copyFileSync(sourceShudColorPath, destShudColorPath);
+      installed.shud_color = true;
+    } else {
+      errors.push("Не найден исходный файл shud_color.cfg");
     }
 
     if (errors.length > 0) {
@@ -2091,7 +1951,7 @@ app.delete("/api/matches/:id", (req, res) => {
   // Использование транзакции для удаления матча и связанных записей
   db.run("BEGIN TRANSACTION", (err) => {
     if (err) {
-      //console.error("Ошибка начала транзакции:", err);
+      console.error("Ошибка начала транзакции:", err);
       return res.status(500).json({ error: "Ошибка начала транзакции" });
     }
 
@@ -2099,7 +1959,7 @@ app.delete("/api/matches/:id", (req, res) => {
     db.run("DELETE FROM match_maps WHERE match_id = ?", [matchId], (err) => {
       if (err) {
         db.run("ROLLBACK");
-        //console.error("Ошибка при удалении карт матча:", err);
+        console.error("Ошибка при удалении карт матча:", err);
         return res
           .status(500)
           .json({ error: "Ошибка при удалении карт матча" });
@@ -2109,14 +1969,14 @@ app.delete("/api/matches/:id", (req, res) => {
       db.run("DELETE FROM matches WHERE id = ?", [matchId], (err) => {
         if (err) {
           db.run("ROLLBACK");
-          //console.error("Ошибка при удалении матча:", err);
+          console.error("Ошибка при удалении матча:", err);
           return res.status(500).json({ error: "Ошибка при удалении матча" });
         }
 
         // Завершаем транзакцию
         db.run("COMMIT", (err) => {
           if (err) {
-            //console.error("Ошибка при завершении транзакции:", err);
+            console.error("Ошибка при завершении транзакции:", err);
             return res
               .status(500)
               .json({ error: "Ошибка при завершении транзакции" });
@@ -2172,7 +2032,7 @@ app.post("/api/matches/:id/swap", (req, res) => {
     [matchId],
     (err, match) => {
       if (err) {
-        //console.error("Ошибка при получении данных матча:", err);
+        console.error("Ошибка при получении данных матча:", err);
         return res
           .status(500)
           .json({ error: "Ошибка при получении данных матча" });
@@ -2256,9 +2116,9 @@ app.post("/api/matches/:id/swap", (req, res) => {
             const saveWinnerDataPromises = maps.map((map) => {
               return new Promise((resolve, reject) => {
                 if (map.winner_team && !map.original_winner_team) {
-                  //console.log(
-                  //`Сохраняем original_winner_team=${map.winner_team} для карты ${map.map_name}`
-                  //);
+                  console.log(
+                    `Сохраняем original_winner_team=${map.winner_team} для карты ${map.map_name}`
+                  );
                   db.run(
                     `
                                 UPDATE match_maps 
@@ -2283,9 +2143,9 @@ app.post("/api/matches/:id/swap", (req, res) => {
               ...saveWinnerDataPromises,
             ]).then(() => {
               // Не меняем данные о победителях, просто продолжаем операцию swap
-              //console.log(
-              //"Выполняем swap операцию без изменения данных о победителях"
-              //);
+              console.log(
+                "Выполняем swap операцию без изменения данных о победителях"
+              );
 
               // Меняем значения pick_team для правильной работы селекторов
               db.run(
@@ -2302,10 +2162,10 @@ app.post("/api/matches/:id/swap", (req, res) => {
                 (swapPickErr) => {
                   if (swapPickErr) {
                     db.run("ROLLBACK");
-                    //console.error(
-                    //"Ошибка при обновлении pick_team:",
-                    //swapPickErr
-                    //);
+                    console.error(
+                      "Ошибка при обновлении pick_team:",
+                      swapPickErr
+                    );
                     return res
                       .status(500)
                       .json({ error: "Ошибка при обновлении pick_team" });
@@ -2448,13 +2308,13 @@ app.post("/api/matches/:id/update", async (req, res) => {
   const matchId = req.params.id;
   const { format, maps, match_time } = req.body;
 
-  //console.log("=== ОБНОВЛЕНИЕ МАТЧА ===");
-  //console.log("Match ID:", matchId);
-  //console.log("Request body:", req.body);
-  //console.log("match_time:", match_time);
-  //console.log("format:", format);
-  //console.log("maps:", maps);
-  //console.log("Все поля в req.body:", Object.keys(req.body));
+  console.log("=== ОБНОВЛЕНИЕ МАТЧА ===");
+  console.log("Match ID:", matchId);
+  console.log("Request body:", req.body);
+  console.log("match_time:", match_time);
+  console.log("format:", format);
+  console.log("maps:", maps);
+  console.log("Все поля в req.body:", Object.keys(req.body));
 
   try {
     // Получаем информацию о командах матча
@@ -2480,7 +2340,7 @@ app.post("/api/matches/:id/update", async (req, res) => {
       );
     });
 
-    //console.log("Текущие данные матча:", match);
+    console.log("Текущие данные матча:", match);
 
     // Начинаем транзакцию
     await new Promise((resolve, reject) => {
@@ -2491,7 +2351,7 @@ app.post("/api/matches/:id/update", async (req, res) => {
     });
 
     // Обновляем основные данные матча, включая match_time
-    //console.log("Обновляем матч с параметрами:", [format, match_time, matchId]);
+    console.log("Обновляем матч с параметрами:", [format, match_time, matchId]);
     await new Promise((resolve, reject) => {
       db.run(
         `
@@ -2504,10 +2364,10 @@ app.post("/api/matches/:id/update", async (req, res) => {
         [format, match_time, matchId],
         (err) => {
           if (err) {
-            //console.error("Ошибка при обновлении матча:", err);
+            console.error("Ошибка при обновлении матча:", err);
             reject(err);
           } else {
-            //console.log("Матч успешно обновлен");
+            console.log("Матч успешно обновлен");
             resolve();
           }
         }
@@ -2596,9 +2456,9 @@ app.post("/api/matches/:id/update", async (req, res) => {
       });
     });
 
-    //console.log("=== РЕЗУЛЬТАТ ОБНОВЛЕНИЯ ===");
-    //console.log("Обновленный матч:", updatedMatch);
-    //console.log("match_time в базе:", updatedMatch?.match_time);
+    console.log("=== РЕЗУЛЬТАТ ОБНОВЛЕНИЯ ===");
+    console.log("Обновленный матч:", updatedMatch);
+    console.log("match_time в базе:", updatedMatch?.match_time);
 
     res.json({
       success: true,
@@ -2610,7 +2470,7 @@ app.post("/api/matches/:id/update", async (req, res) => {
       db.run("ROLLBACK", () => resolve());
     });
 
-    //console.error("Ошибка при обновлении матча:", error);
+    console.error("Ошибка при обновлении матча:", error);
     res.status(500).json({
       error: "Ошибка при обновлении матча",
       details: error.message,
@@ -3436,110 +3296,6 @@ app.get("/hud/:hudId/:file", (req, res) => {
   res.sendFile(path.join(__dirname, `../public/huds/${hudId}/${file}`));
 });
 
-// ================= ENCRYPTED HUD SUPPORT =================
-// Simple in-memory decryption and serving of encrypted HUD assets
-// Folder layout (text assets only): ../encrypted_huds/<hudId>/*.ehud
-// Request mapping:
-//   - GET /hud-enc/:hudId            → serves decrypted index.html.ehud (text/html)
-//   - GET /hud-enc/:hudId/*          → for a requested path like js/app.js, the server
-//                                     will look for js/app.js.ehud in encrypted_huds
-//                                     and serve it decrypted with appropriate content-type.
-// Non-text/binary assets (png/webp/svg, etc.) should stay under public/ and be referenced
-// with absolute URLs (they will be served by express.static as usual).
-(function setupEncryptedHudRoutes() {
-  const crypto = require("crypto");
-
-  const ENCRYPTED_HUDS_DIR = path.join(__dirname, "../encrypted_huds");
-
-  function getAesKey() {
-    try {
-      const raw = process.env.HUD_ENC_KEY || "fhud_default_enc_key";
-      return crypto.createHash("sha256").update(String(raw)).digest();
-    } catch {
-      return crypto
-        .createHash("sha256")
-        .update("fhud_default_enc_key")
-        .digest();
-    }
-  }
-
-  // Encrypted file format: base64(iv[12] | ciphertext | authTag[16]) using AES-256-GCM
-  function decryptBase64AesGcm(base64Text) {
-    const key = getAesKey();
-    const buf = Buffer.from(String(base64Text || ""), "base64");
-    if (buf.length < 12 + 16) throw new Error("Encrypted blob too short");
-    const iv = buf.subarray(0, 12);
-    const tag = buf.subarray(buf.length - 16);
-    const ciphertext = buf.subarray(12, buf.length - 16);
-    const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
-    decipher.setAuthTag(tag);
-    const out = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
-    return out.toString("utf8");
-  }
-
-  function detectContentTypeByExt(relPath) {
-    const ext = String(relPath || "")
-      .toLowerCase()
-      .split(".")
-      .pop();
-    switch (ext) {
-      case "html":
-        return "text/html; charset=utf-8";
-      case "js":
-        return "application/javascript; charset=utf-8";
-      case "css":
-        return "text/css; charset=utf-8";
-      case "json":
-        return "application/json; charset=utf-8";
-      case "txt":
-        return "text/plain; charset=utf-8";
-      default:
-        // Fallback for text
-        return "text/plain; charset=utf-8";
-    }
-  }
-
-  async function tryServeEncrypted(hudId, relPath, res) {
-    try {
-      const abs = path.join(ENCRYPTED_HUDS_DIR, hudId, `${relPath}.ehud`);
-      if (!fs.existsSync(abs)) return false;
-      const enc = await fs.promises.readFile(abs, "utf8");
-      const plain = decryptBase64AesGcm(enc);
-      res.setHeader("Content-Type", detectContentTypeByExt(relPath));
-      return res.status(200).send(plain);
-    } catch (e) {
-      try {
-        console.error("[HUD-ENC] decrypt error:", e?.message || e);
-      } catch {}
-      return res.status(500).send("Encrypted HUD decode error");
-    }
-  }
-
-  // Entry HTML for encrypted HUD
-  app.get("/hud-enc/:hudId", async (req, res) => {
-    const { hudId } = req.params;
-    // Only serve if encrypted index exists
-    const ok = fs.existsSync(
-      path.join(ENCRYPTED_HUDS_DIR, hudId, "index.html.ehud")
-    );
-    if (!ok) return res.status(404).send("Encrypted HUD not found");
-    return tryServeEncrypted(hudId, "index.html", res);
-  });
-
-  // Nested asset paths for encrypted HUD (e.g., js/app.js → js/app.js.ehud)
-  app.get("/hud-enc/:hudId/*", async (req, res) => {
-    const { hudId } = req.params;
-    const relPath = (req.params[0] || "").replace(/^\/+/, "");
-    if (!relPath) return res.status(400).send("Bad path");
-    // Try encrypted first
-    if (await tryServeEncrypted(hudId, relPath, res)) return;
-    // Otherwise, optionally fall back to public/huds (plain assets like images)
-    const fallback = path.join(__dirname, "../public/huds", hudId, relPath);
-    if (fs.existsSync(fallback)) return res.sendFile(fallback);
-    return res.status(404).end();
-  });
-})();
-
 // -----------------------------
 // CS2 Spectator control API
 // -----------------------------
@@ -3660,9 +3416,9 @@ app.post("/api/cs2/spectate", express.json({ limit: "100kb" }), (req, res) => {
         byName: false,
       };
       try {
-        //console.log(
-        //`[SPECTATE] request steam64=${steam64} name=${targetName || ""}`
-        //);
+        console.log(
+          `[SPECTATE] request steam64=${steam64} name=${targetName || ""}`
+        );
       } catch {}
       // Без предварительных смен режимов — как в рабочем варианте
       try {
@@ -3670,7 +3426,7 @@ app.post("/api/cs2/spectate", express.json({ limit: "100kb" }), (req, res) => {
         if (accId != null) {
           const cmd1 = `spec_player_by_accountid ${accId}`;
           try {
-            //console.log(`[SPECTATE] ${cmd1}`);
+            console.log(`[SPECTATE] ${cmd1}`);
           } catch {}
           global.netcon.send(cmd1);
           used.byAccountId = true;
@@ -3680,7 +3436,7 @@ app.post("/api/cs2/spectate", express.json({ limit: "100kb" }), (req, res) => {
         try {
           const cmd2 = `mirv_pov ${steam64}`;
           try {
-            //console.log(`[SPECTATE] ${cmd2}`);
+            console.log(`[SPECTATE] ${cmd2}`);
           } catch {}
           global.netcon.send(cmd2);
         } catch {}
@@ -3692,7 +3448,7 @@ app.post("/api/cs2/spectate", express.json({ limit: "100kb" }), (req, res) => {
           try {
             const cmd3 = `spec_player "${esc}"`;
             try {
-              //console.log(`[SPECTATE] ${cmd3}`);
+              console.log(`[SPECTATE] ${cmd3}`);
             } catch {}
             global.netcon.send(cmd3);
           } catch {}
@@ -3701,7 +3457,7 @@ app.post("/api/cs2/spectate", express.json({ limit: "100kb" }), (req, res) => {
       }
       if (!allowNameFallback) {
         try {
-          //console.log("[SPECTATE] name fallback disabled");
+          console.log("[SPECTATE] name fallback disabled");
         } catch {}
       }
       return res.json({ ok: true, used, allowNameFallback });
@@ -3781,6 +3537,12 @@ const gameState = {
     killfeed_on: false,
     last_event_ts: 0,
     netcon_connected: false,
+  },
+  // HLAE Game Events
+  hlae_events: {
+    player_spawns: [], // последние события появления игроков
+    weapon_fires: [], // последние события выстрелов
+    player_info: [], // последние события информации об игроках
   },
   // Сигнатура последней генерации биндов наблюдателя
   specBindsSig: "",
@@ -3937,9 +3699,9 @@ function calculateHSPercent(playerData, currentRound, mapData) {
 // Функция очистки истории урона при смене карты
 function cleanupDamageHistory(newMapName) {
   if (gameState.lastMapName && gameState.lastMapName !== newMapName) {
-    //console.log(
-    //`Очистка истории урона: ${gameState.lastMapName} -> ${newMapName}`
-    //);
+    console.log(
+      `Очистка истории урона: ${gameState.lastMapName} -> ${newMapName}`
+    );
     gameState.damageHistory = {};
     gameState.lastMapName = newMapName;
   }
@@ -3947,9 +3709,9 @@ function cleanupDamageHistory(newMapName) {
 
 function cleanupHSHistory(newMapName) {
   if (gameState.lastMapName && gameState.lastMapName !== newMapName) {
-    //console.log(
-    //`Очистка истории HS: ${gameState.lastMapName} -> ${newMapName}`
-    //);
+    console.log(
+      `Очистка истории HS: ${gameState.lastMapName} -> ${newMapName}`
+    );
     gameState.hsHistory = {};
     gameState.lastMapName = newMapName;
   }
@@ -4033,7 +3795,117 @@ function addKillToKillfeed(kill) {
     broadcastToAllClients("killfeed", payload);
     broadcastToAllClients("killfeed_update", payload);
   } catch (e) {
-    //console.error("Ошибка добавления в killfeed:", e);
+    console.error("Ошибка добавления в killfeed:", e);
+  }
+}
+
+// Обработчик HLAE Game Events
+function handleHLAEGameEvent(eventName, fields, tick) {
+  try {
+    if (!global.gameState) return;
+
+    global.gameState.hlae_events = global.gameState.hlae_events || {
+      player_spawns: [],
+      weapon_fires: [],
+      player_info: [],
+    };
+
+    const timestamp = Date.now();
+    const eventData = {
+      event: eventName,
+      timestamp,
+      tick: tick || 0,
+      source: "netcon",
+      ...fields,
+    };
+
+    if (eventName === "player_spawn") {
+      // Обрабатываем событие появления игрока
+      const spawnData = {
+        ...eventData,
+        steamid: fields.steamid || "",
+        name: fields.name || "",
+        team: fields.team || "",
+        userid: fields.userid || 0,
+        health: fields.health || 100,
+        armor: fields.armor || 0,
+        helmet: Boolean(fields.helmet),
+        money: fields.money || 0,
+        weapons: fields.weapons || {},
+        pos: fields.pos || { x: 0, y: 0, z: 0 },
+        angle: fields.angle || { x: 0, y: 0, z: 0 },
+        observer_slot: fields.observer_slot || 0,
+      };
+
+      // Добавляем в список (ограничиваем до 50 последних)
+      global.gameState.hlae_events.player_spawns.unshift(spawnData);
+      if (global.gameState.hlae_events.player_spawns.length > 50) {
+        global.gameState.hlae_events.player_spawns =
+          global.gameState.hlae_events.player_spawns.slice(0, 50);
+      }
+
+      console.log(
+        `[HLAE] Player spawn: ${spawnData.name} (${spawnData.steamid}) - Team: ${spawnData.team}`
+      );
+    } else if (eventName === "weapon_fire") {
+      // Обрабатываем событие выстрела
+      const fireData = {
+        ...eventData,
+        steamid: fields.steamid || "",
+        name: fields.name || "",
+        team: fields.team || "",
+        userid: fields.userid || 0,
+        weapon: fields.weapon || "",
+        weapon_class: fields.weapon_class || "",
+        ammo_in_mag: fields.ammo_in_mag || 0,
+        ammo_reserve: fields.ammo_reserve || 0,
+        pos: fields.pos || { x: 0, y: 0, z: 0 },
+        angle: fields.angle || { x: 0, y: 0, z: 0 },
+        silenced: Boolean(fields.silenced),
+        observer_slot: fields.observer_slot || 0,
+      };
+
+      // Добавляем в список (ограничиваем до 100 последних)
+      global.gameState.hlae_events.weapon_fires.unshift(fireData);
+      if (global.gameState.hlae_events.weapon_fires.length > 100) {
+        global.gameState.hlae_events.weapon_fires =
+          global.gameState.hlae_events.weapon_fires.slice(0, 100);
+      }
+
+      console.log(
+        `[HLAE] Weapon fire: ${fireData.name} (${fireData.weapon}) - Team: ${fireData.team}`
+      );
+    } else if (eventName === "player_info") {
+      // Обрабатываем событие информации об игроке
+      const infoData = {
+        ...eventData,
+        steamid: fields.steamid || "",
+        name: fields.name || "",
+        team: fields.team || "",
+        userid: fields.userid || 0,
+        bot: Boolean(fields.bot),
+        fakeclient: Boolean(fields.fakeclient),
+        ishltv: Boolean(fields.ishltv),
+        filesDownloaded: fields.filesDownloaded || 0,
+        ping: fields.ping || 0,
+        loss: fields.loss || 0,
+        address: fields.address || "",
+        observer_slot: fields.observer_slot || 0,
+      };
+
+      // Добавляем в список (ограничиваем до 100 последних)
+      global.gameState.hlae_events.player_info.unshift(infoData);
+      if (global.gameState.hlae_events.player_info.length > 100) {
+        global.gameState.hlae_events.player_info =
+          global.gameState.hlae_events.player_info.slice(0, 100);
+      }
+
+      console.log(
+        `[HLAE] Player info: ${infoData.name} (${infoData.steamid}) - Team: ${infoData.team} - Bot: ${infoData.bot}`
+      );
+    }
+  } catch (error) {
+    console.error("[HLAE] Error handling game event:", error);
   }
 }
 
@@ -4046,41 +3918,131 @@ function addHLAEKillToFeed(kill) {
       gameState.hlae_status.killfeed_on = true;
       gameState.hlae_status.last_event_ts = Date.now();
     } catch {}
-    // Обогащаем именами из GSI allplayers по steamid если есть
+    // Обогащаем именами из GSI allplayers и HLAE player_info по steamid/userid
     try {
       const ap = gameState?.allplayers || {};
       const getPlayer = (sid) => (sid ? ap[String(sid)] : null);
-      // Заменяем имя на базовое из allplayers и добавляем реальное имя
-      if (kill.killer_steamid) {
-        const p = getPlayer(kill.killer_steamid);
-        if (p) {
-          if (p.name) kill.killer_name = p.name;
-          if (p.realName) kill.killer_realName = p.realName;
-          if (p.team) {
-            kill.killer_team = p.team;
-            kill.killer_side = p.team;
+
+      // Функция для поиска в HLAE player_info по userid или steamid
+      const getHLAEPlayerInfo = (userid, steamid) => {
+        const playerInfos = gameState?.hlae_events?.player_info || [];
+        // Ищем по userid сначала, потом по steamid
+        return playerInfos.find(
+          (info) =>
+            (userid && info.userid === userid) ||
+            (steamid && info.steamid === steamid)
+        );
+      };
+
+      // Обрабатываем киллера
+      if (kill.killer_id || kill.killer_steamid) {
+        // Сначала пробуем GSI allplayers
+        if (kill.killer_steamid) {
+          const p = getPlayer(kill.killer_steamid);
+          if (p) {
+            if (p.name) kill.killer_name = p.name;
+            if (p.realName) kill.killer_realName = p.realName;
+            if (p.team) {
+              kill.killer_team = p.team;
+              kill.killer_side = p.team;
+            }
+          }
+        }
+
+        // Если имя все еще пустое, пробуем HLAE player_info
+        if (!kill.killer_name && (kill.killer_id || kill.killer_steamid)) {
+          const hlaeInfo = getHLAEPlayerInfo(
+            kill.killer_id,
+            kill.killer_steamid
+          );
+          if (hlaeInfo) {
+            if (hlaeInfo.name) kill.killer_name = hlaeInfo.name;
+            if (hlaeInfo.steamid) kill.killer_steamid = hlaeInfo.steamid;
+            if (hlaeInfo.team) {
+              kill.killer_team = hlaeInfo.team;
+              kill.killer_side = hlaeInfo.team;
+            }
+            console.log(
+              `[HLAE] Resolved killer name from player_info: ${hlaeInfo.name} (userid: ${kill.killer_id}, steamid: ${hlaeInfo.steamid})`
+            );
+          } else {
+            console.log(
+              `[HLAE] Could not resolve killer name for userid: ${kill.killer_id}, steamid: ${kill.killer_steamid}`
+            );
           }
         }
       }
-      if (kill.victim_steamid) {
-        const p = getPlayer(kill.victim_steamid);
-        if (p) {
-          if (p.name) kill.victim_name = p.name;
-          if (p.realName) kill.victim_realName = p.realName;
-          if (p.team) {
-            kill.victim_team = p.team;
-            kill.victim_side = p.team;
+
+      // Обрабатываем жертву
+      if (kill.victim_id || kill.victim_steamid) {
+        // Сначала пробуем GSI allplayers
+        if (kill.victim_steamid) {
+          const p = getPlayer(kill.victim_steamid);
+          if (p) {
+            if (p.name) kill.victim_name = p.name;
+            if (p.realName) kill.victim_realName = p.realName;
+            if (p.team) {
+              kill.victim_team = p.team;
+              kill.victim_side = p.team;
+            }
+          }
+        }
+
+        // Если имя все еще пустое, пробуем HLAE player_info
+        if (!kill.victim_name && (kill.victim_id || kill.victim_steamid)) {
+          const hlaeInfo = getHLAEPlayerInfo(
+            kill.victim_id,
+            kill.victim_steamid
+          );
+          if (hlaeInfo) {
+            if (hlaeInfo.name) kill.victim_name = hlaeInfo.name;
+            if (hlaeInfo.steamid) kill.victim_steamid = hlaeInfo.steamid;
+            if (hlaeInfo.team) {
+              kill.victim_team = hlaeInfo.team;
+              kill.victim_side = hlaeInfo.team;
+            }
+            console.log(
+              `[HLAE] Resolved victim name from player_info: ${hlaeInfo.name} (userid: ${kill.victim_id}, steamid: ${hlaeInfo.steamid})`
+            );
+          } else {
+            console.log(
+              `[HLAE] Could not resolve victim name for userid: ${kill.victim_id}, steamid: ${kill.victim_steamid}`
+            );
           }
         }
       }
-      if (kill.assister_steamid) {
-        const p = getPlayer(kill.assister_steamid);
-        if (p) {
-          if (p.name) kill.assister_name = p.name;
-          if (p.realName) kill.assister_realName = p.realName;
-          if (p.team) {
-            kill.assister_team = p.team;
-            kill.assister_side = p.team;
+
+      // Обрабатываем ассистента
+      if (kill.assister_id || kill.assister_steamid) {
+        // Сначала пробуем GSI allplayers
+        if (kill.assister_steamid) {
+          const p = getPlayer(kill.assister_steamid);
+          if (p) {
+            if (p.name) kill.assister_name = p.name;
+            if (p.realName) kill.assister_realName = p.realName;
+            if (p.team) {
+              kill.assister_team = p.team;
+              kill.assister_side = p.team;
+            }
+          }
+        }
+
+        // Если имя все еще пустое, пробуем HLAE player_info
+        if (
+          !kill.assister_name &&
+          (kill.assister_id || kill.assister_steamid)
+        ) {
+          const hlaeInfo = getHLAEPlayerInfo(
+            kill.assister_id,
+            kill.assister_steamid
+          );
+          if (hlaeInfo) {
+            if (hlaeInfo.name) kill.assister_name = hlaeInfo.name;
+            if (hlaeInfo.steamid) kill.assister_steamid = hlaeInfo.steamid;
+            if (hlaeInfo.team) {
+              kill.assister_team = hlaeInfo.team;
+              kill.assister_side = hlaeInfo.team;
+            }
           }
         }
         // Собираем assists-массив для клиентского Killfeed
@@ -4093,27 +4055,76 @@ function addHLAEKillToFeed(kill) {
             };
           });
         } else {
-          const pa = getPlayer(kill.assister_steamid);
-          const assistName = kill.assister_name || (pa && pa.name) || "";
-          const assistTeam = (pa && pa.team) || "";
-          kill.assists = [
-            {
-              steamid: String(kill.assister_steamid),
-              name: assistName,
-              team: assistTeam,
-            },
-          ];
+          // Создаем массив assists только если есть реальный ассист
+          if (kill.assister_id || kill.assister_steamid || kill.assister_name) {
+            const pa = getPlayer(kill.assister_steamid);
+            const assistName = kill.assister_name || (pa && pa.name) || "";
+            const assistTeam = (pa && pa.team) || "";
+
+            // Создаем массив только если есть имя ассиста
+            if (assistName && assistName.trim() !== "") {
+              kill.assists = [
+                {
+                  steamid: String(kill.assister_steamid),
+                  name: assistName,
+                  team: assistTeam,
+                },
+              ];
+            } else {
+              kill.assists = []; // Пустой массив, если нет ассиста
+            }
+          } else {
+            kill.assists = []; // Пустой массив, если нет данных об ассисте
+          }
         }
+      }
+    } catch {}
+
+    // Нормализация полей имен/команд для совместимости HUD'ов
+    try {
+      const normalizeName = (v) => (typeof v === "string" && v.trim() ? v : "");
+      // Имя киллера/жертвы: гарантируем поля killer / victim
+      kill.killer =
+        normalizeName(kill.killer) || normalizeName(kill.killer_name);
+      kill.victim =
+        normalizeName(kill.victim) || normalizeName(kill.victim_name);
+      // Команды (CT/T): берем из *_team или *_side
+      if (!kill.killer_team && kill.killer_side)
+        kill.killer_team = kill.killer_side;
+      if (!kill.victim_team && kill.victim_side)
+        kill.victim_team = kill.victim_side;
+      // Ассисты: приводим к массиву объектов с name/team
+      if (Array.isArray(kill.assists)) {
+        kill.assists = kill.assists.map((a) => ({
+          steamid: String(a?.steamid || ""),
+          name: normalizeName(a?.name),
+          team: a?.team || "",
+        }));
       }
     } catch {}
 
     if (!Array.isArray(gameState.HLAE_killfeed)) gameState.HLAE_killfeed = [];
     gameState.HLAE_killfeed.push(kill);
     if (gameState.HLAE_killfeed.length > 100) gameState.HLAE_killfeed.shift();
+
+    // Отладочное логирование для HLAE killfeed
+    console.log(`[HLAE] Final kill data:`, {
+      killer: kill.killer_name || kill.killer,
+      victim: kill.victim_name || kill.victim,
+      killer_team: kill.killer_team,
+      victim_team: kill.victim_team,
+      weapon: kill.weapon,
+      attackerblind: kill.attackerblind,
+      killer_flashed: kill.killer_flashed,
+      headshot: kill.headshot,
+      noscope: kill.noscope,
+      throughsmoke: kill.throughsmoke,
+    });
+
     const payload = { type: "new_kill", kill };
     broadcastToAllClients("hlae_killfeed", payload);
   } catch (e) {
-    //console.error("Ошибка добавления в HLAE_killfeed:", e);
+    console.error("Ошибка добавления в HLAE_killfeed:", e);
   }
 }
 
@@ -4511,18 +4522,12 @@ gsiApp.post("/gsi", async (req, res) => {
         }
 
         // Отправка обновленных данных клиентам для Dota 2
-        //console.log("GSI: отправляем данные Dota 2 клиентам через Socket.IO");
-        try {
-          for (const s of getAllConnectedSockets())
-            emitGsiToSocket(s, gameState);
-        } catch {
-          io.emit("gsi", gameState);
-          if (ioHttps) ioHttps.emit("gsi", gameState);
-        }
+        console.log("GSI: отправляем данные Dota 2 клиентам через Socket.IO");
+        io.emit("gsi", gameState);
         res.sendStatus(200);
         return; // Выходим из функции для Dota 2
       } catch (error) {
-        //console.error("Ошибка при обработке Dota 2 GSI данных:", error);
+        console.error("Ошибка при обработке Dota 2 GSI данных:", error);
         res.sendStatus(500);
         return;
       }
@@ -4753,9 +4758,9 @@ gsiApp.post("/gsi", async (req, res) => {
                       : null;
                   }
 
-                  //console.log(
-                  //`Установлен победитель карты: ${currentMap.map_name}, team=${currentMap.winner_team}, original_team=${currentMap.original_winner_team}`
-                  //);
+                  console.log(
+                    `Установлен победитель карты: ${currentMap.map_name}, team=${currentMap.winner_team}, original_team=${currentMap.original_winner_team}`
+                  );
 
                   // Обновляем БД с финальным счетом и победителем
                   await new Promise((resolve, reject) => {
@@ -4784,7 +4789,7 @@ gsiApp.post("/gsi", async (req, res) => {
                       ],
                       (err) => {
                         if (err) {
-                          //console.error("Ошибка обновления победителя:", err);
+                          console.error("Ошибка обновления победителя:", err);
                           reject(err);
                         } else {
                           //console.log('Победитель карты определен:', {
@@ -4836,14 +4841,14 @@ gsiApp.post("/gsi", async (req, res) => {
     if (data.map) {
       // Очищаем историю урона при смене карты
       if (gameState.lastMapName && gameState.lastMapName !== data.map.name) {
-        //console.log(
-        //`Смена карты обнаружена: ${gameState.lastMapName} -> ${data.map.name}`
-        //);
+        console.log(
+          `Смена карты обнаружена: ${gameState.lastMapName} -> ${data.map.name}`
+        );
         cleanupDamageHistory(data.map.name);
         cleanupHSHistory(data.map.name);
       } else if (!gameState.lastMapName) {
         // Первое подключение к карте
-        //console.log(`Первое подключение к карте: ${data.map.name}`);
+        console.log(`Первое подключение к карте: ${data.map.name}`);
         gameState.lastMapName = data.map.name;
       }
       gameState.map = data.map;
@@ -4979,9 +4984,9 @@ gsiApp.post("/gsi", async (req, res) => {
         // Для раунда 27 в фазе перерыва используем специальную логику
         if (currentRound === 27 && data.map.phase === "intermission") {
           // Не меняем стороны в gameState, сохраняем как было в последнем раунде основного времени
-          //console.log(
-          //`Сохраняем стороны для раунда 27 в перерыве: CT=${currentCTTeam}, T=${currentTTeam}`
-          //);
+          console.log(
+            `Сохраняем стороны для раунда 27 в перерыве: CT=${currentCTTeam}, T=${currentTTeam}`
+          );
           gameState.map.team_ct.name = currentCTTeam;
           gameState.map.team_ct.short_name = currentCTShortName;
           gameState.map.team_ct.logo = currentCTLogo;
@@ -5050,18 +5055,18 @@ gsiApp.post("/gsi", async (req, res) => {
               if (currentMap.status !== "completed") {
                 currentMap.original_winner_team = winnerTeam;
                 currentMap.original_winner_logo = winnerLogo;
-                //console.log(
-                //`Карта ${currentMap.map_name} завершена впервые, устанавливаем winner_team=${winnerTeam}, winner_logo=${winnerLogo}`
-                //);
+                console.log(
+                  `Карта ${currentMap.map_name} завершена впервые, устанавливаем winner_team=${winnerTeam}, winner_logo=${winnerLogo}`
+                );
               } else {
-                //console.log(
-                //`Карта ${currentMap.map_name} уже была завершена, сохраняем только winner_team=${winnerTeam}, winner_logo=${winnerLogo}`
-                //);
+                console.log(
+                  `Карта ${currentMap.map_name} уже была завершена, сохраняем только winner_team=${winnerTeam}, winner_logo=${winnerLogo}`
+                );
               }
 
-              //console.log(
-              //`Обновляем статус карты ${currentMap.map_name} на completed, победитель: ${winnerTeam}, оригинал: ${currentMap.original_winner_team}`
-              //);
+              console.log(
+                `Обновляем статус карты ${currentMap.map_name} на completed, победитель: ${winnerTeam}, оригинал: ${currentMap.original_winner_team}`
+              );
 
               // Обновляем базу данных с информацией о победителе и статусом карты
               await new Promise((resolve, reject) => {
@@ -5086,10 +5091,10 @@ gsiApp.post("/gsi", async (req, res) => {
                   ],
                   (err) => {
                     if (err) {
-                      //console.error(
-                      //"Ошибка при обновлении данных о победителе:",
-                      //err
-                      //);
+                      console.error(
+                        "Ошибка при обновлении данных о победителе:",
+                        err
+                      );
                       reject(err);
                     } else {
                       //console.log('Данные о победителе успешно обновлены в базе данных');
@@ -5120,16 +5125,15 @@ gsiApp.post("/gsi", async (req, res) => {
           data.map.winner.original_logo || data.map.winner.logo;
 
         // Логируем для отладки
-        //console.log(
-        //`GSI: Получены данные о победителе: team=${winnerTeam}, logo=${winnerLogo}, original_team=${
-        //data.map.winner.original_team || "не задано"
-        //}, original_logo=${data.map.winner.original_logo || "не задано"}`
-        //);
-        //);
+        console.log(
+          `GSI: Получены данные о победителе: team=${winnerTeam}, logo=${winnerLogo}, original_team=${
+            data.map.winner.original_team || "не задано"
+          }, original_logo=${data.map.winner.original_logo || "не задано"}`
+        );
 
-        //console.log(
-        //`Получены данные о победителе из GSI: team=${winnerTeam}, logo=${winnerLogo}`
-        //);
+        console.log(
+          `Получены данные о победителе из GSI: team=${winnerTeam}, logo=${winnerLogo}`
+        );
 
         // Обновляем базу данных с информацией о победителе
         await new Promise((resolve, reject) => {
@@ -5154,11 +5158,11 @@ gsiApp.post("/gsi", async (req, res) => {
             ],
             (err) => {
               if (err) {
-                //console.error(
-                "Ошибка при обновлении данных о победителе:",
-                  //err
-                  //);
-                  reject(err);
+                console.error(
+                  "Ошибка при обновлении данных о победителе:",
+                  err
+                );
+                reject(err);
               } else {
                 //console.log('Данные о победителе обновлены:', {
                 //winnerTeam,
@@ -5184,9 +5188,9 @@ gsiApp.post("/gsi", async (req, res) => {
             currentMap.winner_logo = winnerLogo;
             currentMap.original_winner_team = winnerTeam;
             currentMap.original_winner_logo = winnerLogo;
-            //console.log(
-            //`GSI: Обновлен статус и победитель карты ${currentMap.map_name}: ${winnerTeam}`
-            //);
+            console.log(
+              `GSI: Обновлен статус и победитель карты ${currentMap.map_name}: ${winnerTeam}`
+            );
           }
         }
       }
@@ -5206,7 +5210,7 @@ gsiApp.post("/gsi", async (req, res) => {
           [data.player.steamid],
           (err, row) => {
             if (err) {
-              //console.error("Ошибка при запросе аватара из базы:", err);
+              console.error("Ошибка при запросе аватара из базы:", err);
               reject(err);
             } else {
               //console.log('Аватар из базы для', data.player.steamid, ':', row?.avatar || 'не найден');
@@ -5229,7 +5233,7 @@ gsiApp.post("/gsi", async (req, res) => {
           [data.player.steamid],
           (err, row) => {
             if (err) {
-              //console.error("Ошибка при получении имени игрока из базы:", err);
+              console.error("Ошибка при получении имени игрока из базы:", err);
               reject(err);
             } else {
               resolve(row?.nickname || null);
@@ -5430,6 +5434,25 @@ gsiApp.post("/gsi", async (req, res) => {
           isWinningTeam && roundKills >= 3;
       }
 
+      // Проставляем флаг observer: true для игрока, чей observer_slot совпадает с текущим slot наблюдаемого игрока
+      try {
+        const currentObservedSlot = Number(
+          (gameState && gameState.player && gameState.player.slot) ??
+            (data && data.player && data.player.observer_slot) ??
+            -1
+        );
+        if (Number.isFinite(currentObservedSlot) && currentObservedSlot >= 0) {
+          for (const [pid, p] of Object.entries(gameState.allplayers)) {
+            const pSlot = Number(p && p.observer_slot);
+            gameState.allplayers[pid].observer = pSlot === currentObservedSlot;
+          }
+        } else {
+          for (const pid of Object.keys(gameState.allplayers)) {
+            gameState.allplayers[pid].observer = false;
+          }
+        }
+      } catch {}
+
       // Определяем MVP раунда в отдельной функции
       gameState.round_mvp = determineRoundMVP(data, gameState);
 
@@ -5467,9 +5490,9 @@ gsiApp.post("/gsi", async (req, res) => {
           .digest("hex");
 
         if (sig && sig !== gameState.specBindsSig) {
-          //console.log(
-          //`[CFG] Updating spectator binds - signature changed: ${gameState.specBindsSig} -> ${sig}`
-          //);
+          console.log(
+            `[CFG] Updating spectator binds - signature changed: ${gameState.specBindsSig} -> ${sig}`
+          );
           gameState.specBindsSig = sig;
           // Сохраняем в cfg игры
           (function writeAutoSpecCfg() {
@@ -5542,7 +5565,7 @@ gsiApp.post("/gsi", async (req, res) => {
                 "",
               ].join("\n");
               fs.writeFileSync(cfgPath, content, "utf8");
-              //console.log(`[CFG] Written ${binds.length} binds to ${cfgPath}`);
+              console.log(`[CFG] Written ${binds.length} binds to ${cfgPath}`);
             } catch {}
           })();
         }
@@ -5551,6 +5574,21 @@ gsiApp.post("/gsi", async (req, res) => {
 
     if (data.bomb) {
       gameState.bomb = data.bomb;
+      try {
+        const mapName =
+          (gameState.map && gameState.map.name) ||
+          (data.map && data.map.name) ||
+          null;
+        const bombPos =
+          (data.bomb && data.bomb.position) ||
+          (gameState.bomb && gameState.bomb.position) ||
+          null;
+        const site = findBombSite(mapName, bombPos);
+        if (site) {
+          if (gameState.bomb) gameState.bomb.site = site;
+          if (gameState.map) gameState.map.bomb_site = site;
+        }
+      } catch {}
     }
 
     if (data.grenades) {
@@ -5610,8 +5648,24 @@ io.on("connection", (socket) => {
   //console.log('Клиент подключился');
 
   socket.on("ready", () => {
-    // Отправляем текущее состояние игры (с фильтрацией под HUD)
-    emitGsiToSocket(socket, gameState);
+    // Отправляем текущее состояние игры
+    try {
+      const initial = { ...gameState };
+      try {
+        const nc = global.netcon;
+        initial.netcon_active = Boolean(
+          nc &&
+            nc.connected === true &&
+            String(nc.host) === "127.0.0.1" &&
+            Number(nc.port) === 2121
+        );
+      } catch {}
+      // Убрано: hlae_cs2_tools_active больше не включаем в GSI
+      if (initial.hlae_status) delete initial.hlae_status;
+      socket.emit("gsi", initial);
+    } catch {
+      socket.emit("gsi", gameState);
+    }
 
     // Получаем активный матч и данные команд
     db.get(
@@ -5705,7 +5759,7 @@ io.on("connection", (socket) => {
 
   // Обработчик для принятия данных от клиента и пересылки их всем подключенным клиентам
   socket.on("hud_data", (data) => {
-    //console.log("Получены данные для HUD:", data.type);
+    console.log("Получены данные для HUD:", data.type);
     // Пересылаем всем клиентам
     io.emit("hud_data", data);
   });
@@ -5752,21 +5806,21 @@ const startServers = async () => {
               command = `xdg-open ${url}`;
               break;
             default:
-              //console.log(
-              //`Платформа ${platform} не поддерживается для автоматического открытия браузера`
-              //);
+              console.log(
+                `Платформа ${platform} не поддерживается для автоматического открытия браузера`
+              );
               return;
           }
 
           exec(command, (err) => {
             if (err) {
-              //console.error("Ошибка при открытии браузера:", err);
+              console.error("Ошибка при открытии браузера:", err);
             }
           });
         } else {
-          //console.log(
-          // "Запущено через Electron, браузер не открывается автоматически"
-          //);
+          console.log(
+            "Запущено через Electron, браузер не открывается автоматически"
+          );
         }
 
         resolve();
@@ -5798,15 +5852,17 @@ const startServers = async () => {
             return "";
           },
           onEvent: (evt) => {
-            // Простейшее сопоставление: превращаем часть событий в киллфид
+            // Обрабатываем все HLAE Game Events
             try {
-              // item_equip / weapon_fire / player_hurt / player_death и т.п.
+              // Обрабатываем HLAE Game Events для всех типов событий
+              handleHLAEGameEvent(evt.name, evt.fields, evt.tick);
+
+              // Специальная обработка для player_death (киллфид)
               if (evt.type === "player_death") {
-                // Поля зависят от игры/мода; оставим для логов
-                //console.log(
-                //"[NETCON->KILLFEED] player_death:",
-                //evt.norm || evt.fields
-                //);
+                console.log(
+                  "[NETCON->KILLFEED] player_death:",
+                  evt.norm || evt.fields
+                );
                 // Добавляем в отдельный поток HLAE_killfeed
                 global.gameState = global.gameState || {};
                 const entry = evt.norm || { weapon: evt.fields?.weapon };
@@ -5818,25 +5874,20 @@ const startServers = async () => {
                     global.gameState.HLAE_killfeed || [];
                   global.gameState.HLAE_killfeed.push(kill);
                 }
-                if (global.broadcastToAllClients) {
-                  global.broadcastToAllClients("gsi", global.gameState);
-                } else {
-                  try {
-                    for (const s of getAllConnectedSockets())
-                      emitGsiToSocket(s, global.gameState);
-                  } catch {
-                    if (global.io) global.io.emit("gsi", global.gameState);
-                    if (global.ioHttps)
-                      global.ioHttps.emit("gsi", global.gameState);
-                  }
-                }
               }
-            } catch {}
+
+              // Отправляем обновленный GSI всем клиентам
+              if (global.broadcastToAllClients)
+                global.broadcastToAllClients("gsi", global.gameState);
+              else if (global.io) global.io.emit("gsi", global.gameState);
+            } catch (error) {
+              console.error("[NETCON] Error processing event:", error);
+            }
           },
         });
       global.netcon.start();
     } catch (e) {
-      //console.warn("Netcon listener init failed:", e?.message || e);
+      console.warn("Netcon listener init failed:", e?.message || e);
     }
 
     /*
@@ -5844,9 +5895,9 @@ const startServers = async () => {
       const HTTPS_PORT = PORT + 1; // 2627
       await new Promise((resolve) => {
         httpsServer.listen(HTTPS_PORT, () => {
-          //console.log(
+          console.log(
             `HTTPS сервер запущен на https://${serverIP}:${HTTPS_PORT}`
-          //);
+          );
           resolve();
         });
       });
@@ -5856,13 +5907,13 @@ const startServers = async () => {
       const HTTPS_GSI_PORT = GSI_PORT + 1; // 1351
       await new Promise((resolve) => {
         httpsGsiServer.listen(HTTPS_GSI_PORT, () => {
-          //console.log(`HTTPS GSI сервер запущен на порту ${HTTPS_GSI_PORT}`);
+          console.log(`HTTPS GSI сервер запущен на порту ${HTTPS_GSI_PORT}`);
           resolve();
         });
       });
     }*/
   } catch (error) {
-    //console.error("Ошибка при запуске серверов:", error);
+    console.error("Ошибка при запуске серверов:", error);
     process.exit(1);
   }
 };
@@ -5872,11 +5923,11 @@ startServers();
 
 // Обработка ошибок процесса
 process.on("uncaughtException", (error) => {
-  //console.error("Необработанное исключение:", error);
+  console.error("Необработанное исключение:", error);
 });
 
 process.on("unhandledRejection", (error) => {
-  //console.error("Необработанное отклонение промиса:", error);
+  console.error("Необработанное отклонение промиса:", error);
 });
 
 // Перед отправкой обновлений GSI
@@ -5889,15 +5940,8 @@ if (!global.lastGsiUpdate) {
 const now = Date.now();
 if (now - global.lastGsiUpdate > global.gsiThrottleInterval) {
   global.lastGsiUpdate = now;
-  //console.log("GSI: отправляем данные CS2 клиентам через Socket.IO");
-  try {
-    // Персональная отправка c фильтрацией
-    for (const s of getAllConnectedSockets()) emitGsiToSocket(s, gameState);
-  } catch {
-    // Fallback к общему эмиту
-    io.emit("gsi", gameState);
-    if (ioHttps) ioHttps.emit("gsi", gameState);
-  }
+  console.log("GSI: отправляем данные CS2 клиентам через Socket.IO");
+  io.emit("gsi", gameState);
 }
 
 // Добавьте эти переменные в начало модуля радара
@@ -5932,9 +5976,9 @@ function handleGsiUpdate(data) {
     gameState.lastMapName &&
     gameState.lastMapName !== data.map.name
   ) {
-    //console.log(
-    //`Принудительная очистка при смене карты: ${gameState.lastMapName} -> ${data.map.name}`
-    // );
+    console.log(
+      `Принудительная очистка при смене карты: ${gameState.lastMapName} -> ${data.map.name}`
+    );
     gameState.damageHistory = {};
     gameState.hsHistory = {};
     gameState.lastMapName = data.map.name;
@@ -6246,7 +6290,7 @@ async function recreateMatchMapsTable() {
     });
 
     if (!tableExists) {
-      //console.log("Таблица match_maps не существует. Создаем...");
+      console.log("Таблица match_maps не существует. Создаем...");
       // Создаем таблицу
       await new Promise((resolve, reject) => {
         db.run(
@@ -6278,7 +6322,7 @@ async function recreateMatchMapsTable() {
           }
         );
       });
-      //console.log("Таблица match_maps создана");
+      console.log("Таблица match_maps создана");
       return;
     }
 
@@ -6289,7 +6333,7 @@ async function recreateMatchMapsTable() {
 
     // ... остальной код функции
   } catch (error) {
-    //console.error("Ошибка при пересоздании таблицы match_maps:", error);
+    console.error("Ошибка при пересоздании таблицы match_maps:", error);
   }
 }
 
@@ -6304,12 +6348,12 @@ db.run(
   (err) => {
     if (err) {
       // Игнорируем ошибку, если колонка уже существует
-      //console.log(
-      //"Информация: колонка map_type уже существует или произошла другая ошибка:",
-      //err.message
-      //);
+      console.log(
+        "Информация: колонка map_type уже существует или произошла другая ошибка:",
+        err.message
+      );
     } else {
-      //console.log("Колонка map_type успешно добавлена в таблицу match_maps");
+      console.log("Колонка map_type успешно добавлена в таблицу match_maps");
     }
   }
 );
@@ -6318,32 +6362,28 @@ db.run(
 db.run("ALTER TABLE match_maps ADD COLUMN original_winner_team TEXT", (err) => {
   if (err) {
     // Игнорируем ошибку, если колонка уже существует
-    //console.log(
-    //"Информация: колонка original_winner_team уже существует или произошла другая ошибка:",
-    //err.message
-    //);
-    err.message;
-    //);
+    console.log(
+      "Информация: колонка original_winner_team уже существует или произошла другая ошибка:",
+      err.message
+    );
   } else {
-    console
-      .log
-      //  "Колонка original_winner_team успешно добавлена в таблицу match_maps"
-      //);
-      ();
+    console.log(
+      "Колонка original_winner_team успешно добавлена в таблицу match_maps"
+    );
   }
 });
 
 db.run("ALTER TABLE match_maps ADD COLUMN original_winner_logo TEXT", (err) => {
   if (err) {
     // Игнорируем ошибку, если колонка уже существует
-    //console.log(
-    //"Информация: колонка original_winner_logo уже существует или произошла другая ошибка:",
-    //err.message
-    //);
+    console.log(
+      "Информация: колонка original_winner_logo уже существует или произошла другая ошибка:",
+      err.message
+    );
   } else {
-    //console.log(
-    //"Колонка original_winner_logo успешно добавлена в таблицу match_maps"
-    //);
+    console.log(
+      "Колонка original_winner_logo успешно добавлена в таблицу match_maps"
+    );
   }
 });
 
@@ -6811,6 +6851,123 @@ function broadcastGsiData(data) {
   broadcastToAllClients("gsi", data);
 }
 
+// Определение точки закладки (A/B) по названию карты и позиции бомбы/игрока
+function findBombSite(mapName, position) {
+  if (!mapName || !position) return null;
+  const x = Number(position.x ?? position[0]);
+  const y = Number(position.y ?? position[1]);
+  const z = Number(position.z ?? position[2]);
+  if ([x, y, z].some((v) => Number.isNaN(v))) return null;
+
+  const mapReference = {
+    de_mirage: (p) => (p.y < -600 ? "A" : "B"),
+    de_cache: (p) => (p.y > 0 ? "A" : "B"),
+    de_overpass: (p) => (p.z > 400 ? "A" : "B"),
+    de_nuke: (p) => (p.z > -500 ? "A" : "B"),
+    de_dust2: (p) => (p.x > -500 ? "A" : "B"),
+    de_inferno: (p) => (p.x > 1400 ? "A" : "B"),
+    de_vertigo: (p) => (p.x > -1400 ? "A" : "B"),
+    de_train: (p) => (p.y > -450 ? "A" : "B"),
+  };
+
+  const fn = mapReference[mapName];
+  if (!fn) return null;
+  return fn({ x, y, z });
+}
+
+// =========================
+// League of Legends GSI pull
+// =========================
+const httpModule = require("http");
+
+function fetchJsonFromLocal(pathname, timeoutMs = 500) {
+  return new Promise((resolve) => {
+    const req = httpModule.request(
+      {
+        host: "127.0.0.1",
+        port: 1350,
+        path: pathname,
+        method: "GET",
+        timeout: timeoutMs,
+        headers: { Accept: "application/json" },
+      },
+      (res) => {
+        if (res.statusCode && res.statusCode >= 400) {
+          res.resume();
+          resolve(null);
+          return;
+        }
+        let data = "";
+        res.setEncoding("utf8");
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch {
+            resolve(null);
+          }
+        });
+      }
+    );
+    req.on("error", () => resolve(null));
+    req.on("timeout", () => {
+      try {
+        req.destroy();
+      } catch {}
+      resolve(null);
+    });
+    req.end();
+  });
+}
+
+let lastLolBroadcastTimestamp = 0;
+async function pollLeagueOfLegendsAndBroadcast() {
+  try {
+    // Берем актуальное игровое время, если доступно, чтобы запросить /api/time при клиентском режиме
+    const currentLolGame = await fetchJsonFromLocal("/api/game");
+    const gameTime = Number(currentLolGame?.gameTime ?? 0) || 0;
+
+    // Вытягиваем игроки/статистика; если сервер в client-режиме, /api/time отдаст объединенный пакет
+    let players = await fetchJsonFromLocal("/api/players");
+    let statistics = await fetchJsonFromLocal("/api/statistics");
+
+    // Попытка получить агрегированный пакет, если прямые роуты неактивны
+    if (!players || !statistics) {
+      const combined = await fetchJsonFromLocal(
+        `/api/time?gameTime=${gameTime}`
+      );
+      if (
+        combined &&
+        combined.players &&
+        combined.statistics &&
+        combined.game
+      ) {
+        players = combined.players;
+        statistics = combined.statistics;
+      }
+    }
+
+    if (!currentLolGame && !players && !statistics) return; // аддон не активен
+
+    // Обновляем общее состояние
+    gameState.lol = {
+      game: currentLolGame || gameState.lol?.game || null,
+      players: players || gameState.lol?.players || [],
+      statistics: statistics || gameState.lol?.statistics || null,
+    };
+
+    // Ограничим частоту рассылки
+    const now = Date.now();
+    if (now - lastLolBroadcastTimestamp >= 250) {
+      lastLolBroadcastTimestamp = now;
+      broadcastGsiData(gameState);
+    }
+  } catch {}
+}
+
+// Запускаем цикл опроса LoL аддона, если он доступен локально
+setInterval(pollLeagueOfLegendsAndBroadcast, 500);
+
 // Добавьте после строки 3867
 
 // Создаем отдельный обработчик GSI для HTTPS, если он настроен
@@ -6857,7 +7014,23 @@ if (ioHttps) {
 
     socket.on("ready", () => {
       console.log("Клиент на HTTPS WebSocket отправил ready");
-      emitGsiToSocket(socket, gameState);
+      try {
+        const initial = { ...gameState };
+        try {
+          const nc = global.netcon;
+          initial.netcon_active = Boolean(
+            nc &&
+            nc.connected === true &&
+            String(nc.host) === "127.0.0.1" &&
+            Number(nc.port) === 2121
+          );
+        } catch {}
+        // Убрано: hlae_cs2_tools_active больше не включаем в GSI
+        if (initial.hlae_status) delete initial.hlae_status;
+        socket.emit("gsi", initial);
+      } catch {
+        socket.emit("gsi", gameState);
+      }
       console.log("Отправлены начальные GSI данные через HTTPS WebSocket");
     });
 
@@ -7024,19 +7197,19 @@ function compareVersions(v1, v2) {
 // Функция для проверки наличия обновлений
 async function checkForUpdates() {
   try {
-    //console.log("Проверка обновлений...");
-    //console.log(`Текущая версия: ${currentVersion}`);
+    console.log("Проверка обновлений...");
+    console.log(`Текущая версия: ${currentVersion}`);
 
     if (!fetchFn) {
-      //console.warn(
-      //"fetch недоступен. Пропускаем проверку обновлений (требуется Node 18+)"
-      //);
+      console.warn(
+        "fetch недоступен. Пропускаем проверку обновлений (нужен Node 18+ или node-fetch)"
+      );
       return false;
     }
 
     // Получаем последнюю версию с GitHub
     const response = await fetchFn(
-      "https://raw.githubusercontent.com/fyflo/SHUD/main/package.json",
+      "https://raw.githubusercontent.com/fyflo/CS2_Manager_HUD/main/package.json",
       {
         headers: { "Cache-Control": "no-cache" },
         cache: "no-store",
@@ -7057,14 +7230,14 @@ async function checkForUpdates() {
       console.log(`Доступна новая версия: ${latestVersion}`);
       console.log(`Ваша текущая версия: ${currentVersion}`);
       console.log(`Пожалуйста, обновите приложение:`);
-      console.log(`https://github.com/fyflo/SHUD/releases/latest`);
+      console.log(`https://github.com/fyflo/CS2_Manager_HUD/releases/latest`);
       console.log(`=================================`);
 
       // Добавляем информацию об обновлении в gameState для отображения в HUD
       gameState.update_available = {
         current: currentVersion,
         latest: latestVersion,
-        update_url: "https://github.com/fyflo/SHUD/releases/latest",
+        update_url: "https://github.com/fyflo/CS2_Manager_HUD/releases/latest",
       };
 
       return true;
@@ -7073,8 +7246,8 @@ async function checkForUpdates() {
       return false;
     }
   } catch (error) {
-    //console.error("Ошибка при проверке обновлений:", error);
-    //console.log("Детали ошибки:", error.message);
+    console.error("Ошибка при проверке обновлений:", error);
+    console.log("Детали ошибки:", error.message);
     return false;
   }
 }
@@ -7094,7 +7267,7 @@ app.get("/api/check-updates", async (req, res) => {
         update_available: true,
         current_version: currentVersion,
         latest_version: gameState.update_available.latest,
-        update_url: "https://github.com/fyflo/SHUD/releases/latest",
+        update_url: "https://github.com/fyflo/CS2_Manager_HUD/releases/latest",
       });
     } else {
       res.json({
@@ -7115,7 +7288,7 @@ app.get("/api/update-info", (req, res) => {
       update_available: true,
       current_version: currentVersion,
       latest_version: gameState.update_available.latest,
-      update_url: "https://github.com/fyflo/SHUD/releases/latest",
+      update_url: "https://github.com/fyflo/CS2_Manager_HUD/releases/latest",
     });
   } else {
     res.json({
@@ -7145,7 +7318,7 @@ app.get("/api/version", (req, res) => {
     const packageInfo = require("../package.json");
     res.json({ version: packageInfo.version });
   } catch (error) {
-    //console.error("Ошибка при чтении package.json:", error);
+    console.error("Ошибка при чтении package.json:", error);
     res
       .status(500)
       .json({ version: "0.0.0", error: "Не удалось прочитать версию" });
@@ -7155,7 +7328,7 @@ app.get("/api/version", (req, res) => {
 // Добавляем колонку format в таблицу matches, если она не существует
 db.run("PRAGMA table_info(matches)", function (err, rows) {
   if (err) {
-    //console.error("Ошибка при получении информации о таблице matches:", err);
+    console.error("Ошибка при получении информации о таблице matches:", err);
     return;
   }
 
@@ -7168,10 +7341,10 @@ db.run("PRAGMA table_info(matches)", function (err, rows) {
     // Если rows не массив, используем другой подход
     db.all("PRAGMA table_info(matches)", function (err, rows) {
       if (err) {
-        //console.error(
-        //"Ошибка при получении информации о таблице matches:",
-        //err
-        //);
+        console.error(
+          "Ошибка при получении информации о таблице matches:",
+          err
+        );
         return;
       }
 
@@ -7195,9 +7368,9 @@ function addFormatColumn() {
     "ALTER TABLE matches ADD COLUMN format TEXT DEFAULT 'bo1'",
     function (err) {
       if (err) {
-        //console.error("Ошибка при добавлении колонки format:", err);
+        console.error("Ошибка при добавлении колонки format:", err);
       } else {
-        //console.log("Колонка format успешно добавлена в таблицу matches");
+        console.log("Колонка format успешно добавлена в таблицу matches");
       }
     }
   );
@@ -7218,7 +7391,7 @@ function addFormatColumn() {
     `,
     function (err) {
       if (err) {
-        //console.error("Ошибка при создании временной таблицы:", err);
+        console.error("Ошибка при создании временной таблицы:", err);
         return;
       }
 
@@ -7232,17 +7405,17 @@ function addFormatColumn() {
         `,
         function (err) {
           if (err) {
-            //console.error(
-            //"Ошибка при копировании данных во временную таблицу:",
-            //err
-            //);
+            console.error(
+              "Ошибка при копировании данных во временную таблицу:",
+              err
+            );
             return;
           }
 
           // Удаляем старую таблицу
           db.run("DROP TABLE matches", function (err) {
             if (err) {
-              //console.error("Ошибка при удалении старой таблицы:", err);
+              console.error("Ошибка при удалении старой таблицы:", err);
               return;
             }
 
@@ -7251,14 +7424,14 @@ function addFormatColumn() {
               "ALTER TABLE matches_temp RENAME TO matches",
               function (err) {
                 if (err) {
-                  //console.error(
-                  //"Ошибка при переименовании временной таблицы:",
-                  //err
-                  //);
+                  console.error(
+                    "Ошибка при переименовании временной таблицы:",
+                    err
+                  );
                 } else {
-                  //console.log(
-                  //"Таблица matches успешно пересоздана со столбцом format"
-                  //);
+                  console.log(
+                    "Таблица matches успешно пересоздана со столбцом format"
+                  );
                 }
               }
             );
@@ -7317,7 +7490,7 @@ app.get("/api/positions", (req, res) => {
 
     res.json(response);
   } catch (error) {
-    //console.error("Ошибка при получении позиций игроков:", error);
+    console.error("Ошибка при получении позиций игроков:", error);
     res.status(500).json({ error: "Внутренняя ошибка сервера" });
   }
 });
@@ -7428,7 +7601,7 @@ app.post("/api/launch-cs2-exec", (req, res) => {
     if (!safe)
       return res.status(400).json({ error: "Некорректное имя конфига" });
 
-    const cmd = `"${steamExe}" -applaunch 730 -novid +exec ${safe} +exec shud_color`;
+    const cmd = `"${steamExe}" -applaunch 730 -novid +exec ${safe}`;
     const child = exec(cmd, { windowsHide: true, detached: true });
     if (child && child.unref) child.unref();
     return res.json({ success: true });
@@ -7489,7 +7662,7 @@ app.post("/api/launch-hlae", (req, res) => {
     // Формируем команду запуска HLAE c customLoader
     // Важно корректно экранировать кавычки в -cmdLine
     // Принудительно используем DX11, чтобы AfxHookSource2 корректно подцепился
-    const cmdLineInner = `-steam -insecure -console -dx11 -afxDisableSteamStorage +exec ${safeExec} +exec shud_color`;
+    const cmdLineInner = `-steam -insecure -console -dx11 -afxDisableSteamStorage +exec ${safeExec}`;
     const noGuiFlag = req.body?.showGui ? "" : " -noGui";
     const cmd = `"${hlaePath}" -customLoader${noGuiFlag} -autoStart -hookDllPath "${hookDll}" -programPath "${cs2Exe}" -cmdLine "${cmdLineInner}"`;
 
@@ -7575,7 +7748,7 @@ app.post("/api/launch-cs2-hlae-insecure", async (req, res) => {
       : "observer_cs2_tools_killfeed";
 
     // Командная строка для CS2: -tools, -insecure и +exec <cfg>
-    const cmdLineInner = `-steam -insecure -console -tools -noassetbrowser -novid +hideconsole +mirv_cvar_unhide_all +exec ${safeExec} +exec shud_color -netconport 2121`;
+    const cmdLineInner = `-steam -insecure -console -tools -noassetbrowser -novid +hideconsole +mirv_cvar_unhide_all +exec ${safeExec} -netconport 2121`;
 
     // Запускаем только customLoader, без GUI и дополнительных тулов (interop не трогаем вообще)
     const cmd = `"${hlaeExe}" -customLoader -noGui -autoStart -hookDllPath "${hookDll}" -programPath "${cs2Exe}" -cmdLine "${cmdLineInner}"`;
@@ -7661,9 +7834,9 @@ function detectAndEmitKillfeed(data) {
         gameState.hlae_status = gameState.hlae_status || {};
         gameState.hlae_status.killfeed_on = false; // сбросим флаг до новых событий HLAE
       } catch {}
-      //console.log(
-      //"[KILLFEED] Очищен при freezetime (killfeed + HLAE_killfeed)"
-      //);
+      console.log(
+        "[KILLFEED] Очищен при freezetime (killfeed + HLAE_killfeed)"
+      );
 
       // Отправляем событие очистки killfeed всем клиентам
       broadcastToAllClients("killfeed", { type: "clear" });
@@ -7762,6 +7935,7 @@ function detectAndEmitKillfeed(data) {
 
       const deathIncreased = curDeaths > prevEntry.deaths;
       const droppedToZero = prevHp > 0 && curHealth === 0;
+      const isDisconnected = curHealth === 0 && !deathIncreased && prevHp > 0;
 
       // Используем оба фактора для более надежной детекции смертей
       if (deathIncreased && droppedToZero) {
@@ -7833,6 +8007,60 @@ function detectAndEmitKillfeed(data) {
         //  prevEntry.deaths
         //} -> ${curDeaths}, health: ${curHealth}`
         //);
+      }
+
+      // Обработка отключений игроков (HP = 0, но deaths не увеличился)
+      if (isDisconnected) {
+        // Проверяем, не обрабатывали ли мы уже это отключение
+        if (!gameState.processedDisconnects) {
+          gameState.processedDisconnects = new Set();
+        }
+
+        if (!gameState.processedDisconnects.has(steamId)) {
+          // Добавляем отключение в killfeed
+          const disconnectKill = {
+            killer: "world",
+            victim: player?.name || steamId,
+            killer_team: "",
+            victim_team: player?.team || "",
+            weapon: "disconnect",
+            disconnect: true,
+            timestamp: Date.now(),
+            source: "gsi",
+          };
+
+          // Добавляем в killfeed
+          if (!Array.isArray(gameState.killfeed)) gameState.killfeed = [];
+          gameState.killfeed.push(disconnectKill);
+          if (gameState.killfeed.length > 100) gameState.killfeed.shift();
+
+          // Отправляем клиентам
+          const payload = { type: "new_kill", kill: disconnectKill };
+          if (global.broadcastToAllClients) {
+            global.broadcastToAllClients("killfeed", payload);
+          }
+
+          // Отмечаем как обработанное
+          gameState.processedDisconnects.add(steamId);
+
+          console.log(
+            `[DISCONNECT] Player disconnected: ${
+              player?.name || steamId
+            } (${steamId})`
+          );
+        }
+      } else if (
+        curHealth > 0 &&
+        gameState.processedDisconnects &&
+        gameState.processedDisconnects.has(steamId)
+      ) {
+        // Игрок вернулся - убираем из обработанных отключений
+        gameState.processedDisconnects.delete(steamId);
+        console.log(
+          `[DISCONNECT] Player reconnected: ${
+            player?.name || steamId
+          } (${steamId})`
+        );
       }
 
       // Детекция киллера: сперва по round_kills, при отсутствии — по match_stats.kills
@@ -8244,6 +8472,56 @@ function detectAndEmitKillfeed(data) {
       }
     }
 
+    // Обработка суицидов: victims без киллера в активном раунде
+    for (const vic of victims) {
+      // Проверяем, что это подтвержденная смерть (deaths увеличился)
+      if (vic.confirmed && vic.deaths > vic.previousDeaths) {
+        // Проверяем, что раунд активный (не freezetime/paused)
+        const roundPhase = data.round?.phase;
+        const isActiveRound =
+          roundPhase && !["freezetime", "paused"].includes(roundPhase);
+
+        if (isActiveRound) {
+          // Проверяем, что никто не получил +1 kill (нет киллера)
+          const hasKiller = killers.some((kil) => kil.steamId !== vic.steamId);
+
+          if (!hasKiller) {
+            // Это суицид - создаем запись
+            const suicideKill = {
+              killer: vic.player?.name || vic.steamId,
+              killer_team: vic.player?.team || "",
+              killer_side: vic.player?.team || "",
+              killer_steamid: vic.steamId,
+              victim: vic.player?.name || vic.steamId,
+              victim_team: vic.player?.team || "",
+              victim_steamid: vic.steamId,
+              weapon: "suicide",
+              suicide: true,
+              timestamp: Date.now(),
+              source: "gsi",
+            };
+
+            // Добавляем в killfeed
+            if (!Array.isArray(gameState.killfeed)) gameState.killfeed = [];
+            gameState.killfeed.push(suicideKill);
+            if (gameState.killfeed.length > 100) gameState.killfeed.shift();
+
+            // Отправляем клиентам
+            const payload = { type: "new_kill", kill: suicideKill };
+            if (global.broadcastToAllClients) {
+              global.broadcastToAllClients("killfeed", payload);
+            }
+
+            console.log(
+              `[SUICIDE] Player suicide: ${vic.player?.name || vic.steamId} (${
+                vic.steamId
+              })`
+            );
+          }
+        }
+      }
+    }
+
     // Обновляем prev снапшот
     const nextPrev = {};
     for (const [sid, pl] of Object.entries(allplayers)) {
@@ -8498,7 +8776,7 @@ app.post("/api/popup-word", (req, res) => {
         timestamp: timestamp || Date.now(),
       });
 
-      //console.log(`Popup word sent to HUD: ${word}`);
+      console.log(`Popup word sent to HUD: ${word}`);
       res.json({ success: true, message: "Popup word sent to HUD" });
     } else {
       res
@@ -8506,7 +8784,7 @@ app.post("/api/popup-word", (req, res) => {
         .json({ success: false, message: "Invalid popup word data" });
     }
   } catch (error) {
-    //console.error("Error handling popup word:", error);
+    console.error("Error handling popup word:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
@@ -8527,7 +8805,7 @@ app.post("/api/kills-leaderboard", (req, res) => {
         timestamp: timestamp || Date.now(),
       });
 
-      //console.log(`Kills leaderboard ${action} command sent to HUD`);
+      console.log(`Kills leaderboard ${action} command sent to HUD`);
       res.json({
         success: true,
         message: `Kills leaderboard ${action} command sent to HUD`,
@@ -8538,7 +8816,7 @@ app.post("/api/kills-leaderboard", (req, res) => {
         .json({ success: false, message: "Invalid kills-leaderboard data" });
     }
   } catch (error) {
-    //console.error("Error handling kills-leaderboard:", error);
+    console.error("Error handling kills-leaderboard:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
@@ -8549,7 +8827,7 @@ app.get("/api/dota2-cfg-check", (req, res) => {
     const result = checkDota2CfgInstallation(req.query?.path);
     res.json(result);
   } catch (error) {
-    //console.error("Error checking Dota 2 CFG installation:", error);
+    console.error("Error checking Dota 2 CFG installation:", error);
     res.status(500).json({
       installed: false,
       error: "Ошибка при проверке установки CFG файла Dota 2",
@@ -8563,7 +8841,7 @@ app.post("/api/dota2-cfg-install", (req, res) => {
     const result = installDota2Cfg(req.body?.path || req.query?.path);
     res.json(result);
   } catch (error) {
-    //console.error("Error installing Dota 2 CFG:", error);
+    console.error("Error installing Dota 2 CFG:", error);
     res.status(500).json({
       success: false,
       error: "Ошибка при установке CFG файла Dota 2",
@@ -8577,7 +8855,7 @@ app.get("/api/dota2-cfg-remove", (req, res) => {
     const result = removeDota2Cfg(req.query?.path);
     res.json(result);
   } catch (error) {
-    //console.error("Error removing Dota 2 CFG:", error);
+    console.error("Error removing Dota 2 CFG:", error);
     res.status(500).json({
       success: false,
       error: "Ошибка при удалении CFG файла Dota 2",

@@ -32,11 +32,11 @@ class NetconListener {
         if (name && String(name).length) this.steamToName[sid] = String(name);
       }
       if (name || steamid) {
-        //console.log(
-        //  `[NETCON] identity: userid=${uid} name=${name || ""} steamid=${
-        //    steamid || ""
-        //  }`
-        //);
+        console.log(
+          `[NETCON] identity: userid=${uid} name=${name || ""} steamid=${
+            steamid || ""
+          }`
+        );
       }
     } catch {}
   }
@@ -79,7 +79,7 @@ class NetconListener {
         { host: this.host, port: this.port },
         () => {
           this.connected = true;
-          //console.log(`[NETCON] connected to ${this.host}:${this.port}`);
+          console.log(`[NETCON] connected to ${this.host}:${this.port}`);
           try {
             global.gameState = global.gameState || {};
             global.gameState.hlae_status = global.gameState.hlae_status || {};
@@ -117,13 +117,12 @@ class NetconListener {
       });
 
       this.client.on("error", (err) => {
-        //console.log("[NETCON] error:", err?.message || err);
+        console.log("[NETCON] error:", err?.message || err);
       });
 
       this.client.on("close", () => {
-        if (this.connected)
-          //console.log("[NETCON] connection closed");
-          this.connected = false;
+        if (this.connected) console.log("[NETCON] connection closed");
+        this.connected = false;
         try {
           global.gameState = global.gameState || {};
           global.gameState.hlae_status = global.gameState.hlae_status || {};
@@ -132,7 +131,7 @@ class NetconListener {
         setTimeout(() => this._connect(), this.reconnectDelayMs);
       });
     } catch (e) {
-      //console.log("[NETCON] connect failed:", e?.message || e);
+      console.log("[NETCON] connect failed:", e?.message || e);
       setTimeout(() => this._connect(), this.reconnectDelayMs);
     }
   }
@@ -146,7 +145,7 @@ class NetconListener {
         )
       ) {
         this.inStatusTable = true;
-        //console.log("[NETCON] status header detected");
+        console.log("[NETCON] status header detected");
         return;
       }
       if (this.inStatusTable) {
@@ -161,9 +160,9 @@ class NetconListener {
           const name = m[2];
           const steamish = m[3];
           this._setIdentity(uid, name, steamish);
-          //console.log(
-          //  `[NETCON] status row: uid=${uid} name=${name} steam=${steamish}`
-          //);
+          console.log(
+            `[NETCON] status row: uid=${uid} name=${name} steam=${steamish}`
+          );
           return;
         }
         // Завершение таблицы при встрече пустой строки или другой секции
@@ -214,9 +213,9 @@ class NetconListener {
   _finalizeCurrentEvent() {
     if (!this.currentEvent) return;
     try {
-      //console.log(
-      //  `[NETCON] event: ${this.currentEvent.name} (tick=${this.currentEvent.tick})`
-      //);
+      console.log(
+        `[NETCON] event: ${this.currentEvent.name} (tick=${this.currentEvent.tick})`
+      );
       const name = this.currentEvent.name;
       const tick = this.currentEvent.tick;
       const fields = this.currentEvent.fields || {};
@@ -270,9 +269,9 @@ class NetconListener {
           victimName = this._resolveNameByUserId(victimId);
 
         if (!attackerName || !victimName) {
-          //console.log(
-          //  `[NETCON] resolve names: killerId=${killerId} -> "${attackerName}" | victimId=${victimId} -> "${victimName}"`
-          //);
+          console.log(
+            `[NETCON] resolve names: killerId=${killerId} -> "${attackerName}" | victimId=${victimId} -> "${victimName}"`
+          );
           // Триггерим status для пополнения кэша, с троттлингом
           const now = Date.now();
           this._lastStatusReq = this._lastStatusReq || 0;
