@@ -285,7 +285,7 @@ body {
   width: 140px;
   /* height: 250px; */
   position: fixed;
-  bottom: 0px;
+  bottom: 200px;
   left: 21.5%;
   transform: translateX(-50%);
   /* background-color: var(--main-panel-color); */
