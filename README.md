@@ -70,6 +70,8 @@ Dota 2 - интеграция с игровыми данными
 <img width="1919" height="1080" alt="image" src="https://github.com/user-attachments/assets/09d1c5ce-e743-4409-a44e-276b9f521b33" />
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a7f22a52-5467-4eb5-b7e2-77e16cd7dd69" />
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e8fc4138-7858-4337-8137-910ca71bf6f4" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/28497259-28e5-4402-938e-e578ff9089ed" />
+
 
 
 
