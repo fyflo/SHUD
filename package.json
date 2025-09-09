@@ -1,6 +1,6 @@
 {
   "name": "SHUD",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "main": "server/server.js",
   "scripts": {
     "desktop": "electron ./electron/main.js"
@@ -28,3 +28,4 @@
     "electron": "^31.2.0"
   }
 }
+
