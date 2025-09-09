@@ -1,0 +1,80 @@
+/* Стили для отображения иконок утилит с одинаковыми размерами и loss bonus */
+.utility1_img,
+.utility2_img,
+.utility3_img,
+.utility4_img,
+.utility5_img,
+.kit_img,
+.taser_img {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  filter: invert(1) drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: all 0.3s ease;
+  transform-origin: center;
+  opacity: 0.9;
+}
+
+.utility1_img:hover,
+.utility2_img:hover,
+.utility3_img:hover,
+.utility4_img:hover,
+.utility5_img:hover,
+.kit_img:hover,
+.taser_img:hover {
+  transform: scale(1.1);
+  filter: invert(1) brightness(1.2)
+    drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+  opacity: 1;
+}
+
+.utility1_text,
+.utility2_text,
+.utility3_text,
+.utility4_text,
+.utility5_text,
+.kit_text,
+.taser_text {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  font-size: 22px;
+  font-weight: bold;
+  text-align: center;
+  vertical-align: text-bottom;
+  line-height: 40px;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+  transition: all 0.2s ease;
+}
+
+/* Стили для Loss Bonus */
+.loss_bonus_left_text,
+.loss_bonus_right_text {
+  position: relative;
+  width: 45%;
+  height: 50%;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 30px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #ffffff;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+}
+
+.value_left_text,
+.value_right_text {
+  position: relative;
+  width: 100%;
+  height: 50%;
+  font-size: 22px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 30px;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+  transition: color 0.3s ease;
+}

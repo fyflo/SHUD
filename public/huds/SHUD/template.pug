@@ -1,0 +1,432 @@
+doctype html
+html
+    head
+        title SHUD
+        link(rel='stylesheet', href=`/hud/${hudId}/style.css`)
+        link(rel='stylesheet', href=`/hud/${hudId}/animate.css`)
+        link(rel='stylesheet', href=`/hud/${hudId}/utility-icons.css`)
+        link(rel='stylesheet', href=`/hud/${hudId}/player_grenade.css`)
+        script(src="/js/jquery-3.7.1.min.js")
+        script(src='/socket.io/socket.io.js')
+        script(src='/js/gsiManager.js')
+    body
+      .layout.shud-layout
+        .layout-container.shud-layout-container.layouten_normal
+          .layout.shud-layout
+            .layout_normal
+            .players_alive_container.shud-players-alive-container
+              .players_alive.shud-players-alive
+                .team_counter_left
+                .vs_counter
+                .team_counter_right
+            #killfeed-container
+              .killfeed-entries
+            #radar-container
+              #radarBuyZones
+              #radar-players
+                img.player-avatar
+                #bomb-container
+              #smokes
+              #flashbangs
+              #hegrenades
+              #infernos
+            #matchbar.shud-matchbar
+              .matchbar-inner
+                .team.left
+                  .bloben-container
+                    .background-shape
+                  .name_logo.left
+                    .logo
+                      img
+                    .team-name.left
+                  .team-score.left
+                    .team-series
+                    .score 0
+                #timer.no-bo
+                  #round_timer_text 1:52
+                  #round_now Round 1/24
+                  #bomb_container
+                    .bombtimer
+                      .fill
+                  .defuse_plant_container
+                    .defuse_plant_bar#defuse_planting_bar
+                      .defuse_fill
+                // timeout indicator
+                #time_out_team
+                  #time_out_team_text
+                .team.right
+                  .bloben-container
+                    .background-shape
+                  .name_logo.right
+                    .logo
+                      img
+                    .team-name.right 
+                  .team-score.right
+                    .team-series
+                    .score 0
+            .map-veto.shud-map-veto
+              // First map
+              #map_pick_team_1.map-strip
+                .map-inner
+                  .map_pick_team_1_pick.logo-slot
+                  .map_pick_team_1_map.map-name
+                  .map_pick_team_1_score.map-score
+                  .map_pick_team_1_win.win-slot
+              // Second map
+              #map_pick_team_2.map-strip
+                .map-inner
+                  .map_pick_team_2_pick.logo-slot
+                  .map_pick_team_2_map.map-name
+                  .map_pick_team_2_score.map-score
+                  .map_pick_team_2_win.win-slot
+              // Third (decider) map
+              #decider.map-strip
+                .map-inner
+                  .decider_pick.logo-slot
+                  .decider_map.map-name
+                  .decider_score.map-score
+                  .decider_win.win-slot
+              // For bo5
+              #map_pick_team_3.map-strip
+                .map-inner
+                  .map_pick_team_3_pick.logo-slot
+                  .map_pick_team_3_map.map-name
+                  .map_pick_team_3_score.map-score
+                  .map_pick_team_3_win.win-slot
+              #map_pick_team_4.map-strip
+                .map-inner
+                  .map_pick_team_4_pick.logo-slot
+                  .map_pick_team_4_map.map-name
+                  .map_pick_team_4_score.map-score
+                  .map_pick_team_4_win.win-slot
+              #decider2.map-strip
+                .map-inner
+                  .decider2_pick.logo-slot
+                  .decider_map2.map-name
+                  .decider_score2.map-score
+                  .decider2_win.win-slot
+            .observed.shud-observed
+              .avatar
+                img(height='140' width='140' alt='Avatar')
+              .player_data
+                .username_container
+                  .username 
+                  .state
+                    .health 100
+                    .armor_indicator.ind
+                .stats-row
+                  .kills 0
+                  .deaths 0
+                  .round_kills 0
+                  .adr 0
+                .grenades
+                .triangle
+            .teambox.shud-teambox.left.normal
+              .player.left
+                .obs-slot_1 1
+                .player-inner
+                  .avatar
+                  .hp_bar_container
+                    .player_name_armor_health.left
+                      .username 
+                      .health_armor
+                        .health_amount 87
+                        .armor_indicator.ind
+                    .hp_bar_outer
+                      .hp_bar
+                      .hp_bar_damage
+                  .health_armor_2
+                    .health_amount 87
+                    .armor_indicator.ind
+                  .kills 0
+                  .deaths 0
+                  .round_kills 0
+                  .money 0
+                  .primary_container
+                  .grenades
+              .player.left
+                .obs-slot_2 
+                .player-inner
+                  .avatar
+                  .hp_bar_container
+                    .player_name_armor_health.left
+                      .username 
+                      .health_armor
+                        .health_amount
+                        .armor_indicator.ind
+                    .hp_bar_outer
+                      .hp_bar
+                      .hp_bar_damage
+                  .kills 0
+                  .deaths 1
+                  .round_kills 0
+                  .money 0
+                  .primary_container
+                  .grenades
+              .player.left.T
+                .obs-slot_3 8
+                .player-inner
+                  .avatar
+                  .hp_bar_container
+                    .player_name_armor_health.left
+                      .username 
+                      .health_armor
+                        .health_amount 100
+                        .armor_indicator.ind
+                    .hp_bar_outer
+                      .hp_bar
+                      .hp_bar_damage
+                  .health_armor_2
+                    .health_amount 100
+                    .armor_indicator.ind
+                  .kills 0
+                  .deaths 0
+                  .round_kills 0
+                  .money 0
+                  .primary_container
+                  .grenades
+              .player.left.T
+                .obs-slot_4 9
+                .player-inner
+                  .avatar
+                  .hp_bar_container
+                    .player_name_armor_health.left
+                      .username 
+                      .health_armor
+                        .health_amount 100
+                        .armor_indicator.ind
+                    .hp_bar_outer
+                      .hp_bar
+                      .hp_bar_damage
+                  .health_armor_2
+                    .health_amount 100
+                    .armor_indicator.ind
+                  .kills 0
+                  .deaths 0
+                  .round_kills 0
+                  .money 0
+                  .primary_container
+                  .grenades
+              .player.left
+                .obs-slot_5 10
+                .player-inner
+                  .avatar
+                  .hp_bar_container
+                    .player_name_armor_health.left
+                      .username 
+                      .health_armor
+                        .health_amount
+                        .armor_indicator.ind
+                    .hp_bar_outer
+                      .hp_bar
+                      .hp_bar_damage
+                  .health_armor_2
+                    .health_amount
+                  .kills 0
+                  .deaths 1
+                  .round_kills 0
+                  .money 0
+                  .primary_container
+                  .grenades
+            .teambox.shud-teambox.right.normal
+              .player.right
+                .obs-slot_1 0
+                .player-inner
+                  .avatar
+                  .hp_bar_container
+                    .player_name_armor_health.right
+                      .username 
+                      .health_armor
+                        .health_amount 100
+                        .armor_indicator.ind
+                    .hp_bar_outer
+                      .hp_bar
+                      .hp_bar_damage
+                  .health_armor_2
+                    .health_amount 100
+                    .armor_indicator.ind
+                  .kills 0
+                  .deaths 0
+                  .round_kills 0
+                  .money 0
+                  .primary_container
+                  .grenades
+              .player.right
+                .obs-slot_2 1
+                .player-inner
+                  .avatar
+                  .hp_bar_container
+                    .player_name_armor_health.right
+                      .username 
+                      .health_armor
+                        .health_amount
+                        .armor_indicator.ind
+                    .hp_bar_outer
+                      .hp_bar
+                      .hp_bar_damage
+                  .health_armor_2
+                    .health_amount
+                  .kills 0
+                  .deaths 0
+                  .round_kills 0
+                  .money 0
+                  .primary_container
+                  .grenades
+              .player.right
+                .obs-slot_3 2
+                .player-inner
+                  .avatar
+                  .hp_bar_container
+                    .player_name_armor_health.right
+                      .username 
+                      .health_armor
+                        .health_amount 100
+                        .armor_indicator.ind
+                    .hp_bar_outer
+                      .hp_bar
+                      .hp_bar_damage
+                  .health_armor_2
+                    .health_amount 100
+                    .armor_indicator.ind
+                  .kills 0
+                  .deaths 0
+                  .round_kills 0
+                  .money 0
+                  .primary_container
+                  .grenades
+              .player.right
+                .obs-slot_4 3
+                .player-inner
+                  .avatar
+                  .hp_bar_container
+                    .player_name_armor_health.right
+                      .username 
+                      .health_armor
+                        .health_amount 100
+                        .armor_indicator.ind
+                    .hp_bar_outer
+                      .hp_bar
+                      .hp_bar_damage
+                  .health_armor_2
+                    .health_amount 100
+                    .armor_indicator.ind
+                  .kills 0
+                  .deaths 0
+                  .round_kills 0
+                  .money 0
+                  .primary_container
+                  .grenades
+              .player.right
+                .obs-slot_5 4
+                .player-inner
+                  .avatar
+                  .hp_bar_container
+                    .player_name_armor_health.right
+                      .username 
+                      .health_armor
+                        .health_amount 100
+                        .armor_indicator.ind
+                    .hp_bar_outer
+                      .hp_bar
+                      .hp_bar_damage
+                  .health_armor_2
+                    .health_amount 100
+                    .armor_indicator.ind
+                  .kills 0
+                  .deaths 0
+                  .round_kills 0
+                  .money 0
+                  .primary_container
+                  .grenades
+              .player.right
+                .obs-slot_6 5
+                .player-inner
+                  .avatar
+                  .hp_bar_container
+                    .player_name_armor_health.right
+                      .username 
+                      .health_armor
+                        .health_amount 100
+                        .armor_indicator.ind
+                    .hp_bar_outer
+                      .hp_bar
+                      .hp_bar_damage
+                  .health_armor_2
+                    .health_amount 100
+                    .armor_indicator.ind
+                  .deaths 0
+                  .round_kills 0
+                  .money 0
+                  .primary_container
+                  .grenades
+            .winner-announcement.shud-winner-announcement
+              .body-outer
+                .body-inner
+                  .team-text
+                    .winner_logo
+                    .winner_team
+                    .winner-text WINS
+            .boxes
+                  #utility_left
+                    #info_team
+                      .eco_left
+                        .eco_text
+                      .loss_bonus_left_text
+                    .utility
+                      .utility1
+                        .utility1_img
+                        .utility1_text
+                      .utility2
+                        .utility2_img
+                        .utility2_text
+                      .utility3
+                        .utility3_img
+                        .utility3_text
+                      .utility4
+                        .utility4_img
+                        .utility4_text
+                      .utility5
+                        .utility5_img
+                        .utility5_text
+                      .kit
+                        .kit_img
+                        .kit_text
+                      .taser
+                        .taser_img
+                        .taser_text
+                  #utility_right
+                    #info_team
+                      .eco_right
+                        .eco_text
+                      .loss_bonus_right_text
+                    .utility
+                      .utility1
+                        .utility1_img
+                        .utility1_text
+                      .utility2
+                        .utility2_img
+                        .utility2_text
+                      .utility3
+                        .utility3_img
+                        .utility3_text
+                      .utility4
+                        .utility4_img
+                        .utility4_text
+                      .utility5
+                        .utility5_img
+                        .utility5_text
+                      .taser
+                        .taser_img
+                        .taser_text
+            
+
+          
+          
+        script(src=`/hud/${hudId}/index.js`)
+        script(src="/js/jquery-3.7.1.min.js")
+          
+        // Конфигурация всплывающего слова
+        script(src=`/hud/${hudId}/popup-config.js`)
+        
+        
+        
