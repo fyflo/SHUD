@@ -91,6 +91,93 @@ body {
   display: block;
 }
 
+/* FACEIT Import panel/button (соответствует inline стилям index.html) */
+.panel-cs2 {
+  background: rgba(20, 20, 20, 0.85);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 16px;
+}
+
+.button-cs2 {
+  background: linear-gradient(90deg, #ffd600 0%, #ffea00 100%);
+  color: #222;
+  font-weight: bold;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.2s, background 0.2s;
+  border: none;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.button-cs2:hover {
+  box-shadow: 0 4px 16px #ffd60088;
+  background: linear-gradient(90deg, #ffea00 0%, #ffd600 100%);
+}
+
+/* FACEIT results */
+.faceit-team-card {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.faceit-team-header {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.faceit-team-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.faceit-team-table th,
+.faceit-team-table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.faceit-team-table input.faceit-steam64 {
+  width: 100%;
+  background: #1f1f1f;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+.btn-mini {
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  cursor: pointer;
+}
+.btn-mini:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.faceit-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+.faceit-status.exists {
+  background: rgba(76, 175, 80, 0.15);
+  color: #8de08f;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+.faceit-status.missing {
+  background: rgba(255, 214, 0, 0.15);
+  color: #ffea00;
+  border: 1px solid rgba(255, 214, 0, 0.3);
+}
+
 /* Анимации */
 @keyframes fadeIn {
   from {
@@ -131,6 +218,7 @@ button {
   border: none;
   cursor: pointer;
   transition: background 0.3s;
+  font-weight: 700;
 }
 
 button:hover {
@@ -2891,7 +2979,7 @@ select {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 15px;
+  margin-bottom: 0px;
 }
 
 .file-input-container input[type="file"] {
@@ -2903,29 +2991,23 @@ select {
 }
 
 .file-input-container label {
-  display: inline-block;
-  padding: 10px 20px;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 20px;
   background-color: #007bff;
   color: white;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 1em;
   font-weight: 500;
   transition: all 0.3s ease;
   border: 1px solid #007bff;
-  height: 42px;
-  line-height: 22px;
   box-sizing: border-box;
 }
 
 .file-input-container label:hover {
   background-color: #0056b3;
   border-color: #0056b3;
-  transform: translateY(-1px);
-}
-
-.file-input-container label:active {
-  transform: translateY(0);
 }
 
 .file-input-container label::before {
