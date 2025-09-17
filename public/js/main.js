@@ -51,6 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initializeGSI();
   loadInitialData();
   initFormHandlers();
+  initFaceitImport();
 });
 
 // Инициализация навигации
@@ -76,6 +77,911 @@ function initializeNavigation() {
         if (sectionId === "scoreboard-section") {
           updateGameInfo(); // Обновляем скорборд при переключении
         }
+        if (sectionId === "faceit-import-section") {
+          const input = document.getElementById("faceit-matchroom");
+          if (input && !input.value) input.focus();
+        }
+      }
+    });
+  });
+}
+
+// ============== FACEIT IMPORT ==============
+function initFaceitImport() {
+  const btn = document.getElementById("faceit-import-btn");
+  const input = document.getElementById("faceit-matchroom");
+  const resultsEl = document.getElementById("faceit-import-results");
+  if (!btn || !input || !resultsEl) return;
+
+  btn.addEventListener("click", async () => {
+    const value = (input.value || "").trim();
+    if (!value) {
+      alert("Введите matchroom URL или ID");
+      return;
+    }
+    resultsEl.textContent = "Загрузка...";
+    try {
+      const resp = await fetch("/api/faceit/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matchroom: value }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        alert(`Ошибка: ${data.error || resp.status}`);
+        resultsEl.innerHTML = "";
+        return;
+      }
+      await renderFaceitResults(data, resultsEl);
+      // Обновим списки команд/игроков после импорта
+      try {
+        await loadTeams();
+      } catch (_) {}
+      try {
+        await loadPlayers();
+      } catch (_) {}
+    } catch (e) {
+      alert("Сбой запроса к /api/faceit/import");
+      resultsEl.innerHTML = "";
+    }
+  });
+
+  // Привязка кнопки получения состава команды по URL (index.html)
+  const teamBtn = document.getElementById("faceit-team-roster-btn");
+  const teamInput = document.getElementById("faceit-team-url");
+  const teamOut = document.getElementById("faceit-team-roster-results");
+  if (teamBtn && teamInput && teamOut) {
+    teamBtn.addEventListener("click", async () => {
+      const url = (teamInput.value || "").trim();
+      if (!url) {
+        alert("Укажите ссылку на команду FACEIT");
+        return;
+      }
+      teamOut.textContent = "Загрузка состава...";
+      try {
+        const api = new URL("/api/faceit/team/roster", window.location.origin);
+        api.searchParams.set("url", url);
+        const r = await fetch(api.toString(), { cache: "no-store" });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          teamOut.textContent = data?.error || "Ошибка получения состава";
+          return;
+        }
+        const players = Array.isArray(data?.players) ? data.players : [];
+        if (!players.length) {
+          teamOut.textContent = "Состав пуст";
+          return;
+        }
+        // Загрузим существующих игроков для проверки статуса
+        let existingBySteam = new Set();
+        let existingByNick = new Set();
+        try {
+          const rAll = await fetch("/api/players");
+          const pd = await rAll.json().catch(() => ({}));
+          const all = Array.isArray(pd) ? pd : pd.players || [];
+          existingBySteam = new Set(
+            (all || [])
+              .map((p) => (p.steam64 != null ? String(p.steam64) : null))
+              .filter(Boolean)
+          );
+          existingByNick = new Set(
+            (all || [])
+              .map((p) => (p.nickname || p.name || "").toLowerCase())
+              .filter(Boolean)
+          );
+        } catch (_) {}
+        const rows = players
+          .map((p, i) => {
+            const nick = p.nickname || "";
+            const s64 = p.steam64 || "";
+            const realName = p.realName || "";
+            const exists =
+              (s64 && existingBySteam.has(String(s64))) ||
+              (nick && existingByNick.has(String(nick).toLowerCase()));
+            const status = exists ? "exists" : "missing";
+            const statusText = exists ? i18n("inDb") : i18n("newStatus");
+            const addBtn = exists
+              ? ""
+              : `<button class=\"button-cs2 roster-add-player\" data-row=\"r-${i}\">${i18n(
+                  "add"
+                )}</button>`;
+            return `
+              <tr data-row=\"r-${i}\">\n                <td><input type=\"text\" class=\"roster-nick\" value=\"${nick}\" placeholder=\"${i18n(
+              "nickname"
+            )}\" /></td>\n                <td><input type=\"text\" class=\"roster-realname\" value=\"${realName}\" placeholder=\"${i18n(
+              "playerRealName"
+            )}\" /></td>\n                <td><input type=\"text\" class=\"roster-steam64\" value=\"${s64}\" placeholder=\"${i18n(
+              "playerSteam64"
+            )}\" /></td>\n                <td><span class=\"faceit-status ${status}\">${statusText}</span> <button class=\"btn-mini roster-resolve\" data-nick=\"${nick}\">${i18n(
+              "getSteam64"
+            )}</button></td>\n                <td><input type=\"file\" class=\"roster-avatar\" accept=\"image/*\" /> ${addBtn}</td>\n              </tr>`;
+          })
+          .join("");
+        teamOut.innerHTML = `
+          <div><b>${i18n("teamLabel")}:</b> ${
+          data.teamName || data.teamId || ""
+        }</div>
+          <table class=\"faceit-team-table\" style=\"margin-top:6px; width:100%\">\n            <thead><tr><th>${i18n(
+            "nickname"
+          )}</th><th>${i18n("playerRealName")}</th><th>${i18n(
+          "playerSteam64"
+        )}</th><th>${i18n("status") || ""}</th><th>${i18n("avatar")}/${i18n(
+          "actions"
+        )}</th></tr></thead>\n            <tbody>${rows}</tbody>\n          </table>`;
+
+        // Навесить обработчики: нормализация Steam64
+        teamOut.querySelectorAll(".roster-steam64").forEach((inp) => {
+          const normalize = () => {
+            const m = String(inp.value || "").match(/7656119\d{10}/);
+            if (m) inp.value = m[0];
+          };
+          inp.addEventListener("blur", normalize);
+          inp.addEventListener("change", normalize);
+          inp.addEventListener("paste", () => setTimeout(normalize, 0));
+        });
+
+        // Получить Steam64 по нику
+        teamOut.querySelectorAll(".roster-resolve").forEach((b) => {
+          b.addEventListener("click", async (ev) => {
+            const tr = ev.currentTarget.closest("tr");
+            if (!tr) return;
+            const nick = (tr.querySelector(".roster-nick")?.value || "").trim();
+            const s64Inp = tr.querySelector(".roster-steam64");
+            if (!nick || !s64Inp) return;
+            const u = new URL(
+              "/api/faceit/resolve-steam64",
+              window.location.origin
+            );
+            u.searchParams.set("nickname", nick);
+            try {
+              const r2 = await fetch(u.toString());
+              const j2 = await r2.json().catch(() => ({}));
+              if (r2.ok && j2?.steam64) s64Inp.value = j2.steam64;
+              const statusCell = tr.querySelector(".faceit-status");
+              const addBtn = tr.querySelector(".roster-add-player");
+              const existsNow =
+                (s64Inp.value && existingBySteam.has(String(s64Inp.value))) ||
+                (nick && existingByNick.has(String(nick).toLowerCase()));
+              if (statusCell) {
+                statusCell.classList.remove("missing", "exists");
+                statusCell.classList.add(existsNow ? "exists" : "missing");
+                statusCell.textContent = existsNow
+                  ? i18n("inDb")
+                  : i18n("newStatus");
+              }
+              if (existsNow && addBtn) addBtn.remove();
+            } catch (_) {}
+          });
+        });
+
+        // Добавить игрока
+        teamOut.querySelectorAll(".roster-add-player").forEach((b) => {
+          b.addEventListener("click", async (ev) => {
+            const tr = ev.currentTarget.closest("tr");
+            if (!tr) return;
+            const nick = (tr.querySelector(".roster-nick")?.value || "").trim();
+            const realName = (
+              tr.querySelector(".roster-realname")?.value || ""
+            ).trim();
+            const s64 = (
+              tr.querySelector(".roster-steam64")?.value || ""
+            ).trim();
+            const file = tr.querySelector(".roster-avatar")?.files?.[0] || null;
+            if (!s64) {
+              alert("Укажите Steam64");
+              return;
+            }
+            const form = new FormData();
+            form.set("nickname", nick);
+            if (realName) form.set("realName", realName);
+            form.set("steam64", s64);
+            if (file) form.append("avatar", file);
+            try {
+              const r3 = await fetch("/api/players", {
+                method: "POST",
+                body: form,
+              });
+              if (!r3.ok) {
+                const e = await r3.json().catch(() => ({}));
+                throw new Error(e.error || r3.status);
+              }
+              const statusCell = tr.querySelector(".faceit-status");
+              if (statusCell) {
+                statusCell.classList.remove("missing");
+                statusCell.classList.add("exists");
+                statusCell.textContent = i18n("inDb");
+              }
+              ev.currentTarget.remove();
+            } catch (err) {
+              alert("Ошибка добавления игрока: " + err.message);
+            }
+          });
+        });
+
+        // Проверка статуса при ручном вводе ник/Steam64
+        const updateRosterRowStatus = (tr) => {
+          const nick = (tr.querySelector(".roster-nick")?.value || "").trim();
+          const s64 = (tr.querySelector(".roster-steam64")?.value || "").trim();
+          const statusCell = tr.querySelector(".faceit-status");
+          const addBtn = tr.querySelector(".roster-add-player");
+          const existsNow =
+            (s64 && existingBySteam.has(String(s64))) ||
+            (nick && existingByNick.has(String(nick).toLowerCase()));
+          if (statusCell) {
+            statusCell.classList.remove("missing", "exists");
+            statusCell.classList.add(existsNow ? "exists" : "missing");
+            statusCell.textContent = existsNow
+              ? i18n("inDb")
+              : i18n("newStatus");
+          }
+          if (existsNow && addBtn) addBtn.remove();
+        };
+        teamOut
+          .querySelectorAll(".roster-steam64, .roster-nick")
+          .forEach((inp) => {
+            inp.addEventListener("blur", (e) => {
+              const tr = e.currentTarget.closest("tr");
+              if (tr) updateRosterRowStatus(tr);
+            });
+            inp.addEventListener("change", (e) => {
+              const tr = e.currentTarget.closest("tr");
+              if (tr) updateRosterRowStatus(tr);
+            });
+            inp.addEventListener("keyup", (e) => {
+              const tr = e.currentTarget.closest("tr");
+              if (tr) updateRosterRowStatus(tr);
+            });
+          });
+      } catch (e) {
+        teamOut.textContent = "Ошибка запроса";
+      }
+    });
+  }
+}
+
+// Привязка импорта мап-вэто в модалке редактирования матча
+// Удален раздел ввода Matchroom/вставки вето в модалке
+// Применение истории мап-вэто из FACEIT к UI выбора карт
+function applyFaceitVetoToUI(veto, teams) {
+  return;
+}
+
+// Разбор текста вето, пример строк (RU/EN):
+// "K27 блокирует: Nuke", "Insilio блокирует: Inferno",
+// "Train выбирается фракцией K27", "Ancient выбирается по умолчанию",
+// "K27 bans Nuke", "Mirage is picked by Insilio", "Ancient is the decider"
+// parseVetoText удалён вместе с формой ввода
+
+// Применение к новому редактору карт на основе селектов
+function applyVetoToEditor(veto, teams, root) {
+  return;
+}
+async function renderFaceitResults(data, container) {
+  const teams = Array.isArray(data?.teams) ? data.teams : [];
+  if (!teams.length) {
+    container.innerHTML = "";
+    return;
+  }
+  container.innerHTML = "Загрузка...";
+  let allTeams = [];
+  let allPlayers = [];
+  try {
+    const [teamsResp, playersResp] = await Promise.all([
+      fetch("/api/teams"),
+      fetch("/api/players"),
+    ]);
+    allTeams = (await teamsResp.json().catch(() => [])) || [];
+    const playersData = await playersResp.json().catch(() => ({}));
+    allPlayers = Array.isArray(playersData)
+      ? playersData
+      : playersData.players || [];
+  } catch (_) {}
+
+  const teamIdToName = new Map(
+    (allTeams || []).map((t) => [String(t.id), t.name])
+  );
+  const teamNameToId = new Map(
+    (allTeams || []).map((t) => [
+      String((t.name || "").toLowerCase()),
+      String(t.id),
+    ])
+  );
+  const existingBySteam = new Set(
+    (allPlayers || [])
+      .map((p) => (p.steam64 != null ? String(p.steam64) : null))
+      .filter(Boolean)
+  );
+  const existingByNick = new Set(
+    (allPlayers || [])
+      .map((p) => (p.nickname || p.name || "").toLowerCase())
+      .filter(Boolean)
+  );
+
+  const cardHtml = teams
+    .map((t, idx) => {
+      const players = Array.isArray(t.players) ? t.players : [];
+      const teamName = String(t.teamName || "");
+
+      const rows = players
+        .map((p, pidx) => {
+          const nickname = p.nickname || "";
+          const steam64 = p.steam64 || "";
+          const realName = p.realName || "";
+          const playerRowId = `${idx}-${pidx}`;
+          const exists =
+            (steam64 && existingBySteam.has(String(steam64))) ||
+            existingByNick.has(String(nickname).toLowerCase());
+          const statusHtml = `<span class=\"faceit-status ${
+            exists ? "exists" : "missing"
+          }\">${exists ? i18n("inDb") : i18n("newStatus")}</span>`;
+          const actionHtml = exists
+            ? ""
+            : `<button class="button-cs2 faceit-add-player" data-row="${playerRowId}">${i18n(
+                "add"
+              )}</button>`;
+          return `
+            <tr data-row="${playerRowId}">
+              <td>
+                <input type=\"text\" class=\"faceit-nick\" value=\"${nickname}\" placeholder=\"${
+            i18n("playerNickname") || i18n("nickname")
+          }\" />
+              </td>
+              <td>
+                <input type=\"text\" class=\"faceit-realname\" value=\"${realName}\" placeholder=\"${
+            i18n("playerRealName") || i18n("realName")
+          }\" />
+              </td>
+              <td>
+                <input type=\"text\" class=\"faceit-steam64\" placeholder=\"${
+                  i18n("playerSteam64") || "Steam64"
+                }\" value=\"${steam64 || ""}\" />
+              </td>
+              <td>${statusHtml} <button class=\"btn-mini faceit-auto-resolve\" data-nick=\"${nickname}\">${i18n(
+            "getSteam64"
+          )}</button></td>
+              <td>
+                <input type="file" class="faceit-avatar" accept="image/*" />
+                ${actionHtml}
+              </td>
+            </tr>`;
+        })
+        .join("");
+      const viewRows = players
+        .map(
+          (p) =>
+            `<tr><td>${p.nickname || ""}</td><td>${p.steam64 || ""}</td></tr>`
+        )
+        .join("");
+      return `
+        <div class="faceit-team-card" data-team-index="${idx}">
+          <div class="faceit-team-header">${i18n("teamLabel")}: ${
+        teamName || i18n("noTeam") || ""
+      }</div>
+          <div class="faceit-team-actions" style="margin:6px 0 10px; display:flex; gap:8px; align-items:center;">
+            <input type="file" class="faceit-team-logo" accept="image/*" />
+            <button class="btn-mini faceit-add-team" data-i18n="addTeam">${i18n(
+              "addTeam"
+            )}</button>
+          </div>
+          <table class=\"faceit-team-table faceit-table-edit\">
+            <thead>
+              <tr><th>${i18n("nickname")}</th><th>${i18n(
+        "realName"
+      )}</th><th>${i18n("playerSteam64")}</th><th>${
+        i18n("status") || ""
+      }</th><th>${i18n("avatar")}/${i18n("actions")}</th></tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <table class="faceit-team-table faceit-table-view" style="margin-top:6px; width:100%; display:none">
+            <thead><tr><th>${i18n("nickname")}</th><th>${i18n(
+        "playerSteam64"
+      )}</th></tr></thead>
+            <tbody>${viewRows}</tbody>
+          </table>
+        </div>`;
+    })
+    .join("");
+  container.innerHTML = cardHtml;
+  // Переключатель Просмотр/Редактировать
+  container.querySelectorAll(".faceit-toggle-view").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const card = e.currentTarget.closest(".faceit-team-card");
+      if (!card) return;
+      const editTable = card.querySelector(".faceit-table-edit");
+      const viewTable = card.querySelector(".faceit-table-view");
+      if (!editTable || !viewTable) return;
+      const editing = editTable.style.display !== "none";
+      if (editing) {
+        editTable.style.display = "none";
+        viewTable.style.display = "table";
+        e.currentTarget.textContent = "Редактировать";
+      } else {
+        editTable.style.display = "table";
+        viewTable.style.display = "none";
+        e.currentTarget.textContent = "Просмотр";
+      }
+    });
+  });
+
+  // Автозаполнение пустых Steam64 по нику (последовательно, чтобы не спамить API)
+  (async () => {
+    const rows = Array.from(
+      container.querySelectorAll(
+        ".faceit-team-card .faceit-table-edit tbody tr"
+      )
+    );
+    for (const tr of rows) {
+      try {
+        const nickInput = tr.querySelector(".faceit-nick");
+        const steam64Input = tr.querySelector(".faceit-steam64");
+        if (!nickInput || !steam64Input) continue;
+        const nickname = String(
+          nickInput.value || nickInput.getAttribute("value") || ""
+        ).trim();
+        const current = String(steam64Input.value || "").trim();
+        if (!nickname || current) continue;
+        const url = new URL(
+          "/api/faceit/resolve-steam64",
+          window.location.origin
+        );
+        url.searchParams.set("nickname", nickname);
+        const resp = await fetch(url.toString());
+        const data = await resp.json().catch(() => ({}));
+        if (resp.ok && data?.steam64) {
+          const resolved = String(data.steam64);
+          steam64Input.value = resolved;
+          // Обновить статус наличия в базе
+          try {
+            const statusCell = tr.querySelector(".faceit-status");
+            const addBtn = tr.querySelector(".faceit-add-player");
+            const nickLower = String(nickname).toLowerCase();
+            const existsNow =
+              (resolved && existingBySteam.has(resolved)) ||
+              existingByNick.has(nickLower);
+            if (statusCell) {
+              statusCell.classList.remove("missing", "exists");
+              statusCell.classList.add(existsNow ? "exists" : "missing");
+              statusCell.textContent = existsNow
+                ? i18n("inDb")
+                : i18n("newStatus");
+            }
+            if (existsNow && addBtn) addBtn.remove();
+          } catch (_) {}
+        }
+        await new Promise((r) => setTimeout(r, 200));
+      } catch (_) {}
+    }
+  })();
+  // Переключатель Просмотр/Редактировать
+  container.querySelectorAll(".faceit-toggle-view").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const card = e.currentTarget.closest(".faceit-team-card");
+      if (!card) return;
+      const editTable = card.querySelector(".faceit-table-edit");
+      const viewTable = card.querySelector(".faceit-table-view");
+      if (!editTable || !viewTable) return;
+      const editing = editTable.style.display !== "none";
+      if (editing) {
+        editTable.style.display = "none";
+        viewTable.style.display = "table";
+        e.currentTarget.textContent = "Редактировать";
+      } else {
+        editTable.style.display = "table";
+        viewTable.style.display = "none";
+        e.currentTarget.textContent = "Просмотр";
+      }
+    });
+  });
+  // Нормализатор Steam64: принимает URL/строку и возвращает 17-значный SteamID64
+  const extractSteam64 = (raw) => {
+    const s = String(raw || "").trim();
+    // 1) Ищем 17-значный ID начиная с 7656119
+    const m1 = s.match(/7656119\d{10}/);
+    if (m1) return m1[0];
+    // 2) steamcommunity.com/profiles/<id>
+    const m2 = s.match(/steamcommunity\.com\/profiles\/(\d{17})/i);
+    if (m2) return m2[1];
+    // 3) steamrep.com/search?q=<encoded URL with /profiles/<id>/>
+    try {
+      const url = new URL(s);
+      const q = url.searchParams.get("q");
+      if (q) {
+        const inner = decodeURIComponent(q);
+        const m3 = inner.match(/profiles\/(\d{17})/i);
+        if (m3) return m3[1];
+        const m4 = inner.match(/7656119\d{10}/);
+        if (m4) return m4[0];
+      }
+    } catch (_) {}
+    return "";
+  };
+
+  // Навесим обработчики нормализации и моментальной проверки статуса (по нику/Steam64)
+  const computeExistsLocal = (nick, steam64) => {
+    const bySteam = steam64 ? existingBySteam.has(String(steam64)) : false;
+    const byNick = nick
+      ? existingByNick.has(String(nick).toLowerCase())
+      : false;
+    return bySteam || byNick;
+  };
+
+  const updateRowStatusLocal = (tr) => {
+    const nick = (tr.querySelector(".faceit-nick")?.value || "").trim();
+    const s64 = (tr.querySelector(".faceit-steam64")?.value || "").trim();
+    const existsNow = computeExistsLocal(nick, s64);
+    const statusCell = tr.querySelector(".faceit-status");
+    const addBtn = tr.querySelector(".faceit-add-player");
+    if (statusCell) {
+      statusCell.classList.remove("missing", "exists");
+      statusCell.classList.add(existsNow ? "exists" : "missing");
+      statusCell.textContent = existsNow ? i18n("inDb") : i18n("newStatus");
+    }
+    if (existsNow && addBtn) addBtn.remove();
+  };
+
+  container.querySelectorAll("input.faceit-steam64").forEach((inp) => {
+    const normalize = () => {
+      const extracted = extractSteam64(inp.value);
+      if (extracted) inp.value = extracted;
+      const tr = inp.closest("tr");
+      if (tr) updateRowStatusLocal(tr);
+    };
+    inp.addEventListener("blur", normalize);
+    inp.addEventListener("change", normalize);
+    inp.addEventListener("paste", () => setTimeout(normalize, 0));
+    inp.addEventListener("keyup", () => {
+      const tr = inp.closest("tr");
+      if (tr) updateRowStatusLocal(tr);
+    });
+  });
+
+  container.querySelectorAll("input.faceit-nick").forEach((inp) => {
+    const onNick = () => {
+      const tr = inp.closest("tr");
+      if (tr) updateRowStatusLocal(tr);
+    };
+    inp.addEventListener("blur", onNick);
+    inp.addEventListener("change", onNick);
+    inp.addEventListener("keyup", onNick);
+  });
+
+  // Кнопка Получить Steam64: запросить steam64 по нику на FACEIT
+  container.querySelectorAll(".faceit-auto-resolve").forEach((btn) => {
+    btn.addEventListener("click", async (e) => {
+      const button = e.currentTarget;
+      const tr = button.closest("tr");
+      if (!tr) return;
+      const nickInput = tr.querySelector(".faceit-nick");
+      const nickname = nickInput ? nickInput.value.trim() : "";
+      const steam64Input = tr.querySelector(".faceit-steam64");
+      if (!nickname) return;
+      button.disabled = true;
+      const prev = button.textContent;
+      button.textContent = "...";
+      try {
+        const url = new URL(
+          "/api/faceit/resolve-steam64",
+          window.location.origin
+        );
+        url.searchParams.set("nickname", nickname);
+        const resp = await fetch(url.toString());
+        const data = await resp.json().catch(() => ({}));
+        if (resp.ok && data?.steam64) {
+          steam64Input.value = data.steam64;
+        } else {
+          alert("Не удалось найти Steam64 по нику на FACEIT");
+        }
+      } catch (_) {
+        alert("Ошибка запроса автоопределения Steam64");
+      } finally {
+        button.textContent = prev;
+        button.disabled = false;
+      }
+    });
+  });
+
+  // Кнопка Получить Аватарку (старый способ) отключена
+  container.querySelectorAll(".faceit-hltv-avatar").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      alert("Поиск аватарки на HLTV отключён. Загрузите файл.");
+    });
+  });
+
+  // (удалено) Кнопка "Найти на HLTV"
+
+  // (удалено) Кнопка "Вставить ссылку HLTV"
+
+  // Кнопка "Импорт из FACEIT команды": получить состав по URL и добавить строки
+  container.querySelectorAll(".faceit-fetch-team").forEach((btn) => {
+    btn.addEventListener("click", async (e) => {
+      const card = e.currentTarget.closest(".faceit-team-card");
+      if (!card) return;
+      const tbody = card.querySelector("tbody");
+      if (!tbody) return;
+      const url = window.prompt(
+        "Вставьте ссылку на команду FACEIT",
+        "https://www.faceit.com/ru/teams/"
+      );
+      if (!url) return;
+      let data = null;
+      try {
+        const api = new URL("/api/faceit/team/roster", window.location.origin);
+        api.searchParams.set("url", url);
+        const r = await fetch(api.toString(), { cache: "no-store" });
+        data = await r.json().catch(() => ({}));
+        if (!r.ok || !Array.isArray(data?.players) || !data.players.length) {
+          alert(data?.error || "Состав команды не найден");
+          return;
+        }
+      } catch (_) {
+        alert("Ошибка запроса состава команды");
+        return;
+      }
+
+      const hasSet = (s) => s && typeof s.has === "function";
+      const isExists = (nick, steam64) => {
+        try {
+          if (
+            hasSet(window.existingBySteam) &&
+            steam64 &&
+            existingBySteam.has(String(steam64))
+          )
+            return true;
+          if (
+            hasSet(window.existingByNick) &&
+            nick &&
+            existingByNick.has(String(nick).toLowerCase())
+          )
+            return true;
+        } catch (_) {}
+        return false;
+      };
+
+      const attachAutoResolve = (row) => {
+        const btnResolve = row.querySelector(".faceit-auto-resolve");
+        if (!btnResolve) return;
+        btnResolve.addEventListener("click", async () => {
+          const nickInput = row.querySelector(".faceit-nick");
+          const steam64Input = row.querySelector(".faceit-steam64");
+          const nickname = (nickInput?.value || "").trim();
+          if (!nickname) return;
+          btnResolve.disabled = true;
+          const prev = btnResolve.textContent;
+          btnResolve.textContent = "...";
+          try {
+            const u = new URL(
+              "/api/faceit/resolve-steam64",
+              window.location.origin
+            );
+            u.searchParams.set("nickname", nickname);
+            const resp = await fetch(u.toString());
+            const j = await resp.json().catch(() => ({}));
+            if (resp.ok && j?.steam64) steam64Input.value = j.steam64;
+            else alert("Не удалось найти Steam64 по нику на FACEIT");
+          } catch (_) {
+            alert("Ошибка запроса автоопределения Steam64");
+          } finally {
+            btnResolve.textContent = prev;
+            btnResolve.disabled = false;
+          }
+        });
+      };
+
+      const attachAddPlayer = (row) => {
+        const button = row.querySelector(".faceit-add-player");
+        if (!button) return;
+        button.addEventListener("click", async () => {
+          const tr = button.closest("tr");
+          if (!tr) return;
+          const steam64Input = tr.querySelector(".faceit-steam64");
+          const nickname = (
+            tr.querySelector(".faceit-nick")?.value || ""
+          ).trim();
+          const avatarFile =
+            tr.querySelector(".faceit-avatar")?.files?.[0] || null;
+          if (!steam64Input?.value) {
+            alert("Укажите Steam64");
+            return;
+          }
+          if (
+            (hasSet(window.existingBySteam) &&
+              existingBySteam.has(String(steam64Input.value))) ||
+            (hasSet(window.existingByNick) &&
+              existingByNick.has(String(nickname).toLowerCase()))
+          ) {
+            alert("Игрок уже в базе");
+            return;
+          }
+          try {
+            button.disabled = true;
+            button.textContent = i18n("saving") || "...";
+            const form = new FormData();
+            form.set("nickname", nickname);
+            form.set("steam64", steam64Input.value);
+            if (avatarFile) form.append("avatar", avatarFile);
+            const resp = await fetch("/api/players", {
+              method: "POST",
+              body: form,
+            });
+            if (!resp.ok) {
+              const err = await resp.json().catch(() => ({}));
+              throw new Error(err.error || `HTTP ${resp.status}`);
+            }
+            button.textContent = i18n("added") || "OK";
+            try {
+              await loadPlayers();
+            } catch (_) {}
+            const statusCell = tr.querySelector(".faceit-status");
+            if (statusCell) {
+              statusCell.classList.remove("missing");
+              statusCell.classList.add("exists");
+              statusCell.textContent = i18n("inDb");
+            }
+            button.remove();
+          } catch (err) {
+            alert("Ошибка добавления игрока: " + err.message);
+            button.textContent = i18n("add");
+            button.disabled = false;
+          }
+        });
+      };
+
+      data.players.forEach((pl, idx) => {
+        const nickname = String(pl?.nickname || "").trim();
+        const steam64 = String(pl?.steam64 || "").trim();
+        if (!nickname) return;
+        const rowId = `${Date.now()}-${idx}`;
+        const exists = isExists(nickname, steam64);
+        const statusHtml = `<span class="faceit-status ${
+          exists ? "exists" : "missing"
+        }">${exists ? i18n("inDb") : i18n("newStatus")}</span>`;
+        const actionHtml = exists
+          ? ""
+          : `<button class="button-cs2 faceit-add-player" data-row="${rowId}">${i18n(
+              "add"
+            )}</button>`;
+        const html = `
+          <tr data-row="${rowId}">
+            <td><input type=\"text\" class=\"faceit-nick\" value=\"${nickname}\" placeholder=\"${i18n(
+          "nickname"
+        )}\" /></td>
+            <td><input type=\"text\" class=\"faceit-steam64\" placeholder=\"${i18n(
+              "playerSteam64"
+            )}\" value=\"${steam64}\" /></td>
+            <td>${statusHtml} <button class=\"btn-mini faceit-auto-resolve\" data-nick=\"${nickname}\">${i18n(
+          "getSteam64"
+        )}</button></td>
+            <td><input type=\"file\" class=\"faceit-avatar\" accept=\"image/*\" /> ${actionHtml}</td>
+          </tr>`;
+        tbody.insertAdjacentHTML("beforeend", html);
+        const row = tbody.querySelector(`tr[data-row="${rowId}"]`);
+        if (row) {
+          attachAutoResolve(row);
+          attachAddPlayer(row);
+        }
+      });
+
+      alert(`Импортировано игроков: ${data.players.length}`);
+    });
+  });
+
+  container.querySelectorAll(".faceit-add-player").forEach((btn) => {
+    btn.addEventListener("click", async (e) => {
+      const button = e.currentTarget;
+      const tr = button.closest("tr");
+      if (!tr) return;
+      const steam64Input = tr.querySelector(".faceit-steam64");
+      let steam64 = (steam64Input?.value || "").trim();
+      // Нормализуем: поддерживаем вставку URL (steamcommunity / steamrep)
+      const extracted = extractSteam64(steam64);
+      if (extracted) {
+        steam64 = extracted;
+        if (steam64Input) steam64Input.value = extracted;
+      }
+      const nickname = (tr.querySelector(".faceit-nick")?.value || "").trim();
+      const realName = (
+        tr.querySelector(".faceit-realname")?.value || ""
+      ).trim();
+      const avatarFile = tr.querySelector(".faceit-avatar")?.files?.[0] || null;
+      // Привязка к выбранной команде из ближайшей карточки
+      const card = tr.closest(".faceit-team-card");
+      const teamId = ""; // без привязки к другой команде
+
+      if (!steam64) {
+        alert("Укажите Steam64");
+        return;
+      }
+
+      if (
+        existingBySteam.has(String(steam64)) ||
+        existingByNick.has(String(nickname).toLowerCase())
+      ) {
+        alert("Игрок уже в базе");
+        return;
+      }
+
+      try {
+        button.disabled = true;
+        button.textContent = i18n("saving") || "...";
+        const form = new FormData();
+        form.set("nickname", nickname);
+        if (realName) form.set("realName", realName);
+        form.set("steam64", steam64);
+        if (teamId) form.set("teamId", String(teamId));
+        if (avatarFile) form.append("avatar", avatarFile);
+
+        const resp = await fetch("/api/players", {
+          method: "POST",
+          body: form,
+        });
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          throw new Error(err.error || `HTTP ${resp.status}`);
+        }
+        button.textContent = i18n("added") || "OK";
+        try {
+          await loadPlayers();
+        } catch (_) {}
+        const statusCell = tr.querySelector(".faceit-status");
+        if (statusCell) {
+          statusCell.classList.remove("missing");
+          statusCell.classList.add("exists");
+          statusCell.textContent = i18n("inDb");
+        }
+        button.remove();
+      } catch (err) {
+        console.error("Add player failed", err);
+        alert("Ошибка добавления игрока: " + err.message);
+        button.textContent = i18n("add");
+      } finally {
+        button.disabled = false;
+      }
+    });
+  });
+
+  // Добавление команды вручную
+  container.querySelectorAll(".faceit-add-team").forEach((btn, idx) => {
+    btn.addEventListener("click", async (e) => {
+      const card = e.currentTarget.closest(".faceit-team-card");
+      if (!card) return;
+      const header = card.querySelector(".faceit-team-header");
+      const nameText = header
+        ? header.textContent
+            .replace(new RegExp(`^${i18n("teamLabel")}\:\s*`, "i"), "")
+            .trim()
+        : "";
+      const logoInput = card.querySelector(".faceit-team-logo");
+      const sel = null;
+      if (!nameText) return;
+
+      // Дедуп по имени
+      const existsTeam = (allTeams || []).some(
+        (t) => String(t.name || "").toLowerCase() === nameText.toLowerCase()
+      );
+      if (existsTeam) {
+        alert("Команда уже существует");
+        return;
+      }
+
+      const form = new FormData();
+      form.set("name", nameText);
+      if (logoInput?.files?.[0]) form.append("logo", logoInput.files[0]);
+      let ok = false;
+      try {
+        const resp = await fetch("/api/teams", { method: "POST", body: form });
+        ok = resp.ok;
+      } catch (_) {}
+      if (ok) {
+        try {
+          await loadTeams();
+        } catch (_) {}
+        // Попробуем выбрать только что добавленную команду по имени
+        const newId = teamNameToId.get(nameText.toLowerCase());
+        if (sel && newId) sel.value = newId;
+        alert("Команда добавлена");
+      } else {
+        alert("Ошибка добавления команды");
       }
     });
   });
@@ -120,7 +1026,6 @@ function loadInitialData() {
   setTimeout(fixAvatarPaths, 500);
   setTimeout(fixAvatarPaths, 1500);
 }
-
 // Вспомогательная функция для загрузки команд в select
 async function loadTeamsForMatchSelect(selectElement, selectedValue = "") {
   try {
@@ -198,7 +1103,6 @@ document.querySelectorAll(".nav-button").forEach((button) => {
     }
   });
 });
-
 // ... existing code ...
 
 // Заменяем прямое обращение к форме на безопасную проверку
@@ -260,7 +1164,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 });
-
 // Функция для обновления названий команд в зависимости от раунда
 function updateTeamNamesBasedOnRound(currentRound) {
   if (!matchTeams) return;
@@ -395,7 +1298,6 @@ function updateMapStatus(mapItem, status) {
   const statusDiv = mapItem.querySelector(".map-status");
   statusDiv.textContent = status;
 }
-
 function getRequiredMapsCount() {
   const counts = { bo1: 1, bo2: 2, bo3: 3, bo5: 5 };
   return counts[matchFormat] || 1;
@@ -440,7 +1342,6 @@ function resetMapSelection() {
   });
   updateMapsOrderDisplay();
 }
-
 async function saveMatchSettings(e, matchId) {
   e.preventDefault();
 
@@ -510,7 +1411,6 @@ function resetMapPool() {
   updateMapsOrderDisplay();
   updateTeamTurn();
 }
-
 function updateMapsContainer() {
   const format = elements.format.value;
   const mapCount =
@@ -768,7 +1668,6 @@ function updateMapsOrder(format) {
         </div>
     `;
 }*/
-
 // Функции для обновления информации о картах
 window.updateMapScore = function (mapIndex, team, score) {
   if (!selectedMaps[mapIndex]) {
@@ -794,7 +1693,6 @@ window.updateMapSelection = function (mapIndex, mapId) {
     `option[value="${mapId}"]`
   ).textContent;
 };
-
 window.selectSide = function (mapIndex, side, team) {
   if (!selectedMaps[mapIndex]) {
     selectedMaps[mapIndex] = {};
@@ -876,17 +1774,6 @@ window.swapMatchTeams = async function (matchId) {
 };
 
 // ... оставляем весь остальной существующий код без изменений ...
-/*
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
-    initMatchForm();
-    loadMatchesList();
-});*/
-
-// Глобальные функции для кнопок
-// Функция для запуска/остановки матча
-
-// ... existing code ...
 
 // Обновляем обработчик формы создания матча
 document.addEventListener("DOMContentLoaded", () => {
@@ -934,7 +1821,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
-
 // Обновляем функцию loadMatchesList
 async function loadMatchesList() {
   try {
@@ -1010,13 +1896,13 @@ async function loadMatchesList() {
           match.status
         }</span>
                     </div>
-                    <div class="match-teams">
-                        <div class="team team1">
+                    <div class="match-teams" style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
+                        <div class="team team1" style="display:flex; align-items:center; gap:10px; min-width:0;">
                             <img src="${team1LogoPath}" 
                                  alt="${team1Name}" 
                                  class="team-logo" 
                                  onerror="this.onerror=null; this.src='/images/default-team-logo.png';">
-                            <div data-i18n="team1Name" class="match-team1">${
+                            <div data-i18n="team1Name" class="match-team1" style="max-width:32vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${
                               team1Name || "Команда 1"
                             }</div>
                         </div>
@@ -1045,8 +1931,8 @@ async function loadMatchesList() {
                                 }, 2, 1)">+</button>
                             </div>
                         </div>
-                        <div class="team team2">
-                            <div data-i18n="team2Name" class="match-team2">${team2Name}</div>
+                        <div class="team team2" style="display:flex; align-items:center; gap:10px; min-width:0;">
+                            <div data-i18n="team2Name" class="match-team2" style="max-width:32vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${team2Name}</div>
                             <img src="${team2LogoPath}" 
                                  alt="${team2Name}" 
                                  class="team-logo" 
@@ -1055,10 +1941,10 @@ async function loadMatchesList() {
                         <div class="match-actions">
                         ${
                           match.status === "active"
-                            ? `<button onclick="stopMatch('${match.id}')" class="stop-match-btn">
+                            ? `<button onclick="stopMatch('${match.id}', this)" class="stop-match-btn">
                                 <i class="fas fa-stop"></i> <span data-i18n="stopMatch">Стоп матч</span>
                                </button>`
-                            : `<button onclick="startMatch('${match.id}')" class="start-match-btn">
+                            : `<button onclick="startMatch('${match.id}', this)" class="start-match-btn">
                                 <i class="fas fa-play"></i> <span data-i18n="startMatch">Старт матча</span>
                                </button>`
                         }
@@ -1183,7 +2069,6 @@ function shouldSwapTeamsBasedOnRound(currentRound) {
 
   return false;
 }
-
 function determineWinnerWithSwaps(match) {
   const shouldSwap = shouldSwapTeamsBasedOnRound(match.current_round);
 
@@ -1200,7 +2085,11 @@ function determineWinnerWithSwaps(match) {
 }
 
 // Функция для запуска матча
-window.startMatch = async function (matchId) {
+window.startMatch = async function (matchId, btn) {
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("is-loading");
+  }
   try {
     const response = await fetch(`/api/matches/${matchId}/start`, {
       method: "POST",
@@ -1222,10 +2111,17 @@ window.startMatch = async function (matchId) {
 
   // После обновления DOM, вызываем локализацию
   translatePage();
+  if (btn) {
+    btn.disabled = false;
+    btn.classList.remove("is-loading");
+  }
 };
-
 // Функция для остановки матча
-window.stopMatch = async function (matchId) {
+window.stopMatch = async function (matchId, btn) {
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("is-loading");
+  }
   try {
     const response = await fetch(`/api/matches/${matchId}/stop`, {
       method: "POST",
@@ -1247,42 +2143,13 @@ window.stopMatch = async function (matchId) {
 
   // После обновления DOM, вызываем локализацию
   translatePage();
+  if (btn) {
+    btn.disabled = false;
+    btn.classList.remove("is-loading");
+  }
 };
 
 // ... existing code ...
-
-// Функция загрузки команд в селекты
-/*async function loadTeamsIntoSelects() {
-    try {
-        const team1Select = document.getElementById('team1-select');
-        const team2Select = document.getElementById('team2-select');
-        
-        // Проверяем, находимся ли мы на странице админки
-        if (!team1Select || !team2Select) {
-            // Если мы не на странице админки, просто выходим без ошибки
-            return;
-        }
-
-        const response = await fetch('/api/teams');
-        const teams = await response.json();
-
-        const createOptions = (select) => {
-            select.innerHTML = '<option value="">Выберите команду</option>';
-            teams.forEach(team => {
-                const option = document.createElement('option');
-                option.value = team.id;
-                option.textContent = team.name;
-                select.appendChild(option);
-            });
-        };
-
-        createOptions(team1Select);
-        createOptions(team2Select);
-
-    } catch (error) {
-        console.error('Ошибка при загрузке команд:', error);
-    }
-}*/
 
 // Инициализация при загрузке страницы
 document.addEventListener("DOMContentLoaded", () => {
@@ -1435,7 +2302,6 @@ window.updateMatchScore = async function (matchId, teamNumber, change) {
     alert(`Ошибка при обновлении счета: ${error.message}`);
   }
 };
-
 window.deleteMatch = async function (matchId) {
   /*if (!confirm('Вы уверены, что хотите удалить этот матч?')) return;*/
 
@@ -1454,7 +2320,6 @@ window.deleteMatch = async function (matchId) {
     alert(i18n("matchDeleteError"));
   }
 };
-
 // Инициализация при загрузке страницы
 document.addEventListener("DOMContentLoaded", () => {
   initMatchForm();
@@ -1530,7 +2395,6 @@ async function handlePlayerSubmit(e) {
     alert("Ошибка при добавлении игрока: " + error.message);
   }
 }
-
 // ... existing code ...
 
 // Функция загрузки списка команд
@@ -1559,9 +2423,7 @@ async function loadTeamsList() {
                             </div>
                             <div class="card-content">
                                 <h3 class="card-title">${team.name}</h3>
-                                <p class="card-info">${
-                                  team.region || "Регион не указан"
-                                }</p>
+                                
                             </div>
                             <div class="card-actions">
                                 <button class="edit-btn" onclick="editTeam(${
@@ -1705,7 +2567,6 @@ async function loadTeams() {
                                          onerror="this.onerror=null; this.src='/images/default-team-logo.png';">
                                     <div class="team-details">
                                         <h3 class="team-name">${team.name} ${shortNameDisplay}</h3>
-                                        <p data-i18n="teamRegion" class="team-region">${regionDisplay}</p>
                                     </div>
                                 </div>
                                 <div class="team-actions">
@@ -1741,7 +2602,7 @@ function searchTeams(query) {
       const nameElement = card.querySelector(".team-name");
       const regionElement = card.querySelector(".team-region");
 
-      if (!nameElement || !regionElement) {
+      if (!nameElement) {
         return;
       }
 
@@ -1750,16 +2611,6 @@ function searchTeams(query) {
 
       // Получаем текст региона, учитывая как новый формат с флагом, так и старый
       let region = "";
-      const regionSpan = regionElement.querySelector(
-        ".team-region-with-flag span:last-child"
-      );
-      if (regionSpan) {
-        // Новый формат (с флагом)
-        region = regionSpan.textContent.toLowerCase();
-      } else {
-        // Старый формат или простой текст
-        region = regionElement.textContent.toLowerCase();
-      }
 
       // Используем CSS display вместо прямой манипуляции DOM
       card.style.display =
@@ -1769,7 +2620,6 @@ function searchTeams(query) {
     });
   });
 }
-
 // Обновляем функцию initializeTeamSearch
 function initializeTeamSearch() {
   const searchInput = document.getElementById("teamSearch");
@@ -1798,22 +2648,33 @@ async function editTeam(teamId) {
     const team = await response.json();
     const form = document.getElementById("team-form");
 
-    // Заполняем форму данными команды
-    form.name.value = team.name;
-    form.short_name.value = team.short_name || "";
-    form.region.value = team.region || "";
+    // Заполняем форму данными команды (безопасно, только если поле существует)
+    const setIfExists = (fieldName, value) => {
+      if (!form) return;
+      const input = form.querySelector(`[name="${fieldName}"]`);
+      if (input) input.value = value ?? "";
+    };
+
+    setIfExists("name", team.name);
+    setIfExists("short_name", team.short_name);
+    setIfExists("region", team.region);
 
     // Отмечаем, что это редактирование
     form.dataset.editId = teamId;
 
-    // Меняем кнопку на синий цвет и текст
-    if (window.changeButtonToEdit) {
-      window.changeButtonToEdit("add-team-btn", "Обновить команду");
-    } else {
-      const submitBtn = form.querySelector('button[type="submit"]');
-      submitBtn.textContent = "Обновить команду";
-      submitBtn.style.backgroundColor = "#007bff";
-      submitBtn.style.borderColor = "#007bff";
+    // Меняем кнопку на синий цвет и переводим на updateTeam
+    {
+      const submitBtn =
+        form.querySelector("#add-team-btn") ||
+        form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.setAttribute("data-i18n", "updateTeam");
+        submitBtn.textContent =
+          typeof i18n === "function" ? i18n("updateTeam") : "Обновить команду";
+        submitBtn.style.backgroundColor = "#007bff";
+        submitBtn.style.borderColor = "#007bff";
+        if (typeof translatePage === "function") translatePage();
+      }
     }
 
     // Прокручиваем к форме
@@ -1870,14 +2731,18 @@ async function handleTeamSubmit(event) {
     form.reset();
     delete form.dataset.editId;
 
-    // Возвращаем кнопку к исходному состоянию
-    if (window.resetButtonToAdd) {
-      window.resetButtonToAdd("add-team-btn", "Добавить команду");
-    } else {
-      const submitBtn = form.querySelector('button[type="submit"]');
-      submitBtn.textContent = "Добавить команду";
-      submitBtn.style.backgroundColor = "";
-      submitBtn.style.borderColor = "";
+    // Возвращаем кнопку к исходному состоянию (addTeam)
+    {
+      const submitBtn =
+        form.querySelector("#add-team-btn") ||
+        form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.setAttribute("data-i18n", "addTeam");
+        submitBtn.textContent = i18n("addTeam");
+        submitBtn.style.backgroundColor = "";
+        submitBtn.style.borderColor = "";
+        if (typeof translatePage === "function") translatePage();
+      }
     }
 
     await loadTeams();
@@ -1887,18 +2752,87 @@ async function handleTeamSubmit(event) {
     alert(error.message);
   }
 }
-
 // Инициализация обработчиков
 document.addEventListener("DOMContentLoaded", () => {
   const teamForm = document.getElementById("team-form");
   if (teamForm) {
     teamForm.addEventListener("submit", handleTeamSubmit);
+
+    // Мягкая проверка уникальности названия команды (подсказка, без блокировки)
+    const nameInput = teamForm.querySelector('input[name="name"]');
+    if (nameInput) {
+      // создаём индивидуальный хинт и вставляем сразу после инпута
+      const existing =
+        nameInput.nextElementSibling &&
+        nameInput.nextElementSibling.classList &&
+        nameInput.nextElementSibling.classList.contains("field-hint")
+          ? nameInput.nextElementSibling
+          : null;
+      const hint = existing || document.createElement("div");
+      hint.className = "field-hint";
+      hint.style.fontSize = "12px";
+      hint.style.color = "#e5c07b";
+      hint.style.marginTop = "4px";
+      if (!existing) nameInput.insertAdjacentElement("afterend", hint);
+      hint.style.display = "none";
+      const setTeamHintWidth = () => {
+        try {
+          hint.style.width = nameInput.offsetWidth + "px";
+        } catch {}
+      };
+      setTeamHintWidth();
+      window.addEventListener("resize", setTeamHintWidth);
+
+      const debounced = debounce(async () => {
+        // Во время редактирования команды подсказки не показываем
+        if (teamForm && teamForm.dataset && teamForm.dataset.editId) {
+          hint.textContent = "";
+          return;
+        }
+        const val = (nameInput.value || "").trim();
+        if (!val) {
+          hint.textContent = "";
+          return;
+        }
+        try {
+          const resp = await fetch(
+            `/api/teams?name=${encodeURIComponent(val)}`
+          );
+          if (!resp.ok) {
+            hint.textContent = "";
+            hint.style.display = "none";
+            return;
+          }
+          const list = await resp.json();
+          if (Array.isArray(list) && list.length > 0) {
+            const found = list.find(
+              (t) => (t.name || "").toLowerCase() === val.toLowerCase()
+            );
+            hint.textContent = found
+              ? `Внимание: команда с таким названием уже есть.`
+              : "";
+            hint.style.display = hint.textContent ? "block" : "none";
+            setTeamHintWidth();
+          } else {
+            hint.textContent = "";
+            hint.style.display = "none";
+          }
+        } catch {
+          hint.textContent = "";
+          hint.style.display = "none";
+        }
+      }, 400);
+
+      nameInput.addEventListener("input", debounced);
+      nameInput.addEventListener("blur", debounced);
+      // первичная проверка, если уже введено значение
+      setTimeout(debounced, 0);
+    }
   }
 
   // Загружаем команды при загрузке страницы
   loadTeams();
 });
-
 // Функция загрузки списка команд
 async function loadTeamsForSelect(selectElement) {
   try {
@@ -1941,10 +2875,139 @@ function initPlayerForm() {
     });
   }
 }
-
 // Инициализация при загрузке страницы
 document.addEventListener("DOMContentLoaded", () => {
   initPlayerForm();
+
+  // Подсказки уникальности для формы игрока (ник и steam64)
+  const playerForm = document.getElementById("player-form");
+  if (playerForm) {
+    const nickInput = playerForm.querySelector('input[name="nickname"]');
+    const steamInput = playerForm.querySelector('input[name="steam64"]');
+
+    const ensureHint = (input, color) => {
+      if (!input) return null;
+      if (input._hint) return input._hint;
+      const sibling = input.nextElementSibling;
+      let hint =
+        sibling && sibling.classList && sibling.classList.contains("field-hint")
+          ? sibling
+          : null;
+      if (!hint) {
+        hint = document.createElement("div");
+        hint.className = "field-hint";
+        hint.style.fontSize = "12px";
+        hint.style.color = color;
+        hint.style.marginTop = "4px";
+        input.insertAdjacentElement("afterend", hint);
+      }
+      hint.style.display = "block";
+      hint.style.flexBasis = "100%";
+      hint.style.width = "100%";
+      input._hint = hint;
+      return hint;
+    };
+
+    if (nickInput) {
+      const hint = ensureHint(nickInput, "#e5c07b");
+      hint.style.display = "none";
+      const checkNick = debounce(async () => {
+        // Во время редактирования игрока подсказки не показываем
+        if (playerForm && playerForm.dataset && playerForm.dataset.editId) {
+          hint.textContent = "";
+          return;
+        }
+        const val = (nickInput.value || "").trim();
+        if (!val) {
+          hint.textContent = "";
+          return;
+        }
+        try {
+          const resp = await fetch(
+            `/api/players?nickname=${encodeURIComponent(val)}`
+          );
+          if (!resp.ok) {
+            hint.textContent = "";
+            hint.style.display = "none";
+            return;
+          }
+          const data = await resp.json();
+          const list = Array.isArray(data)
+            ? data
+            : Array.isArray(data.players)
+            ? data.players
+            : [];
+          if (list.length > 0) {
+            const same = list.filter(
+              (p) => (p.nickname || "").toLowerCase() === val.toLowerCase()
+            );
+            hint.textContent = same.length
+              ? `Найдено совпадений по нику: ${same.length}`
+              : "";
+            hint.style.display = hint.textContent ? "block" : "none";
+          } else {
+            hint.textContent = "";
+            hint.style.display = "none";
+          }
+        } catch {
+          hint.textContent = "";
+          hint.style.display = "none";
+        }
+      }, 400);
+      nickInput.addEventListener("input", checkNick);
+      nickInput.addEventListener("blur", checkNick);
+      setTimeout(checkNick, 0);
+    }
+
+    if (steamInput) {
+      const hint = ensureHint(steamInput, "#d19a66");
+      hint.style.display = "none";
+      const checkSteam = debounce(async () => {
+        // Во время редактирования игрока подсказки не показываем
+        if (playerForm && playerForm.dataset && playerForm.dataset.editId) {
+          hint.textContent = "";
+          return;
+        }
+        const val = (steamInput.value || "").trim();
+        if (!val) {
+          hint.textContent = "";
+          return;
+        }
+        try {
+          const resp = await fetch(
+            `/api/players?steam64=${encodeURIComponent(val)}`
+          );
+          if (!resp.ok) {
+            hint.textContent = "";
+            hint.style.display = "none";
+            return;
+          }
+          const data = await resp.json();
+          const list = Array.isArray(data)
+            ? data
+            : Array.isArray(data.players)
+            ? data.players
+            : [];
+          if (list.length > 0) {
+            const found = list.find((p) => String(p.steam64 || "") === val);
+            hint.textContent = found
+              ? `Игрок с таким Steam64 уже существует.`
+              : "";
+            hint.style.display = hint.textContent ? "block" : "none";
+          } else {
+            hint.textContent = "";
+            hint.style.display = "none";
+          }
+        } catch {
+          hint.textContent = "";
+          hint.style.display = "none";
+        }
+      }, 400);
+      steamInput.addEventListener("input", checkSteam);
+      steamInput.addEventListener("blur", checkSteam);
+      setTimeout(checkSteam, 0);
+    }
+  }
 });
 
 // Обновляем обработчик редактирования игрока
@@ -1967,14 +3030,21 @@ function editPlayer(playerId) {
         }
       });
 
-      // Меняем кнопку на синий цвет и текст
-      if (window.changeButtonToEdit) {
-        window.changeButtonToEdit("add-player-btn", "Обновить игрока");
-      } else {
-        const submitBtn = form.querySelector('button[type="submit"]');
-        submitBtn.textContent = "Обновить игрока";
-        submitBtn.style.backgroundColor = "#007bff";
-        submitBtn.style.borderColor = "#007bff";
+      // Меняем кнопку на синий цвет и переводим на updatePlayer
+      {
+        const submitBtn =
+          form.querySelector("#add-player-btn") ||
+          form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.setAttribute("data-i18n", "updatePlayer");
+          submitBtn.textContent =
+            typeof i18n === "function"
+              ? i18n("updatePlayer")
+              : "Обновить игрока";
+          submitBtn.style.backgroundColor = "#007bff";
+          submitBtn.style.borderColor = "#007bff";
+          if (typeof translatePage === "function") translatePage();
+        }
       }
 
       // Прокручиваем к форме
@@ -2011,14 +3081,18 @@ async function handlePlayerSubmit(e) {
     form.reset();
     form.removeAttribute("data-edit-id");
 
-    // Возвращаем кнопку к исходному состоянию
-    if (window.resetButtonToAdd) {
-      window.resetButtonToAdd("add-player-btn", "Добавить игрока");
-    } else {
-      const submitBtn = form.querySelector('button[type="submit"]');
-      submitBtn.textContent = "Добавить игрока";
-      submitBtn.style.backgroundColor = "";
-      submitBtn.style.borderColor = "";
+    // Возвращаем кнопку к исходному состоянию (addPlayer)
+    {
+      const submitBtn =
+        form.querySelector("#add-player-btn") ||
+        form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.setAttribute("data-i18n", "addPlayer");
+        submitBtn.textContent = i18n("addPlayer");
+        submitBtn.style.backgroundColor = "";
+        submitBtn.style.borderColor = "";
+        if (typeof translatePage === "function") translatePage();
+      }
     }
 
     // Обновляем список игроков
@@ -2097,7 +3171,9 @@ async function loadPlayers() {
     if (playersList) {
       playersList.innerHTML = `
                 <div class="players-controls">
-                    <input type="text" id="playerSearch" placeholder="Поиск по никнейму или Steam64" class="search-input">
+                    <input type="text" id="playerSearch" placeholder="${i18n(
+                      "playerSearchPlaceholder"
+                    )}" data-i18n-placeholder="playerSearchPlaceholder" class="search-input">
                 </div>
                 <div class="players-grid">
                             ${players
@@ -2117,9 +3193,9 @@ async function loadPlayers() {
                                 <p class="card-subtitle">${
                                   player.realName || "-"
                                 }</p>
-                                <p class="card-info">${
-                                  player.teamName || "Без команды"
-                                }</p>
+                                <p class="card-info"${
+                                  player.teamName ? "" : ' data-i18n="noTeam"'
+                                }>${player.teamName || i18n("noTeam")}</p>
                             </div>
                             <div class="card-actions">
                                 <button class="edit-btn" onclick="editPlayer(${
@@ -2164,7 +3240,6 @@ async function deletePlayer(playerId) {
     alert("Ошибка при удалении игрока");
   }
 }
-
 async function loadHUDs() {
   try {
     const response = await fetch("/api/huds");
@@ -2178,6 +3253,7 @@ async function loadHUDs() {
                 </div>
                 <h3 data-i18n="closeOverlayHint">ALT+Q - Закрыть оверлей</h3>
                 <h3 data-i18n="toggleOverlayHint">ALT+X - Свернуть/Развернуть оверлей</h3>
+                <h3 data-i18n="colorsHLAE">Команда для смены цвета через HLAE: exec shud_color</h3>
                 <div class="players-table-container">
                     <table class="players-table">
                         <thead>
@@ -2220,6 +3296,11 @@ async function loadHUDs() {
                                         }" target="_blank" class="button" data-i18n="openInBrowser">
                                             ${i18n("openInBrowser")}
                                         </a>
+                                        <button class="open-folder-button" data-hud="${
+                                          hud.id
+                                        }" data-i18n="openHudFolder">${i18n(
+                                  "openHudFolder"
+                                )}</button>
                                         <button class="overlay-button" data-hud="${
                                           hud.id
                                         }" data-i18n="launchOverlay">
@@ -2249,8 +3330,43 @@ async function loadHUDs() {
         });
       });
 
-      // Инициализируем поиск
-      initializeHUDSearch();
+      // Обработчик открытия папки HUD
+      hudsList.querySelectorAll(".open-folder-button").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const hudId = button.dataset.hud;
+          try {
+            const resp = await fetch(
+              `/api/huds/${encodeURIComponent(hudId)}/open-folder`,
+              { method: "POST" }
+            );
+            if (!resp.ok) {
+              const err = await resp.json().catch(() => ({}));
+              alert((err && err.error) || `HTTP ${resp.status}`);
+            }
+          } catch (e) {
+            alert("Не удалось открыть папку HUD");
+          }
+        });
+      });
+
+      // Инициализируем поиск, если функция определена
+      if (typeof initializeHUDSearch === "function") {
+        initializeHUDSearch();
+      } else {
+        const searchInput = document.getElementById("hudSearch");
+        if (searchInput) {
+          searchInput.addEventListener("input", () => {
+            const q = searchInput.value.trim().toLowerCase();
+            document.querySelectorAll(".hud-row").forEach((row) => {
+              const name =
+                row
+                  .querySelector("td:nth-child(2)")
+                  ?.textContent?.toLowerCase() || "";
+              row.style.display = name.includes(q) ? "" : "none";
+            });
+          });
+        }
+      }
 
       // Признаки поддержки фич берем из объекта HUD (/api/huds уже мержит config.json)
       const renderHudFeatures = (hud) => {
@@ -2260,26 +3376,36 @@ async function loadHUDs() {
         const icons = [];
         if (cfg.radar) {
           icons.push(
-            '<i class="fas fa-map feature feature-radar" title="Кастомный радар"></i>'
+            `<i class="fas fa-map feature feature-radar" data-i18n-title="featureRadar" title="${i18n(
+              "featureRadar"
+            )}"></i>`
           );
         } else if (cfg.radar === false) {
           icons.push(
-            '<i class="fas fa-map-slash feature feature-radar-disabled" title="Радар отключен"></i>'
+            `<i class="fas fa-map-slash feature feature-radar-disabled" data-i18n-title="featureRadarDisabled" title="${i18n(
+              "featureRadarDisabled"
+            )}"></i>`
           );
         }
         if (cfg.killfeed) {
           icons.push(
-            '<i class="fas fa-skull feature feature-killfeed" title="Кастомный киллфид"></i>'
+            `<i class="fas fa-skull feature feature-killfeed" data-i18n-title="featureKillfeed" title="${i18n(
+              "featureKillfeed"
+            )}"></i>`
           );
         }
         if (cfg.HLAE_killfeed) {
           icons.push(
-            '<i class="fas fa-bolt feature feature-hlae" title="HLAE + Killfeed из CS2"></i>'
+            `<i class="fas fa-bolt feature feature-hlae" data-i18n-title="featureHlae" title="${i18n(
+              "featureHlae"
+            )}"></i>`
           );
         }
         if (cfg.HLAE_killfeed_castom) {
           icons.push(
-            '<i class="fas fa-tools feature feature-hlae-custom" title="HLAE + CS2 tools с кастомным killfeed"></i>'
+            `<i class="fas fa-tools feature feature-hlae-custom" data-i18n-title="featureHlaeCustom" title="${i18n(
+              "featureHlaeCustom"
+            )}"></i>`
           );
         }
         container.innerHTML = icons.join(" ");
@@ -2606,7 +3732,6 @@ mirv_colors teamid t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${teamidAlpha}`;
                 </div>
               </div>
             </div>`;
-
           // Синхронизируем color input c rgba
           formEl.querySelectorAll("input[data-key]")?.forEach((inp) => {
             const key = inp.getAttribute("data-key");
@@ -2817,7 +3942,6 @@ mirv_colors teamid t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${teamidAlpha}`;
               }
             });
           }
-
           // Инициализация переключателей режима и контролов градиента
           formEl
             .querySelectorAll("select[data-key-mode]")
@@ -2991,7 +4115,6 @@ mirv_colors teamid t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${teamidAlpha}`;
                 }
               }
             });
-
           // Инициализация HLAE полей
           formEl
             .querySelectorAll("input[data-key-alpha-range]")
@@ -3089,7 +4212,6 @@ mirv_colors teamid t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${teamidAlpha}`;
                 });
               }
             });
-
           // Обработчик для сохранения пути к CS2
           const cs2PathSaveBtn = document.getElementById("cs2-path-save");
           if (cs2PathSaveBtn) {
@@ -3128,7 +4250,6 @@ mirv_colors teamid t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${teamidAlpha}`;
               }
             });
           }
-
           // Функция для обновления HLAE цвета
           function updateHlaeColor(textInput, colorInput, alpha) {
             const hex = colorInput.value;
@@ -3145,7 +4266,6 @@ mirv_colors teamid t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${teamidAlpha}`;
               swatch.style.background = textInput.value;
             }
           }
-
           // Функция для обновления цветовых полей после сохранения
           function updateFormColorsAfterSave(savedColors) {
             Object.entries(savedColors).forEach(([key, value]) => {
@@ -3393,7 +4513,6 @@ mirv_colors teamid t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${teamidAlpha}`;
               }
             };
           }
-
           // Сброс к оригиналу: очищаем файл конфига
           if (btnReset) {
             btnReset.onclick = async () => {
@@ -3617,92 +4736,7 @@ mirv_colors teamid t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${teamidAlpha}`;
     console.error("Ошибка загрузки HUD:", error);
   }
 }
-
 // ... existing code ...
-
-// Обновленная функция копирования ссылки HUD
-function copyHUDUrl(hudId) {
-  const url = `${window.location.origin}/hud/${hudId}`;
-
-  // Создаем временный input элемент
-  const tempInput = document.createElement("input");
-  tempInput.style.position = "absolute";
-  tempInput.style.left = "-9999px";
-  tempInput.value = url;
-  document.body.appendChild(tempInput);
-
-  try {
-    // Выбираем текст
-    tempInput.select();
-    tempInput.setSelectionRange(0, 99999); // Для мобильных устройств
-
-    // Пытаемся скопировать
-    const successful = document.execCommand("copy");
-    if (successful) {
-      alert(i18n("Copy HUDUrlSuccess"));
-    } else {
-      throw new Error(i18n("copyHUDUrlError"));
-    }
-  } catch (err) {
-    console.error("Ошибка при копировании:", err);
-    // Показываем ссылку пользователю для ручного копирования
-    prompt(i18n("copyHUDUrlManual"), url);
-  } finally {
-    // Удаляем временный элемент
-    document.body.removeChild(tempInput);
-  }
-}
-
-// ... existing code ...
-
-// Функция поиска HUD'ов
-function searchHUDs(query) {
-  const searchQuery = query.toLowerCase();
-  const hudRows = document.querySelectorAll(".hud-row");
-
-  requestAnimationFrame(() => {
-    hudRows.forEach((row) => {
-      const nameElement = row.children[1]; // Название находится во втором столбце
-      const descElement = row.children[2]; // Описание в третьем столбце
-
-      if (!nameElement || !descElement) return;
-
-      const name = nameElement.textContent.toLowerCase();
-      const description = descElement.textContent.toLowerCase();
-
-      row.style.display =
-        name.includes(searchQuery) || description.includes(searchQuery)
-          ? ""
-          : "none";
-    });
-  });
-}
-
-// Инициализация поиска HUD'ов
-function initializeHUDSearch() {
-  const searchInput = document.getElementById("hudSearch");
-  if (!searchInput) return;
-
-  const debouncedSearch = debounce((e) => {
-    requestAnimationFrame(() => {
-      searchHUDs(e.target.value);
-    });
-  }, 300);
-
-  searchInput.addEventListener("input", debouncedSearch);
-}
-
-// Глобальные переменные
-let socket;
-let pauseUpdates = false;
-let lastTableHTML = "";
-let previousScores = {
-  ct: "0",
-  t: "0",
-};
-
-// ... existing code ...
-
 // Обновляем функцию updateGameInfo для использования данных из текущего матча
 async function updateGameInfo() {
   const scoreboardSection = document.getElementById("scoreboard-section");
@@ -3827,12 +4861,18 @@ async function updateGameInfo() {
         playerRows += `
                     <tr class="player-row ${player.team.toLowerCase()}">
                         <td>${ctName}</td>
-                        <td class="selectable" title="Выделите текст для копирования">${
-                          player.steamid
-                        }</td>
-                        <td class="selectable" title="Выделите текст для копирования">${
-                          player.name
-                        }</td>
+                        <td style="white-space:nowrap">
+                          ${player.steamid}
+                          <span class="copy-btn" data-copy-text="${encodeURIComponent(
+                            String(player.steamid || "")
+                          )}" title="Скопировать" style="margin-left:6px;cursor:pointer;font-size:12px;line-height:1;vertical-align:middle;display:inline">📋</span>
+                        </td>
+                        <td>
+                          ${player.name}
+                          <span class="copy-btn" data-copy-text="${encodeURIComponent(
+                            String(player.name || "")
+                          )}" title="Скопировать" style="margin-left:6px;cursor:pointer;font-size:12px;line-height:1;vertical-align:middle;display:inline">📋</span>
+                        </td>
                         <td>${player.match_stats?.kills || 0}</td>
                         <td>${player.state.kill_hs || 0}</td>
                         <td>${player.match_stats?.deaths || 0}</td>
@@ -3866,12 +4906,18 @@ async function updateGameInfo() {
         playerRows += `
                     <tr class="player-row ${player.team.toLowerCase()}">
                         <td>${tName}</td>
-                        <td class="selectable" title="Выделите текст для копирования">${
-                          player.steamid
-                        }</td>
-                        <td class="selectable" title="Выделите текст для копирования">${
-                          player.name
-                        }</td>
+                        <td style="white-space:nowrap">
+                          ${player.steamid}
+                          <span class="copy-btn" data-copy-text="${encodeURIComponent(
+                            String(player.steamid || "")
+                          )}" title="Скопировать" style="margin-left:6px;cursor:pointer;font-size:12px;line-height:1;vertical-align:middle;display:inline">📋</span>
+                        </td>
+                        <td>
+                          ${player.name}
+                          <span class="copy-btn" data-copy-text="${encodeURIComponent(
+                            String(player.name || "")
+                          )}" title="Скопировать" style="margin-left:6px;cursor:pointer;font-size:12px;line-height:1;vertical-align:middle;display:inline">📋</span>
+                        </td>
                         <td>${player.match_stats?.kills || 0}</td>
                         <td>${player.state.kill_hs || 0}</td>
                         <td>${player.match_stats?.deaths || 0}</td>
@@ -3908,7 +4954,7 @@ async function updateGameInfo() {
                     <thead>
                         <tr>
                             <th>Команда</th>
-                            <th>Steam64</th>
+                            <th style="width:210px;white-space:nowrap">Steam64</th>
                             <th>Игрок</th>
                             <th>Убийства</th>
                             <th>УБ. в голову</th>
@@ -3930,13 +4976,13 @@ async function updateGameInfo() {
       if (newTableHTML !== lastTableHTML) {
         statsTable.innerHTML = newTableHTML;
         lastTableHTML = newTableHTML;
+        ensureScoreboardCopyListener();
       }
     }
   } catch (error) {
     console.error("Ошибка обновления данных:", error);
   }
 }
-
 // Функция для получения текущего матча
 async function getCurrentMatch() {
   try {
@@ -4113,7 +5159,6 @@ async function loadTeamsForSelect(selectElement, selectedValue = "") {
       '<option data-i18n="selectTeamError" value="">Ошибка загрузки команд</option>';
   }
 }
-
 // Объединенная функция инициализации формы матча
 function initMatchForm() {
   const matchForm = document.getElementById("match-form");
@@ -4281,79 +5326,6 @@ function initMatchForm() {
     };
   }
 }
-/*
-// Добавляем функцию updateMapsContainer
-function updateMapsContainer() {
-    const formatSelect = document.getElementById('editFormat');
-    const mapsContainer = document.querySelector('.maps-container');
-    
-    if (!formatSelect || !mapsContainer) {
-        console.error('Не найдены необходимые элементы для обновления карт');
-        return;
-    }
-    
-    const format = formatSelect.value;
-    let mapCount = 1; // По умолчанию одна карта
-    
-    // Определяем количество карт в зависимости от формата
-    if (format === 'bo3') {
-        mapCount = 3;
-    } else if (format === 'bo2') {
-        mapCount = 2;
-    } else if (format === 'bo5') {
-        mapCount = 5;
-    }
-    
-    // Очищаем контейнер
-    mapsContainer.innerHTML = '';
-    
-    // Создаем элементы для каждой карты
-    for (let i = 0; i < mapCount; i++) {
-        const mapItem = document.createElement('div');
-        mapItem.className = 'map-item';
-        
-        mapItem.innerHTML = `
-            <div class="map-number">Карта ${i + 1}</div>
-            <select class="map-select">
-                <option value="">Выберите карту</option>
-                <option value="de_dust2">Dust II</option>
-                <option value="de_mirage">Mirage</option>
-                <option value="de_inferno">Inferno</option>
-                <option value="de_nuke">Nuke</option>
-                <option value="de_overpass">Overpass</option>
-                <option value="de_vertigo">Vertigo</option>
-                <option value="de_ancient">Ancient</option>
-                <option value="de_anubis">Anubis</option>
-                <option value="de_train">Train</option>
-            </select>
-            <select class="pick-team-select">
-                <option value="">Выбор команды</option>
-                <option value="team1">Команда 1</option>
-                <option value="team2">Команда 2</option>
-            </select>
-        `;
-        
-        mapsContainer.appendChild(mapItem);
-    }
-    
-    // Обновляем названия команд в селекторах выбора
-    const team1Element = document.getElementById('editTeam1');
-    const team2Element = document.getElementById('editTeam2');
-    
-    if (team1Element && team2Element) {
-        const team1Name = team1Element.options[team1Element.selectedIndex]?.text || 'Команда 1';
-        const team2Name = team2Element.options[team2Element.selectedIndex]?.text || 'Команда 2';
-        
-        document.querySelectorAll('.pick-team-select').forEach(select => {
-            const team1Option = select.querySelector('option[value="team1"]');
-            const team2Option = select.querySelector('option[value="team2"]');
-            
-            if (team1Option) team1Option.textContent = team1Name;
-            if (team2Option) team2Option.textContent = team2Name;
-        });
-    }
-}*/
-
 // Обновляем функцию редактирования матча для сохранения выбранных карт
 window.editMatch = async function (matchId) {
   try {
@@ -4658,7 +5630,6 @@ async function checkCS2Configs(customPath) {
     return null;
   }
 }
-
 // Функция для установки конфигов CS2
 async function installCS2Configs() {
   try {
@@ -4700,7 +5671,6 @@ async function installCS2Configs() {
     alert("Ошибка при установке конфигов");
   }
 }
-
 // Обновление статуса конфигов в интерфейсе
 async function updateConfigsStatus() {
   const gsiStatusElement = document.getElementById("cs2-gsi-status");
@@ -5112,7 +6082,6 @@ function initializeCS2Tools() {
   // Проверяем статус конфигов при загрузке страницы
   updateConfigsStatus();
 }
-
 // Функция для сохранения данных матча
 async function saveMatch(matchId) {
   const mapsContainer = document.querySelector(".maps-container");
@@ -5200,7 +6169,6 @@ async function saveMatch(matchId) {
     alert(`Ошибка: ${error.message}`);
   }
 }
-
 function updateMapsContainerWithElements(
   elements,
   team1Name,
@@ -5612,7 +6580,6 @@ async function loadTeamsForSelect(selectElement, selectedValue = "") {
       '<option value="" data-i18n="errorLoadingTeams">Ошибка загрузки команд</option>';
   }
 }
-
 // Отдельная функция для инициализации всех селектов команд на странице
 function initializeAllTeamSelects() {
   console.log("Инициализация всех селектов команд");
@@ -5842,7 +6809,6 @@ window.gsiManager.subscribe(function (event) {
     }
   }
 });
-
 // Пример кода обработчика формы на клиенте
 document.addEventListener("DOMContentLoaded", function () {
   const createMatchForm = document.getElementById("createMatchForm");
@@ -5902,7 +6868,6 @@ document.addEventListener("DOMContentLoaded", function () {
     };
   }
 });
-
 // Функция для открытия модального окна редактирования счета
 function openScoreEditModal(matchId, mapIndex, mapName) {
   // Получаем данные о матче и его картах
@@ -6113,7 +7078,6 @@ async function updateAllTeamSelects() {
     console.error("Ошибка при обновлении селекторов команд:", error);
   }
 }
-
 // Инициализация формы импорта LHM
 function initImportLHMForm() {
   const importForm = document.getElementById("import-lhm-form");
@@ -6433,7 +7397,6 @@ async function loadTeams() {
                                          onerror="this.onerror=null; this.src='/images/default-team-logo.png';">
                                     <div class="team-details">
                                         <h3 class="team-name">${team.name}</h3>
-                                        <p data-i18n="teamRegion" class="team-region">${regionDisplay}</p>
                                     </div>
                                 </div>
                                 <div class="team-actions">
@@ -6486,7 +7449,6 @@ function getRegionInfo(regionCode) {
   // Если регион есть в списке, возвращаем его данные, иначе - сам регион и глобус
   return regionMap[regionCode] || { name: regionCode, flag: "🌎" };
 }
-
 // Функция для отправки данных команд в GSI
 function sendTeamLogosToGSI(
   team1Logo,
@@ -6504,8 +7466,9 @@ function sendTeamLogosToGSI(
     const fixLogoPath = (logo) => {
       if (!logo) return `${baseUrl}/images/default-team-logo.png`;
       if (logo.startsWith("http")) return logo; // Уже абсолютный URL
-      if (logo.startsWith("/")) return `${baseUrl}${logo}`; // Добавляем только домен
-      return `${baseUrl}/${logo}`; // Добавляем полный путь
+      if (logo.startsWith("/")) return `${baseUrl}${logo}`; // Абсолютный от корня
+      // Иначе это имя файла из uploads
+      return `${baseUrl}/uploads/${logo}`;
     };
 
     // Используем sendToHUD вместо send
@@ -6586,13 +7549,10 @@ function getFlagByRegion(regionValue) {
   const option = select.querySelector('option[value="' + regionValue + '"]');
   return option ? option.getAttribute("data-flag") : "❓";
 }
-
 // Пример использования (закомментирован, т.к. вызывает ошибку):
 // const flag = getFlagByRegion(team.region);
 // document.querySelector('.region-flag').textContent = flag;
-
 // ... existing code ...
-
 // Функция для инициализации секции камер
 function initializeCamerasSection() {
   console.log("Вызвана initializeCamerasSection", gsiDataBuffer);
@@ -6707,7 +7667,6 @@ function initializeCamerasSection() {
     if (input) input.value = prevInputs[steamid];
   });
 }
-
 // ... existing code ...
 
 document.getElementById("refresh-cameras-btn").addEventListener("click", () => {
@@ -6767,7 +7726,7 @@ async function loadPlayers() {
             <div class="search-bar">
                 <input type="text" id="playerSearch" placeholder="${i18n(
                   "playerSearchPlaceholder"
-                )}" class="search-input">
+                )}" data-i18n-placeholder="playerSearchPlaceholder" class="search-input">
             </div>
             <div class="players-grid">
                 ${players
@@ -6790,9 +7749,11 @@ async function loadPlayers() {
                                     <h3 class="player-name">${
                                       player.nickname
                                     }</h3>
-                                    <p class="player-team">${
-                                      player.teamName || i18n("noTeam")
-                                    }</p>
+                                    <p class="player-team"${
+                                      player.teamName
+                                        ? ""
+                                        : ' data-i18n="noTeam"'
+                                    }>${player.teamName || i18n("noTeam")}</p>
                                 </div>
                             </div>
                             <div class="player-actions">
@@ -6951,9 +7912,7 @@ if (launchCs2HlaeInsecureBtn) {
     }
   });
 }
-
 // ... existing code ...
-
 // Функция для обновления Dota 2 скорборда
 function updateDota2Scoreboard(data, currentMatch) {
   const statsTable = document.querySelector(
@@ -7043,8 +8002,20 @@ function updateDota2Scoreboard(data, currentMatch) {
       playerRows += `
         <tr class="player-row radiant">
           <td>${radiantName}</td>
-          <td class="selectable" title="Выделите текст для копирования">${player.steamid}</td>
-          <td class="selectable" title="Выделите текст для копирования">${player.name}</td>
+          <td class="selectable" title="Выделите текст для копирования">${
+            player.steamid
+          }
+            <span class="copy-btn" data-copy-text="${encodeURIComponent(
+              String(player.steamid || "")
+            )}" title="Скопировать" style="margin-left:6px;cursor:pointer;font-size:12px;line-height:1;vertical-align:middle;display:inline">📋</span>
+          </td>
+          <td class="selectable" title="Выделите текст для копирования">${
+            player.name
+          }
+            <span class="copy-btn" data-copy-text="${encodeURIComponent(
+              String(player.name || "")
+            )}" title="Скопировать" style="margin-left:6px;cursor:pointer;font-size:12px;line-height:1;vertical-align:middle;display:inline">📋</span>
+          </td>
           <td>${player.hero}</td>
           <td>${player.kills}</td>
           <td>${player.deaths}</td>
@@ -7069,8 +8040,20 @@ function updateDota2Scoreboard(data, currentMatch) {
       playerRows += `
         <tr class="player-row dire">
           <td>${direName}</td>
-          <td class="selectable" title="Выделите текст для копирования">${player.steamid}</td>
-          <td class="selectable" title="Выделите текст для копирования">${player.name}</td>
+          <td class="selectable" title="Выделите текст для копирования">${
+            player.steamid
+          }
+            <span class="copy-btn" data-copy-text="${encodeURIComponent(
+              String(player.steamid || "")
+            )}" title="Скопировать" style="margin-left:6px;cursor:pointer;font-size:12px;line-height:1;vertical-align:middle;display:inline">📋</span>
+          </td>
+          <td class="selectable" title="Выделите текст для копирования">${
+            player.name
+          }
+            <span class="copy-btn" data-copy-text="${encodeURIComponent(
+              String(player.name || "")
+            )}" title="Скопировать" style="margin-left:6px;cursor:pointer;font-size:12px;line-height:1;vertical-align:middle;display:inline">📋</span>
+          </td>
           <td>${player.hero}</td>
           <td>${player.kills}</td>
           <td>${player.deaths}</td>
@@ -7130,6 +8113,7 @@ function updateDota2Scoreboard(data, currentMatch) {
 
     // Обновляем таблицу
     statsTable.innerHTML = newTableHTML;
+    ensureScoreboardCopyListener();
   } catch (error) {
     console.error("Ошибка обновления Dota 2 скорборда:", error);
   }
