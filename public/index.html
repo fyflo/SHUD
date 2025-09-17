@@ -118,6 +118,12 @@
               </button>
             </li>
             <li class="nav-item">
+              <button class="nav-button" data-section="faceit-import-section">
+                <i class="fas fa-cloud-download-alt"></i>
+                <span data-i18n="navFaceitImport">FACEIT Импорт</span>
+              </button>
+            </li>
+            <li class="nav-item">
               <button class="nav-button active" data-section="cs2-section">
                 <i class="fas fa-gamepad"></i>
                 <span data-i18n="navCS2Integration">CFG Интеграция</span>
@@ -196,6 +202,54 @@
 
       <!-- Основной контент -->
       <main class="main-content">
+        <!-- FACEIT Импорт -->
+        <section id="faceit-import-section" class="content-section panel-cs2">
+          <h3 data-i18n="faceitImport">FACEIT Импорт</h3>
+          <div class="form-group">
+            <label for="faceit-matchroom" data-i18n="faceitMatchroomLabel"
+              >Matchroom URL или ID</label
+            >
+            <input
+              type="text"
+              id="faceit-matchroom"
+              placeholder="https://www.faceit.com/en/cs2/room/1-xxxx-.... или 1-xxxx-..."
+              style="width: 100%"
+            />
+          </div>
+          <button
+            id="faceit-import-btn"
+            class="button-cs2"
+            style="width: 100%; margin-top: 8px"
+          >
+            <span data-i18n="getFaceitMatchroom"
+              >Получить данные с Matchroom</span
+            >
+          </button>
+
+          <hr style="margin: 16px 0; opacity: 0.2" />
+          <div class="form-group">
+            <label for="faceit-team-url" data-i18n="faceitTeamUrl"
+              >URL команды FACEIT</label
+            >
+            <input
+              type="text"
+              id="faceit-team-url"
+              placeholder="https://www.faceit.com/ru/teams/<teamId>"
+              style="width: 100%"
+            />
+          </div>
+          <button
+            id="faceit-team-roster-btn"
+            class="button-cs2"
+            style="width: 100%; margin-top: 8px"
+          >
+            <span data-i18n="getFaceitTeamRoster">Получить состав команды</span>
+          </button>
+          <div id="faceit-team-roster-results" style="margin-top: 8px"></div>
+
+          <div id="faceit-import-results" style="margin-top: 12px"></div>
+        </section>
+
         <!-- Форма для скрытия игроков по Steam64 ID -->
         <section id="hide-players-section" class="content-section panel-cs2">
           <h3 data-i18n="hidePlayersTitle">Скрыть Тренера по Steam64 ID</h3>
@@ -1166,7 +1220,7 @@
           });
         }
 
-        // Запуск CS2 HLAE (LHM)
+        // Запуск CS2 HLAE с -insecure
         const launchCs2HlaeInsecureBtn = document.getElementById(
           "launch-cs2-hlae-insecure"
         );
@@ -1186,7 +1240,7 @@
               });
               const data = await resp.json().catch(() => ({}));
               if (resp.ok) {
-                alert("CS2 запускается через HLAE (LHM-старт)");
+                alert("CS2 запускается через HLAE с -insecure");
               } else {
                 alert(`Ошибка запуска: ${data.error || "неизвестно"}`);
               }
