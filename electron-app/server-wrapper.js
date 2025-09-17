@@ -26,9 +26,9 @@ function createPackageJsonIfNeeded(serverDir) {
     writeLog(`Создание package.json в ${serverDir}`);
 
     const packageJson = {
-      name: "cs2-hud-manager-server",
+      name: "SHUD",
       version: "1.0.0",
-      description: "CS2 HUD Manager Server",
+      description: "SHUD Server",
       main: "server.js",
       dependencies: {
         express: "^4.18.2",

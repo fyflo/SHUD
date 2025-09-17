@@ -1,4 +1,12 @@
-const { app, BrowserWindow, dialog, protocol, session, globalShortcut, globalShortcut: { isRegistered } } = require("electron");
+const {
+  app,
+  BrowserWindow,
+  dialog,
+  protocol,
+  session,
+  globalShortcut,
+  globalShortcut: { isRegistered },
+} = require("electron");
 const path = require("path");
 const fs = require("fs");
 const net = require("net");
@@ -46,7 +54,7 @@ async function installDependencies(targetDir) {
 
     // Создаем минимальный package.json
     const minPackage = {
-      name: "cs2-hud-manager-server",
+      name: "SHUD",
       version: "1.0.0",
       main: "server.js",
       dependencies: {
@@ -204,41 +212,41 @@ async function startServer() {
 
 // Функция для показа всплывающего слова в HUD
 function showPopupWordInHUD() {
-  console.log('=== ELECTRON: Alt+T pressed globally ===');
-  
+  console.log("=== ELECTRON: Alt+T pressed globally ===");
+
   // Отправляем HTTP запрос к серверу
-  const http = require('http');
-  
+  const http = require("http");
+
   const postData = JSON.stringify({
-    type: 'popup_word',
-    action: 'show',
-    word: 'ГЛОБАЛЬНАЯ ГОРЯЧАЯ КЛАВИША22!',
-    timestamp: Date.now()
+    type: "popup_word",
+    action: "show",
+    word: "ГЛОБАЛЬНАЯ ГОРЯЧАЯ КЛАВИША22!",
+    timestamp: Date.now(),
   });
-  
+
   const options = {
-    hostname: 'localhost',
+    hostname: "localhost",
     port: 2626, // Используем правильный порт сервера
-    path: '/api/popup-word',
-    method: 'POST',
+    path: "/api/popup-word",
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(postData)
-    }
+      "Content-Type": "application/json",
+      "Content-Length": Buffer.byteLength(postData),
+    },
   };
-  
+
   const req = http.request(options, (res) => {
     console.log(`✅ HTTP API response: ${res.statusCode}`);
     if (res.statusCode === 200) {
-      console.log('✅ Popup word sent successfully!');
+      console.log("✅ Popup word sent successfully!");
     }
   });
-  
-  req.on('error', (error) => {
-    console.log('❌ HTTP API error:', error.message);
-    console.log('❌ Make sure server is running on port 2626');
+
+  req.on("error", (error) => {
+    console.log("❌ HTTP API error:", error.message);
+    console.log("❌ Make sure server is running on port 2626");
   });
-  
+
   req.write(postData);
   req.end();
 }
@@ -246,39 +254,39 @@ function showPopupWordInHUD() {
 // Функция для показа/скрытия таблицы лидеров по киллам в HUD
 function showKillsLeaderboardInHUD(action) {
   console.log(`=== ELECTRON: Alt+Y ${action} - kills-leaderboard ===`);
-  
+
   // Отправляем HTTP запрос к серверу
-  const http = require('http');
-  
+  const http = require("http");
+
   const postData = JSON.stringify({
-    type: 'kills_leaderboard',
+    type: "kills_leaderboard",
     action: action, // 'show' или 'hide'
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
-  
+
   const options = {
-    hostname: 'localhost',
+    hostname: "localhost",
     port: 2626, // Используем правильный порт сервера
-    path: '/api/kills-leaderboard',
-    method: 'POST',
+    path: "/api/kills-leaderboard",
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(postData)
-    }
+      "Content-Type": "application/json",
+      "Content-Length": Buffer.byteLength(postData),
+    },
   };
-  
+
   const req = http.request(options, (res) => {
     console.log(`✅ HTTP API response: ${res.statusCode}`);
     if (res.statusCode === 200) {
       console.log(`✅ Kills leaderboard ${action} command sent successfully!`);
     }
   });
-  
-  req.on('error', (error) => {
-    console.log('❌ HTTP API error:', error.message);
-    console.log('❌ Make sure server is running on port 2626');
+
+  req.on("error", (error) => {
+    console.log("❌ HTTP API error:", error.message);
+    console.log("❌ Make sure server is running on port 2626");
   });
-  
+
   req.write(postData);
   req.end();
 }
@@ -286,37 +294,37 @@ function showKillsLeaderboardInHUD(action) {
 // Регистрация глобальных горячих клавиш
 function registerGlobalShortcuts() {
   // Alt+T - показать всплывающее слово в HUD
-  const successT = globalShortcut.register('Alt+T', () => {
-    console.log('Alt+T pressed - showing popup word in HUD');
+  const successT = globalShortcut.register("Alt+T", () => {
+    console.log("Alt+T pressed - showing popup word in HUD");
     showPopupWordInHUD();
   });
-  
+
   // Alt+Y - показать/скрыть таблицу лидеров по киллам в HUD
   let isLeaderboardShown = false;
-  const successY = globalShortcut.register('Alt+Y', () => {
+  const successY = globalShortcut.register("Alt+Y", () => {
     if (!isLeaderboardShown) {
-      console.log('Alt+Y pressed - showing kills leaderboard in HUD');
-      showKillsLeaderboardInHUD('show');
+      console.log("Alt+Y pressed - showing kills leaderboard in HUD");
+      showKillsLeaderboardInHUD("show");
       isLeaderboardShown = true;
     } else {
-      console.log('Alt+Y pressed - hiding kills leaderboard in HUD');
-      showKillsLeaderboardInHUD('hide');
+      console.log("Alt+Y pressed - hiding kills leaderboard in HUD");
+      showKillsLeaderboardInHUD("hide");
       isLeaderboardShown = false;
     }
   });
-  
+
   if (successT) {
-    console.log('✅ Global shortcut Alt+T registered successfully!');
-    console.log('🎮 Press Alt+T anywhere to show popup word in HUD');
+    console.log("✅ Global shortcut Alt+T registered successfully!");
+    console.log("🎮 Press Alt+T anywhere to show popup word in HUD");
   } else {
-    console.log('❌ Failed to register global shortcut Alt+T');
+    console.log("❌ Failed to register global shortcut Alt+T");
   }
-  
+
   if (successY) {
-    console.log('✅ Global shortcut Alt+Y registered successfully!');
-    console.log('🎮 Press Alt+Y anywhere to toggle kills leaderboard in HUD');
+    console.log("✅ Global shortcut Alt+Y registered successfully!");
+    console.log("🎮 Press Alt+Y anywhere to toggle kills leaderboard in HUD");
   } else {
-    console.log('❌ Failed to register global shortcut Alt+Y');
+    console.log("❌ Failed to register global shortcut Alt+Y");
   }
 }
 
@@ -382,7 +390,7 @@ function createWindow() {
     console.log("Окно закрыто");
     mainWindow = null;
   });
-  
+
   // Регистрируем глобальные горячие клавиши после создания окна
   registerGlobalShortcuts();
 }

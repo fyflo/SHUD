@@ -12,8 +12,8 @@
   "author": "fyflo",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^28.3.3",
-    "electron-builder": "^24.9.1"
+    "electron": "^38.1.1",
+    "electron-builder": "^26.0.12"
   },
   "dependencies": {
     "archiver": "^6.0.1",
@@ -26,7 +26,7 @@
     "node": ">=18.0.0"
   },
   "build": {
-    "appId": "com.fyflo.cs2hudmanager",
+    "appId": "com.fyflo.shudmanager",
     "productName": "SHUD",
     "directories": {
       "output": "dist"
