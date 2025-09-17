@@ -1,6 +1,7 @@
 const express = require("express");
-const ip = require("ip");
+const os = require("os");
 const path = require("path"); // Перемещаем сюда импорт path
+const child_process = require("child_process");
 const app = express();
 const gsiApp = express();
 const https = require("https");
@@ -281,8 +282,17 @@ function broadcastToAllClients(event, data) {
   }
 }
 
-// Получаем IP адрес сервера
-const serverIP = ip.address();
+// Получаем IP адрес сервера (без пакета ip)
+function getLocalIPv4() {
+  const nets = os.networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name] || []) {
+      if (net.family === "IPv4" && !net.internal) return net.address;
+    }
+  }
+  return "127.0.0.1";
+}
+const serverIP = getLocalIPv4();
 
 // Настройка статических файлов
 app.use(express.static("public"));
@@ -635,7 +645,6 @@ function getCS2Path() {
   console.log(`CS2 path default: ${defaultPath}`);
   return defaultPath;
 }
-
 // ================= END CS2 PATH MANAGEMENT API =============
 
 const multer = require("multer");
@@ -710,6 +719,1585 @@ app.get("/obs/:file", (req, res) => {
     return res.status(404).send("Not found");
   }
 });
+// ================= FACEIT IMPORT API =================
+// Импорт команд и игроков из FACEIT matchroom (минимальная реализация)
+app.post(
+  "/api/faceit/import",
+  express.json({ limit: "20kb" }),
+  async (req, res) => {
+    try {
+      const input = String(req.body?.matchroom || req.body?.url || "").trim();
+      if (!input)
+        return res.status(400).json({ error: "matchroom/url required" });
+
+      const extractMatchId = (s) => {
+        const full = s.match(
+          /^https?:\/\/www\.faceit\.com\/[^/]+\/cs2\/room\/(1-.+)$/i
+        );
+        if (full && full[1]) return full[1];
+        const raw = s.match(/^(1-.{8}-.{4}-.{4}-.{4}-.{12})$/);
+        if (raw && raw[1]) return raw[1];
+        return null;
+      };
+
+      const matchId = extractMatchId(input);
+      if (!matchId)
+        return res.status(400).json({ error: "invalid matchroom id" });
+
+      const faceitUrl = `https://www.faceit.com/api/match/v2/match/${matchId}`;
+      const faceitResp = await fetch(faceitUrl, {
+        headers: { Accept: "application/json" },
+      });
+      if (!faceitResp.ok)
+        return res
+          .status(faceitResp.status)
+          .json({ error: `faceit fetch failed: ${faceitResp.status}` });
+      const faceit = await faceitResp.json().catch(() => ({}));
+
+      const teamsNode = faceit?.payload?.teams || faceit?.teams || {};
+      const f1 =
+        teamsNode.faction1 || teamsNode.faction_1 || teamsNode.team1 || {};
+      const f2 =
+        teamsNode.faction2 || teamsNode.faction_2 || teamsNode.team2 || {};
+
+      const normalizeTeam = (t) => ({
+        name: String(t?.name || t?.nickname || t?.tag || "").trim(),
+        logo: t?.avatar || t?.logo || t?.image || null,
+        roster: t?.roster || t?.players || [],
+      });
+
+      const t1 = normalizeTeam(f1);
+      const t2 = normalizeTeam(f2);
+
+      // Возвращаем только разобранные данные, без запись в БД
+      const mapPlayers = (players) =>
+        (Array.isArray(players) ? players : []).map((pl) => ({
+          nickname: pl?.nickname || pl?.name || "",
+          steam64: pl?.game_player_id || pl?.steam_id_64 || pl?.steam64 || null,
+        }));
+
+      const result = { matchId, teams: [] };
+      if (t1?.name)
+        result.teams.push({
+          teamName: t1.name,
+          teamLogo: t1.logo || null,
+          players: mapPlayers(t1.roster),
+        });
+      if (t2?.name)
+        result.teams.push({
+          teamName: t2.name,
+          teamLogo: t2.logo || null,
+          players: mapPlayers(t2.roster),
+        });
+
+      // Попробуем извлечь историю мап-вэто из JSON ответа FACEIT
+      try {
+        const knownMaps = [
+          "Ancient",
+          "Anubis",
+          "Mirage",
+          "Inferno",
+          "Nuke",
+          "Overpass",
+          "Vertigo",
+          "Dust2",
+          "Train",
+          "Cache",
+          "Tuscan",
+        ];
+        const mapSet = new Set(knownMaps.map((m) => m.toLowerCase()));
+        const teamsForDetect = [t1?.name || "", t2?.name || ""].filter(Boolean);
+
+        const resultVeto = [];
+        const toTitle = (s) =>
+          s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s;
+        const tryPush = (type, map, team) => {
+          if (!map) return;
+          const name = toTitle(String(map).trim());
+          if (!mapSet.has(name.toLowerCase())) return;
+          resultVeto.push({
+            type: String(type || "").toLowerCase(),
+            map: name,
+            team: team || null,
+          });
+        };
+
+        const visit = (node, contextTeam) => {
+          if (!node) return;
+          if (Array.isArray(node)) {
+            for (const v of node) visit(v, contextTeam);
+            return;
+          }
+          if (typeof node === "object") {
+            // попытка определить команду из узла
+            let teamHere = contextTeam;
+            for (const [k, v] of Object.entries(node)) {
+              if (typeof v === "string") {
+                const val = v.toLowerCase();
+                const found = teamsForDetect.find((nm) =>
+                  val.includes(String(nm).toLowerCase())
+                );
+                if (found) teamHere = found;
+              }
+            }
+
+            // попытка извлечь действия pick/ban/decider
+            let foundMap = null;
+            for (const [k, v] of Object.entries(node)) {
+              if (typeof v === "string" && mapSet.has(v.toLowerCase())) {
+                foundMap = v;
+                break;
+              }
+            }
+            if (foundMap) {
+              const textBlob = JSON.stringify(node).toLowerCase();
+              if (/decider/.test(textBlob)) tryPush("decider", foundMap, null);
+              else if (/pick/.test(textBlob))
+                tryPush("pick", foundMap, teamHere);
+              else if (/ban/.test(textBlob)) tryPush("ban", foundMap, teamHere);
+            }
+
+            for (const v of Object.values(node)) visit(v, teamHere);
+          }
+        };
+
+        visit(faceit, null);
+        if (resultVeto.length && !result.veto) result.veto = resultVeto;
+      } catch (_) {}
+
+      // Попробуем извлечь историю мап-вэто со страницы матчрума (RU/EN)
+      try {
+        const roomUrlRu = `https://www.faceit.com/ru/cs2/room/${matchId}`;
+        const roomUrlEn = `https://www.faceit.com/en/cs2/room/${matchId}`;
+        const tryFetch = async (url) =>
+          fetch(url, {
+            headers: {
+              "User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+              Accept:
+                "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+              "Accept-Language": "ru,en;q=0.9",
+              "Cache-Control": "no-cache",
+              Pragma: "no-cache",
+            },
+          });
+        let roomResp = await tryFetch(roomUrlRu);
+        if (!roomResp.ok) roomResp = await tryFetch(roomUrlEn);
+        if (roomResp.ok) {
+          let html = await roomResp.text();
+          // Удаляем скрипты/стили и декодируем HTML-сущности по минимуму
+          html = String(html || "");
+          // Попытка вынуть JSON из __NEXT_DATA__ и распарсить
+          try {
+            const mNext = html.match(
+              /<script[^>]*id=\"__NEXT_DATA__\"[^>]*>([\s\S]*?)<\/script>/i
+            );
+            if (mNext && mNext[1]) {
+              const nextJson = JSON.parse(mNext[1]);
+              const textBlob = JSON.stringify(nextJson).toLowerCase();
+              const rxList = [
+                { re: /([^.:!?]+?)\s+bans\s*:?[\s]*([a-z0-9_-]+)/gi, t: "ban" },
+                {
+                  re: /([a-z0-9_-]+)\s+is\s+picked\s+by\s+([^.:!?]+)/gi,
+                  t: "pick",
+                },
+                { re: /([a-z0-9_-]+)\s+is\s+the\s+decider/gi, t: "decider" },
+                {
+                  re: /([^.:!?]+?)\s+блокирует\s*:?[\s]*([a-z0-9_-]+)/gi,
+                  t: "ban",
+                },
+                {
+                  re: /([a-z0-9_-]+)\s+выбирается\s+фракцией\s+([^.:!?]+)/gi,
+                  t: "pick",
+                },
+                {
+                  re: /([a-z0-9_-]+)\s+выбирается\s+по\s+умолчанию/gi,
+                  t: "decider",
+                },
+              ];
+              for (const { re, t } of rxList) {
+                let m;
+                while ((m = re.exec(textBlob)))
+                  push(t, m[2] || m[1], m[1] && m[2] ? m[1] : null);
+              }
+            }
+          } catch (_) {}
+          const lines = Array.from(
+            String(html).matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)
+          )
+            .map((m) => m[1] || "")
+            .map((s) =>
+              s
+                .replace(/<[^>]+>/g, " ")
+                .replace(/&nbsp;/g, " ")
+                .trim()
+            )
+            .filter(Boolean);
+
+          const veto = [];
+          const push = (type, map, team) => {
+            const norm = (x) => String(x || "").trim();
+            if (!map) return;
+            veto.push({
+              type: norm(type),
+              map: norm(map),
+              team: team ? norm(team) : null,
+            });
+          };
+          for (const line of lines) {
+            const text = line.replace(/\s+/g, " ").trim();
+            // RU: "K27 блокирует: Nuke"
+            let m = text.match(/^(.+?)\s+блокирует\s*:\s*(.+)$/i);
+            if (m) {
+              push("ban", m[2], m[1]);
+              continue;
+            }
+            // RU: "Train выбирается фракцией K27"
+            m = text.match(/^(.+?)\s+выбирается\s+фракцией\s+(.+)$/i);
+            if (m) {
+              push("pick", m[1], m[2]);
+              continue;
+            }
+            // RU: "Ancient выбирается по умолчанию"
+            m = text.match(/^(.+?)\s+выбирается\s+по\s+умолчанию$/i);
+            if (m) {
+              push("decider", m[1], null);
+              continue;
+            }
+            // EN: "K27 bans: Nuke" or "K27 bans Nuke"
+            m = text.match(/^(.+?)\s+bans\s*:?\s*(.+)$/i);
+            if (m) {
+              push("ban", m[2], m[1]);
+              continue;
+            }
+            // EN: "Mirage is picked by Insilio"
+            m = text.match(/^(.+?)\s+is\s+picked\s+by\s+(.+)$/i);
+            if (m) {
+              push("pick", m[1], m[2]);
+              continue;
+            }
+            // EN: "Ancient is the decider"
+            m = text.match(/^(.+?)\s+is\s+the\s+decider$/i);
+            if (m) {
+              push("decider", m[1], null);
+              continue;
+            }
+          }
+          if (!veto.length) {
+            // Фоллбек: ищем шаблоны по всему тексту страницы (RU/EN)
+            const pageText = String(html)
+              .replace(/<script[\s\S]*?<\/script>/gi, " ")
+              .replace(/<style[\s\S]*?<\/style>/gi, " ")
+              .replace(/<[^>]+>/g, " ")
+              .replace(/&nbsp;/g, " ")
+              .replace(/\s+/g, " ")
+              .trim();
+
+            const tryAll = [
+              // RU
+              {
+                re: /([^.:!?]+?)\s+блокирует\s*:\s*([A-Za-z0-9_-]+)/gi,
+                h: (m) => push("ban", m[2], m[1]),
+              },
+              {
+                re: /([A-Za-z0-9_-]+)\s+выбирается\s+фракцией\s+([^.:!?]+)/gi,
+                h: (m) => push("pick", m[1], m[2]),
+              },
+              {
+                re: /([A-Za-z0-9_-]+)\s+выбирается\s+по\s+умолчанию/gi,
+                h: (m) => push("decider", m[1], null),
+              },
+              // EN
+              {
+                re: /([^.:!?]+?)\s+bans\s*:?\s*([A-Za-z0-9_-]+)/gi,
+                h: (m) => push("ban", m[2], m[1]),
+              },
+              {
+                re: /([A-Za-z0-9_-]+)\s+is\s+picked\s+by\s+([^.:!?]+)/gi,
+                h: (m) => push("pick", m[1], m[2]),
+              },
+              {
+                re: /([A-Za-z0-9_-]+)\s+is\s+the\s+decider/gi,
+                h: (m) => push("decider", m[1], null),
+              },
+            ];
+            for (const { re, h } of tryAll) {
+              let m;
+              while ((m = re.exec(pageText))) h(m);
+            }
+          }
+          if (!veto.length) {
+            // Ещё одна попытка: блок предпочтений карт (matchPreference)
+            const prefSections = Array.from(
+              String(html).matchAll(
+                /data-testid=\"matchPreference\"[\s\S]*?class=\"styles__Name[^>]*\">\s*([^<]+)\s*</gi
+              )
+            ).map((m) => (m && m[1] ? m[1].trim() : ""));
+            // Если на странице несколько карточек, соберём все названия карт по порядку
+            if (prefSections && prefSections.length) {
+              const maps = prefSections
+                .map((n) => n)
+                .filter(Boolean)
+                .map((n) => n.replace(/\s+/g, " "));
+              if (maps.length) {
+                // Для первых карт считаем как pick без указания команды, последняя — decider
+                for (let i = 0; i < maps.length; i += 1) {
+                  const name = maps[i];
+                  if (!name) continue;
+                  if (i === maps.length - 1 && maps.length >= 3)
+                    push("decider", name, null);
+                  else push("pick", name, null);
+                }
+              }
+            }
+          }
+          if (!veto.length) {
+            // Доп. фоллбек: используем r.jina.ai текстовую версию страницы
+            const ruMirror = `https://r.jina.ai/https://www.faceit.com/ru/cs2/room/${matchId}`;
+            const enMirror = `https://r.jina.ai/https://www.faceit.com/en/cs2/room/${matchId}`;
+            const tryMirror = async (u) => {
+              try {
+                const mr = await fetch(u, {
+                  headers: { Accept: "text/plain" },
+                });
+                if (!mr.ok) return null;
+                return await mr.text();
+              } catch (_) {
+                return null;
+              }
+            };
+            let mirrorText =
+              (await tryMirror(ruMirror)) || (await tryMirror(enMirror));
+            if (mirrorText) {
+              const blob = mirrorText.replace(/\s+/g, " ");
+              const tryAll = [
+                // RU
+                {
+                  re: /([^.:!?]+?)\s+блокирует\s*:\s*([A-Za-z0-9_-]+)/gi,
+                  h: (m) => push("ban", m[2], m[1]),
+                },
+                {
+                  re: /([A-Za-z0-9_-]+)\s+выбирается\s+фракцией\s+([^.:!?]+)/gi,
+                  h: (m) => push("pick", m[1], m[2]),
+                },
+                {
+                  re: /([A-Za-z0-9_-]+)\s+выбирается\s+по\s+умолчанию/gi,
+                  h: (m) => push("decider", m[1], null),
+                },
+                // EN
+                {
+                  re: /([^.:!?]+?)\s+bans\s*:?\s*([A-Za-z0-9_-]+)/gi,
+                  h: (m) => push("ban", m[2], m[1]),
+                },
+                {
+                  re: /([A-Za-z0-9_-]+)\s+is\s+picked\s+by\s+([^.:!?]+)/gi,
+                  h: (m) => push("pick", m[1], m[2]),
+                },
+                {
+                  re: /([A-Za-z0-9_-]+)\s+is\s+the\s+decider/gi,
+                  h: (m) => push("decider", m[1], null),
+                },
+              ];
+              for (const { re, h } of tryAll) {
+                let m;
+                while ((m = re.exec(blob))) h(m);
+              }
+            }
+          }
+          if (veto.length) result.veto = veto;
+        }
+      } catch (_) {}
+
+      return res.json(result);
+    } catch (e) {
+      console.error("/api/faceit/import error", e);
+      res.status(500).json({
+        error: "faceit import failed",
+        details: String(e?.message || e),
+      });
+    }
+  }
+);
+
+app.get("/api/faceit/team/roster", async (req, res) => {
+  try {
+    const inputRaw = String(req.query?.url || req.query?.teamId || "").trim();
+    if (!inputRaw)
+      return res.status(400).json({ error: "url/teamId required" });
+
+    const extractTeamId = (s) => {
+      const m = s.match(
+        /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
+      );
+      return m ? m[0] : null;
+    };
+    const teamId = extractTeamId(inputRaw);
+    if (!teamId) return res.status(400).json({ error: "invalid team id" });
+
+    const tryFetchJson = async (url) => {
+      try {
+        const r = await fetch(url, { headers: { Accept: "application/json" } });
+        if (!r.ok) return null;
+        return await r.json().catch(() => null);
+      } catch {
+        return null;
+      }
+    };
+
+    const jsonCandidates = [
+      `https://www.faceit.com/api/teams/v1/teams/${teamId}`,
+      `https://api.faceit.com/teams/v1/teams/${teamId}`,
+      `https://www.faceit.com/api/teams/v2/teams/${teamId}`,
+    ];
+
+    let teamJson = null;
+    for (const u of jsonCandidates) {
+      teamJson = await tryFetchJson(u);
+      if (teamJson) break;
+    }
+
+    const extractNicknamesFromJson = (obj) => {
+      const result = new Set();
+      try {
+        const pushIf = (val) => {
+          const v = String(val || "").trim();
+          if (v) result.add(v);
+        };
+        const scan = (node) => {
+          if (!node || typeof node !== "object") return;
+          if (Array.isArray(node)) {
+            node.forEach(scan);
+            return;
+          }
+          if (node.nickname || node.nick || node.name) {
+            pushIf(node.nickname || node.nick || node.name);
+          }
+          if (node.members || node.roster || node.players) {
+            const list = node.members || node.roster || node.players;
+            if (Array.isArray(list)) list.forEach(scan);
+          }
+          Object.values(node).forEach(scan);
+        };
+        scan(obj);
+      } catch {}
+      return Array.from(result);
+    };
+
+    let teamName = null;
+    let nicknames = [];
+    if (teamJson) {
+      teamName =
+        teamJson?.payload?.name ||
+        teamJson?.name ||
+        teamJson?.payload?.nickname ||
+        null;
+      if (teamName) {
+        teamName = String(teamName)
+          .trim()
+          .replace(/\s*\([^)]*\)\s*$/, "");
+      }
+      nicknames = extractNicknamesFromJson(teamJson);
+    }
+
+    if (!nicknames.length) {
+      // Fallback: parse HTML team page
+      const htmlUrls = [
+        `https://www.faceit.com/en/teams/${teamId}`,
+        `https://www.faceit.com/ru/teams/${teamId}`,
+      ];
+      let html = null;
+      for (const u of htmlUrls) {
+        try {
+          const r = await fetch(u, { headers: { Accept: "text/html" } });
+          if (r.ok) {
+            html = await r.text();
+            break;
+          }
+        } catch {}
+      }
+      if (html) {
+        const links = Array.from(
+          String(html).matchAll(/\/players\/([a-zA-Z0-9_\-]+)/g)
+        );
+        nicknames = Array.from(new Set(links.map((m) => m[1])));
+        if (!teamName) {
+          try {
+            const m = html.match(/<title>\s*([^<]+)\s*\|\s*FACEIT/i);
+            if (m && m[1]) {
+              teamName = m[1].trim().replace(/\s*\([^)]*\)\s*$/, "");
+            }
+          } catch {}
+        }
+      }
+    }
+
+    if (!nicknames.length)
+      return res.status(404).json({ error: "team roster not found", teamId });
+
+    const extractSteam64FromText = (text) => {
+      if (!text) return null;
+      const m = String(text).match(/7656119\d{10}/);
+      return m ? m[0] : null;
+    };
+
+    const resolveSteam64ByNickname = async (nickname) => {
+      // Try users API
+      try {
+        const u1 = `https://www.faceit.com/api/users/v1/nicknames/${encodeURIComponent(
+          nickname
+        )}`;
+        const r1 = await fetch(u1, { headers: { Accept: "application/json" } });
+        if (r1.ok) {
+          const j1 = await r1.json().catch(() => ({}));
+          const guid = j1?.payload?.guid || j1?.payload?.id || null;
+          if (guid) {
+            const u2 = `https://www.faceit.com/api/users/v1/users/${guid}`;
+            const r2 = await fetch(u2, {
+              headers: { Accept: "application/json" },
+            });
+            if (r2.ok) {
+              const j2 = await r2.json().catch(() => ({}));
+              const v =
+                j2?.payload?.steamId64 ||
+                j2?.payload?.steam_id_64 ||
+                extractSteam64FromText(JSON.stringify(j2));
+              if (v) return v;
+            }
+          }
+        }
+      } catch {}
+      // Fallback: player public page
+      try {
+        const u3 = `https://www.faceit.com/en/players/${encodeURIComponent(
+          nickname
+        )}`;
+        const r3 = await fetch(u3, { headers: { Accept: "text/html" } });
+        if (r3.ok) {
+          const html = await r3.text();
+          const m = html.match(
+            /https?:\/\/steamcommunity\.com\/profiles\/(7656119\d{10})/i
+          );
+          if (m && m[1]) return m[1];
+          const v = extractSteam64FromText(html);
+          if (v) return v;
+        }
+      } catch {}
+      return null;
+    };
+
+    const players = [];
+    for (const nick of nicknames) {
+      const steam64 = await resolveSteam64ByNickname(nick);
+      players.push({ nickname: nick, steam64 });
+    }
+
+    return res.json({ teamId, teamName: teamName || null, players });
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ error: "team resolve failed", details: String(e) });
+  }
+});
+// Resolve Steam64 by FACEIT nickname (best-effort, no API key)
+app.get("/api/faceit/resolve-steam64", async (req, res) => {
+  try {
+    const nickname = String(req.query?.nickname || "").trim();
+    if (!nickname) return res.status(400).json({ error: "nickname required" });
+
+    const extractSteam64FromText = (text) => {
+      if (!text) return null;
+      const m = String(text).match(/7656119\d{10}/);
+      return m ? m[0] : null;
+    };
+
+    const extractSteam64FromJson = (obj) => {
+      try {
+        const str = JSON.stringify(obj);
+        return extractSteam64FromText(str);
+      } catch (_) {
+        return null;
+      }
+    };
+
+    let steam64 = null;
+
+    // Step 1: resolve FACEIT user guid by nickname
+    try {
+      const url1 = `https://www.faceit.com/api/users/v1/nicknames/${encodeURIComponent(
+        nickname
+      )}`;
+      const r1 = await fetch(url1, { headers: { Accept: "application/json" } });
+      if (r1.ok) {
+        const j1 = await r1.json().catch(() => ({}));
+        const guid = j1?.payload?.guid || j1?.payload?.id || null;
+        if (guid) {
+          // Step 2: fetch user details
+          const url2 = `https://www.faceit.com/api/users/v1/users/${guid}`;
+          const r2 = await fetch(url2, {
+            headers: { Accept: "application/json" },
+          });
+          if (r2.ok) {
+            const j2 = await r2.json().catch(() => ({}));
+            steam64 =
+              j2?.payload?.steamId64 ||
+              j2?.payload?.steam_id_64 ||
+              extractSteam64FromJson(j2);
+          }
+        }
+      }
+    } catch (_) {}
+
+    // Step 3: fallback to scraping public player page for steamcommunity link
+    if (!steam64) {
+      try {
+        const url3 = `https://www.faceit.com/en/players/${encodeURIComponent(
+          nickname
+        )}`;
+        const r3 = await fetch(url3, { headers: { Accept: "text/html" } });
+        if (r3.ok) {
+          const html = await r3.text();
+          // Try to find explicit link
+          const m = html.match(
+            /https?:\/\/steamcommunity\.com\/profiles\/(7656119\d{10})/i
+          );
+          if (m && m[1]) steam64 = m[1];
+          if (!steam64) steam64 = extractSteam64FromText(html);
+        }
+      } catch (_) {}
+    }
+
+    return res.json({ nickname, steam64: steam64 || null });
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ error: "resolve failed", details: String(e) });
+  }
+});
+
+// ============== HLTV AVATAR RESOLUTION ==============
+app.get("/api/hltv/avatar", async (req, res) => {
+  // Disabled by request
+  return res.status(410).json({ error: "HLTV avatar API disabled" });
+  try {
+    const nickname = String(req.query?.nickname || "").trim();
+    if (!nickname) return res.status(400).json({ error: "nickname required" });
+
+    // Disable caching for this endpoint to avoid 304
+    res.set(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate"
+    );
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+    res.set("Surrogate-Control", "no-store");
+    res.set("ETag", `${Date.now()}-${Math.random()}`);
+
+    // Attempt 1: JSON search endpoint used by HLTV
+    let playerId = null;
+    let playerSlug = null;
+    try {
+      const jsonUrl = `https://www.hltv.org/search?term=${encodeURIComponent(
+        nickname
+      )}`;
+      const jr = await fetch(jsonUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0",
+          Accept: "application/json, text/plain, */*",
+          "X-Requested-With": "XMLHttpRequest",
+          "Accept-Language": "en-US,en;q=0.9",
+          Referer: `https://www.hltv.org/players?search=${encodeURIComponent(
+            nickname
+          )}`,
+          Cookie: "lang=en",
+        },
+      });
+      if (!jr.ok || jr.status === 403 || jr.status === 503) {
+        console.log(
+          `[HLTV][lookup] JSON search retry with minimal headers due to ${jr.status}`
+        );
+        try {
+          jr = await fetch(jsonUrl, {
+            headers: {
+              "User-Agent": "Mozilla/5.0",
+              Accept: "application/json, text/plain, */*",
+              "X-Requested-With": "XMLHttpRequest",
+              Referer: "https://www.hltv.org/",
+            },
+          });
+        } catch {}
+      }
+      // JSON mirror disabled
+      if (jr.ok) {
+        // Читаем тело один раз как текст, затем пытаемся JSON.parse
+        const raw = await jr.text();
+        let j = {};
+        try {
+          j = JSON.parse(raw);
+        } catch (_) {
+          try {
+            const match = raw.match(/\"players\"\s*:\s*(\[[\s\S]*?\])/);
+            if (match) j.players = JSON.parse(match[1]);
+          } catch {}
+        }
+        const players = Array.isArray(j?.players) ? j.players : [];
+        console.log(
+          `[HLTV][lookup] JSON search found ${players.length} players:`,
+          players.map((p) => ({ id: p?.id, slug: p?.slug, name: p?.name }))
+        );
+        let best = null;
+        let bestScore = -1;
+        for (const p of players) {
+          const candSlug = p?.slug || p?.name || "";
+          const sc = score(candSlug);
+          if (sc > bestScore) {
+            bestScore = sc;
+            best = p;
+          }
+        }
+        if (best) {
+          playerId = best.id || best.playerId || null;
+          playerSlug = best.slug || best.name || null;
+          console.log(
+            `[HLTV][lookup] JSON search selected: id=${playerId}, slug=${playerSlug}, score=${bestScore}`
+          );
+        }
+      } else {
+        console.log(
+          `[HLTV][lookup] JSON search failed: ${jr.status} ${jr.statusText}`
+        );
+      }
+    } catch (e) {
+      console.log("[HLTV] json search error:", e?.message || e);
+    }
+
+    // Attempt 2: HTML search fallback
+    if (!playerId) {
+      const searchUrl = `https://www.hltv.org/search?query=${encodeURIComponent(
+        nickname
+      )}`;
+      console.log(`[HLTV][lookup] HTML search URL: ${searchUrl}`);
+      let sr = await fetch(searchUrl, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+          Accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+          "Accept-Language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+          Referer: `https://www.hltv.org/players?search=${encodeURIComponent(
+            nickname
+          )}`,
+          "Upgrade-Insecure-Requests": "1",
+          "Sec-Fetch-Dest": "document",
+          "Sec-Fetch-Mode": "navigate",
+          "Sec-Fetch-Site": "same-origin",
+          "Sec-Fetch-User": "?1",
+          "sec-ch-ua": '"Chromium";v="124", "Not-A.Brand";v="99"',
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": '"Windows"',
+        },
+      });
+      if (!sr.ok || sr.status === 403 || sr.status === 503) {
+        console.log(
+          `[HLTV][lookup] HTML search retry with minimal headers due to ${sr.status}`
+        );
+        try {
+          sr = await fetch(searchUrl, {
+            headers: {
+              "User-Agent": "Mozilla/5.0",
+              Accept: "text/html",
+              Referer: "https://www.hltv.org/",
+            },
+          });
+        } catch {}
+      }
+      if (!sr.ok || sr.status === 403 || sr.status === 503) {
+        console.log(
+          `[HLTV][lookup] HTML search second retry with alt headers due to ${sr.status}`
+        );
+        try {
+          sr = await fetch(searchUrl, {
+            headers: {
+              "User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
+              Accept:
+                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "ru,ru-RU;q=0.9,en-US;q=0.7,en;q=0.6",
+              Referer: "https://www.hltv.org/",
+              "Upgrade-Insecure-Requests": "1",
+            },
+          });
+        } catch {}
+      }
+      if (!sr.ok || sr.status === 403 || sr.status === 503) {
+        const mirror = `https://r.jina.ai/https://www.hltv.org/search?query=${encodeURIComponent(
+          nickname
+        )}`;
+        console.log(`[HLTV][lookup] HTML search trying mirror: ${mirror}`);
+        try {
+          sr = await fetch(mirror, {
+            headers: { Accept: "*/*", "User-Agent": "Mozilla/5.0" },
+          });
+        } catch {}
+      }
+      if (sr.ok) {
+        const html = await sr.text();
+        // Собираем относительные и абсолютные ссылки на игрока
+        const rel = Array.from(
+          html.matchAll(
+            /href=\s*(?:\"|')?\/player\/(\d+)\/([^\"'\/<\s>]+)(?:\"|')?/gi
+          )
+        );
+        const abs = Array.from(
+          html.matchAll(
+            /https?:\/\/www\.hltv\.org\/player\/(\d+)\/([^\"'\/<\s>]+)/gi
+          )
+        );
+        const all = [...rel, ...abs];
+        console.log(
+          `[HLTV][lookup] HTML search found ${all.length} player links:`,
+          all.map((m) => ({ id: m[1], slug: m[2] }))
+        );
+        if (all && all.length) {
+          const candidates = playerId
+            ? all.filter((m) => String(m[1]) === String(playerId))
+            : all;
+          const pool = candidates.length ? candidates : all;
+          let best = null;
+          let bestScore = -1;
+          for (const m of pool) {
+            const candId = m[1];
+            const candSlug = m[2];
+            const sc = score(candSlug);
+            if (sc > bestScore) {
+              bestScore = sc;
+              best = { id: candId, slug: candSlug };
+            }
+          }
+          if (best) {
+            if (!playerId) playerId = best.id;
+            if (!playerSlug) playerSlug = best.slug;
+            console.log(
+              `[HLTV][lookup] HTML search selected: id=${playerId}, slug=${playerSlug}, score=${bestScore}`
+            );
+          }
+        }
+      } else {
+        console.log(
+          `[HLTV][lookup] HTML search failed: ${sr.status} ${sr.statusText}`
+        );
+      }
+    }
+
+    // Players listing search fallback: /players?search=<nick>
+    // (players listing fallback removed by request)
+
+    if (!playerId) return res.json({ nickname, avatarUrl: null });
+
+    const playerUrls = [];
+    if (playerSlug) {
+      playerUrls.push(`https://www.hltv.org/player/${playerId}/${playerSlug}`);
+    }
+    playerUrls.push(`https://www.hltv.org/player/${playerId}/_`);
+
+    let pr = null;
+    for (const u of playerUrls) {
+      console.log(`[HLTV][lookup] Fetching player page: ${u}`);
+      let r = await fetch(u, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+          Accept: "text/html",
+          Referer: "https://www.hltv.org/",
+        },
+      });
+      if (!r.ok || r.status === 403 || r.status === 503) {
+        const mirror = `https://r.jina.ai/${u}`;
+        console.log(`[HLTV][lookup] Player page trying mirror: ${mirror}`);
+        try {
+          r = await fetch(mirror, {
+            headers: { Accept: "*/*", "User-Agent": "Mozilla/5.0" },
+          });
+        } catch (e) {
+          console.log(`[HLTV][lookup] Player page mirror error:`, e.message);
+        }
+      }
+      if (r.ok) {
+        pr = r;
+        break;
+      }
+    }
+
+    if (!pr) return res.json({ nickname, avatarUrl: null });
+    const phtml = await pr.text();
+    try {
+      const m1 = /img-cdn\.hltv\.org\/playerbodyshot\//i.test(phtml);
+      const m2 = /bodyshot-img/i.test(phtml);
+      const m3 = /property=(?:\"|')og:image(?:\"|')/i.test(phtml);
+      console.log(
+        `[HLTV] markers avatar: cdn=${m1} bodyshot-img=${m2} og=${m3} len=${phtml.length}`
+      );
+    } catch {}
+
+    // Extract avatar url: prefer CDN bodyshot; fallbacks to bodyshot-img src and srcset
+    let avatarUrl = null;
+    const cdn = phtml.match(
+      /https?:\/\/img-cdn\.hltv\.org\/playerbodyshot\/[^\"\s>]+/i
+    );
+    if (cdn) avatarUrl = cdn[0];
+    if (!avatarUrl) {
+      const tag = phtml.match(
+        /<img[^>]*class=(?:\"|')[^\"']*bodyshot-img[^\"']*(?:\"|')[^>]*>/i
+      );
+      if (tag) {
+        const src = String(tag[0]).match(/src=(?:\"|')([^\"']+)(?:\"|')/i);
+        if (src) avatarUrl = src[1];
+        if (!avatarUrl) {
+          const srcset = String(tag[0]).match(
+            /srcset=(?:\"|')([^\"']+)(?:\"|')/i
+          );
+          if (srcset) avatarUrl = srcset[1].split(" ")[0];
+        }
+      }
+    }
+    if (!avatarUrl) {
+      const og = phtml.match(
+        /<meta[^>]+property=(?:\"|')og:image(?:\"|')[^>]+content=(?:\"|')([^\"']+)(?:\"|')/i
+      );
+      if (og && og[1]) avatarUrl = og[1];
+    }
+
+    console.log("[HLTV] avatarUrl:", avatarUrl);
+    return res.json({ nickname, playerId, avatarUrl: avatarUrl || null });
+  } catch (e) {
+    console.error("[HLTV] resolve error:", e);
+    return res.status(500).json({ error: "resolve failed" });
+  }
+});
+
+// INSERTED: Resolve HLTV avatar by direct player URL or image URL
+app.get("/api/hltv/avatar/by-url", async (req, res) => {
+  // Disabled by request
+  return res.status(410).json({ error: "HLTV avatar API disabled" });
+  try {
+    const raw = String(req.query.url || "").trim();
+    if (!raw) return res.status(400).json({ error: "url required" });
+    const inputUrl = decodeURIComponent(raw);
+
+    // If it's already a direct HLTV CDN bodyshot URL, return as-is
+    if (
+      /^https?:\/\/img-cdn\.hltv\.org\/playerbodyshot\/[^?\s]+/i.test(inputUrl)
+    ) {
+      return res.json({ avatarUrl: inputUrl });
+    }
+
+    // Otherwise treat as HLTV player profile URL
+    const candidates = [];
+    const normalized = inputUrl.replace(/(\?|#).*$/, "");
+    candidates.push(normalized);
+    if (!normalized.endsWith("/")) candidates.push(normalized + "/");
+    const m = normalized.match(/\/player\/(\d+)\/([^\/\?\#]+)/i);
+    if (m) {
+      const pid = m[1];
+      // Fallback slugless form
+      candidates.push(`https://www.hltv.org/player/${pid}/_`);
+    }
+
+    const fetchOpts = {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        Referer: "https://www.hltv.org/",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+    };
+
+    let html = null;
+    for (const u of candidates) {
+      try {
+        const r = await fetch(u, fetchOpts);
+        if (r.ok) {
+          html = await r.text();
+          break;
+        }
+      } catch {}
+    }
+    if (!html) return res.status(404).json({ error: "player page not found" });
+    try {
+      const m1 = /img-cdn\.hltv\.org\/playerbodyshot\//i.test(html);
+      const m2 = /bodyshot-img/i.test(html);
+      const m3 = /property=(?:\"|')og:image(?:\"|')/i.test(html);
+      console.log(
+        `[HLTV] markers by-url: cdn=${m1} bodyshot-img=${m2} og=${m3} len=${html.length}`
+      );
+    } catch {}
+
+    // Prefer direct CDN bodyshot url
+    let avatarUrl = null;
+    const cdnMatch = html.match(
+      /https?:\/\/img-cdn\.hltv\.org\/playerbodyshot\/[^^\s"'>]+/i
+    );
+    if (cdnMatch) {
+      avatarUrl = cdnMatch[0];
+    } else {
+      // Fallback: parse img tag with bodyshot-img class
+      const tag = html.match(
+        /<img[^>]*class=(?:\"|')[^\"']*bodyshot-img[^\"']*(?:\"|')[^>]*>/i
+      );
+      if (tag) {
+        const src = tag[0].match(/src=(?:\"|')([^\"']+)(?:\"|')/i);
+        if (src) avatarUrl = src[1];
+        if (!avatarUrl) {
+          const srcset = tag[0].match(/srcset=(?:\"|')([^\"']+)(?:\"|')/i);
+          if (srcset) avatarUrl = srcset[1].split(" ")[0];
+        }
+      }
+      // Fallback: og:image
+      if (!avatarUrl) {
+        const og = html.match(
+          /<meta[^>]+property=(?:\"|')og:image(?:\"|')[^>]+content=(?:\"|')([^\"']+)(?:\"|')/i
+        );
+        if (og && og[1]) avatarUrl = og[1];
+      }
+    }
+    return res.json({ avatarUrl: avatarUrl || null });
+  } catch (e) {
+    return res.status(500).json({ error: "resolve failed" });
+  }
+});
+// HLTV: lookup player by nickname and return basic info + avatarUrl
+app.get("/api/hltv/lookup", async (req, res) => {
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate"
+  );
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+  const nickname = String(req.query?.nickname || "").trim();
+  if (!nickname) return res.status(400).json({ error: "nickname required" });
+  try {
+    let playerId = null;
+    let playerSlug = null;
+
+    const normalize = (s) =>
+      String(s || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9\-_.]/gi, " ")
+        .replace(/\s+/g, " ")
+        .replace(/[_.]+/g, " ")
+        .trim();
+    const want = normalize(nickname).replace(/\s+/g, "-");
+    const score = (slug) => {
+      const s = normalize(slug).replace(/\s+/g, "-");
+      if (!s) return 0;
+      if (s === want) return 100;
+      if (s.startsWith(want) || want.startsWith(s)) return 80;
+      if (s.includes(want) || want.includes(s)) return 60;
+      return 10;
+    };
+
+    // Try JSON search endpoint first (disabled)
+    console.log(
+      `[HLTV][lookup] Starting search for: "${nickname}", normalized: "${want}"`
+    );
+    if (false)
+      try {
+        const jsonUrl = `https://www.hltv.org/search?term=${encodeURIComponent(
+          nickname
+        )}`;
+        console.log(`[HLTV][lookup] JSON search URL: ${jsonUrl}`);
+        let jr = await fetch(jsonUrl, {
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+            Accept: "application/json, text/plain, */*",
+            "Accept-Language": "en-US,en;q=0.9",
+            Referer: "https://www.hltv.org/",
+            Origin: "https://www.hltv.org",
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+          },
+        });
+        if (!jr.ok || jr.status === 403 || jr.status === 503) {
+          console.log(
+            `[HLTV][lookup] JSON search retry with minimal headers due to ${jr.status}`
+          );
+          try {
+            jr = await fetch(jsonUrl, {
+              headers: {
+                "User-Agent": "Mozilla/5.0",
+                Accept: "application/json, text/plain, */*",
+                "X-Requested-With": "XMLHttpRequest",
+                Referer: "https://www.hltv.org/",
+              },
+            });
+          } catch {}
+        }
+        // JSON mirror disabled
+        if (jr.ok) {
+          // Читаем тело один раз как текст, затем пытаемся JSON.parse
+          const raw = await jr.text();
+          let j = {};
+          try {
+            j = JSON.parse(raw);
+          } catch (_) {
+            try {
+              const match = raw.match(/\"players\"\s*:\s*(\[[\s\S]*?\])/);
+              if (match) j.players = JSON.parse(match[1]);
+            } catch {}
+          }
+          const players = Array.isArray(j?.players) ? j.players : [];
+          console.log(
+            `[HLTV][lookup] JSON search found ${players.length} players:`,
+            players.map((p) => ({ id: p?.id, slug: p?.slug, name: p?.name }))
+          );
+          let best = null;
+          let bestScore = -1;
+          for (const p of players) {
+            const candSlug = p?.slug || p?.name || "";
+            const sc = score(candSlug);
+            if (sc > bestScore) {
+              bestScore = sc;
+              best = p;
+            }
+          }
+          if (best) {
+            playerId = best.id || best.playerId || null;
+            playerSlug = best.slug || best.name || null;
+            console.log(
+              `[HLTV][lookup] JSON search selected: id=${playerId}, slug=${playerSlug}, score=${bestScore}`
+            );
+          }
+        } else {
+          console.log(
+            `[HLTV][lookup] JSON search failed: ${jr.status} ${jr.statusText}`
+          );
+        }
+      } catch (e) {
+        console.log(`[HLTV][lookup] JSON search error:`, e.message);
+      }
+
+    // HTML search fallback
+    if (!playerId || !playerSlug) {
+      const searchUrl = `https://www.hltv.org/search?query=${encodeURIComponent(
+        nickname
+      )}`;
+      console.log(`[HLTV][lookup] HTML search URL: ${searchUrl}`);
+      let sr = await fetch(searchUrl, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+          Accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+          "Accept-Language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+          Referer: `https://www.hltv.org/players?search=${encodeURIComponent(
+            nickname
+          )}`,
+          "Upgrade-Insecure-Requests": "1",
+          "Sec-Fetch-Dest": "document",
+          "Sec-Fetch-Mode": "navigate",
+          "Sec-Fetch-Site": "same-origin",
+          "Sec-Fetch-User": "?1",
+          "sec-ch-ua": '"Chromium";v="124", "Not-A.Brand";v="99"',
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": '"Windows"',
+        },
+      });
+      if (!sr.ok || sr.status === 403 || sr.status === 503) {
+        console.log(
+          `[HLTV][lookup] HTML search retry with minimal headers due to ${sr.status}`
+        );
+        try {
+          sr = await fetch(searchUrl, {
+            headers: {
+              "User-Agent": "Mozilla/5.0",
+              Accept: "text/html",
+              Referer: "https://www.hltv.org/",
+            },
+          });
+        } catch {}
+      }
+      if (!sr.ok || sr.status === 403 || sr.status === 503) {
+        console.log(
+          `[HLTV][lookup] HTML search second retry with alt headers due to ${sr.status}`
+        );
+        try {
+          sr = await fetch(searchUrl, {
+            headers: {
+              "User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
+              Accept:
+                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "ru,ru-RU;q=0.9,en-US;q=0.7,en;q=0.6",
+              Referer: "https://www.hltv.org/",
+              "Upgrade-Insecure-Requests": "1",
+            },
+          });
+        } catch {}
+      }
+      if (!sr.ok || sr.status === 403 || sr.status === 503) {
+        const mirror = `https://r.jina.ai/https://www.hltv.org/search?query=${encodeURIComponent(
+          nickname
+        )}`;
+        console.log(`[HLTV][lookup] HTML search trying mirror: ${mirror}`);
+        try {
+          sr = await fetch(mirror, {
+            headers: { Accept: "*/*", "User-Agent": "Mozilla/5.0" },
+          });
+        } catch {}
+      }
+      if (sr.ok) {
+        const html = await sr.text();
+        // Собираем относительные и абсолютные ссылки на игрока
+        const rel = Array.from(
+          html.matchAll(
+            /href=\s*(?:\"|')?\/player\/(\d+)\/([^\"'\/<\s>]+)(?:\"|')?/gi
+          )
+        );
+        const abs = Array.from(
+          html.matchAll(
+            /https?:\/\/www\.hltv\.org\/player\/(\d+)\/([^\"'\/<\s>]+)/gi
+          )
+        );
+        const all = [...rel, ...abs];
+        console.log(
+          `[HLTV][lookup] HTML search found ${all.length} player links:`,
+          all.map((m) => ({ id: m[1], slug: m[2] }))
+        );
+        if (all && all.length) {
+          const candidates = playerId
+            ? all.filter((m) => String(m[1]) === String(playerId))
+            : all;
+          const pool = candidates.length ? candidates : all;
+          let best = null;
+          let bestScore = -1;
+          for (const m of pool) {
+            const candId = m[1];
+            const candSlug = m[2];
+            const sc = score(candSlug);
+            if (sc > bestScore) {
+              bestScore = sc;
+              best = { id: candId, slug: candSlug };
+            }
+          }
+          if (best) {
+            if (!playerId) playerId = best.id;
+            if (!playerSlug) playerSlug = best.slug;
+            console.log(
+              `[HLTV][lookup] HTML search selected: id=${playerId}, slug=${playerSlug}, score=${bestScore}`
+            );
+          }
+        }
+      } else {
+        console.log(
+          `[HLTV][lookup] HTML search failed: ${sr.status} ${sr.statusText}`
+        );
+      }
+    }
+
+    if (!playerId) {
+      console.log(`[HLTV][lookup] No player found for "${nickname}"`);
+      return res.json({
+        nickname,
+        playerId: null,
+        slug: null,
+        avatarUrl: null,
+      });
+    }
+
+    // Fetch player page and extract avatar
+    const slugCandidate = playerSlug || want;
+    const playerUrls = [
+      `https://www.hltv.org/player/${playerId}/${slugCandidate}`,
+      `https://www.hltv.org/player/${playerId}/_`,
+    ];
+    let pr = { ok: false };
+    for (const u of playerUrls) {
+      console.log(`[HLTV][lookup] Fetching player page: ${u}`);
+      let r = await fetch(u, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+          Accept: "text/html",
+          Referer: "https://www.hltv.org/",
+        },
+      });
+      if (!r.ok || r.status === 403 || r.status === 503) {
+        const mirror = `https://r.jina.ai/${u}`;
+        console.log(`[HLTV][lookup] Player page trying mirror: ${mirror}`);
+        try {
+          r = await fetch(mirror, {
+            headers: { Accept: "*/*", "User-Agent": "Mozilla/5.0" },
+          });
+        } catch (e) {
+          console.log(`[HLTV][lookup] Player page mirror error:`, e.message);
+        }
+      }
+      if (r.ok) {
+        pr = r;
+        break;
+      }
+    }
+    let avatarUrl = null;
+    if (pr.ok) {
+      const phtml = await pr.text();
+      console.log(
+        `[HLTV][lookup] Player page fetched successfully (${phtml.length} chars)`
+      );
+
+      // Try to recover canonical slug from the page if missing
+      if (!playerSlug) {
+        try {
+          const canonical = phtml.match(
+            /<link[^>]+rel=(?:\"|')canonical(?:\"|')[^>]+href=(?:\"|')([^\"']+)(?:\"|')/i
+          );
+          const ogUrl = phtml.match(
+            /<meta[^>]+property=(?:\"|')og:url(?:\"|')[^>]+content=(?:\"|')([^\"']+)(?:\"|')/i
+          );
+          const urlForSlug = (canonical && canonical[1]) || (ogUrl && ogUrl[1]);
+          if (urlForSlug) {
+            const sm = urlForSlug.match(/\/player\/(\d+)\/([^\/#?\s"'>]+)/i);
+            if (sm && sm[2]) {
+              playerSlug = sm[2];
+              console.log(
+                `[HLTV][lookup] Recovered slug from page: ${playerSlug}`
+              );
+            }
+          }
+        } catch {}
+      }
+
+      // Prefer CDN bodyshot
+      const cdn = phtml.match(
+        /https?:\/\/img-cdn\.hltv\.org\/playerbodyshot\/[\w\-?=&%.]+/i
+      );
+      if (cdn) {
+        avatarUrl = cdn[0];
+        console.log(`[HLTV][lookup] Found CDN bodyshot: ${avatarUrl}`);
+      }
+
+      if (!avatarUrl) {
+        // Allow unquoted attributes in mirror HTML
+        const tag = phtml.match(
+          /<img[^>]*class=(?:\"|')?[^>]*bodyshot-img[^>]*(?:\"|')?[^>]*>/i
+        );
+        if (tag) {
+          console.log(
+            `[HLTV][lookup] Found bodyshot-img tag: ${tag[0].substring(
+              0,
+              200
+            )}...`
+          );
+          const src = String(tag[0]).match(
+            /src=(?:\"|')?([^\"'\s>]+)(?:\"|')?/i
+          );
+          if (src) {
+            avatarUrl = src[1];
+            console.log(`[HLTV][lookup] Extracted src: ${avatarUrl}`);
+          }
+          if (!avatarUrl) {
+            const srcset = String(tag[0]).match(
+              /srcset=(?:\"|')?([^\"'\s>]+)(?:\"|')?/i
+            );
+            if (srcset) {
+              avatarUrl = srcset[1].split(" ")[0];
+              console.log(`[HLTV][lookup] Extracted srcset: ${avatarUrl}`);
+            }
+          }
+        } else {
+          console.log(`[HLTV][lookup] No bodyshot-img tag found`);
+        }
+      }
+
+      if (!avatarUrl) {
+        // Порядок-независимый разбор meta-тегов (og:image, twitter:image)
+        const metaTags = phtml.match(/<meta\b[^>]*?>/gi) || [];
+        let ogImg = null;
+        let twImg = null;
+        for (const tag of metaTags) {
+          try {
+            const attrs = {};
+            const it = tag.matchAll(
+              /([a-zA-Z_:][a-zA-Z0-9_:\-]*)\s*=\s*(?:\"([^\"]*)\"|'([^']*)'|([^"'\s>=]+))/g
+            );
+            for (const m of it) {
+              const k = String(m[1] || "").toLowerCase();
+              const v = m[2] || m[3] || m[4] || "";
+              attrs[k] = v;
+            }
+            const prop = (
+              attrs["property"] ||
+              attrs["name"] ||
+              attrs["itemprop"] ||
+              ""
+            ).toLowerCase();
+            const content =
+              attrs["content"] || attrs["value"] || attrs["src"] || "";
+            if (!content) continue;
+            if (!ogImg && /^og:image(?::secure_url)?$/.test(prop))
+              ogImg = content;
+            if (!twImg && /^twitter:image(?::src)?$/.test(prop))
+              twImg = content;
+          } catch {}
+        }
+        if (ogImg || twImg) {
+          avatarUrl = ogImg || twImg;
+          console.log(`[HLTV][lookup] Found social image: ${avatarUrl}`);
+        } else {
+          console.log(`[HLTV][lookup] No og/twitter image found`);
+        }
+      }
+    } else {
+      console.log(
+        `[HLTV][lookup] Player page fetch failed: ${pr.status} ${pr.statusText}`
+      );
+    }
+
+    // Декодирование HTML-сущностей и протокола
+    if (avatarUrl) {
+      const before = avatarUrl;
+      avatarUrl = avatarUrl.replace(/&amp;/gi, "&").replace(/&#38;/g, "&");
+      if (/^\/\//.test(avatarUrl)) {
+        avatarUrl = `https:${avatarUrl}`;
+      }
+      if (avatarUrl !== before) {
+        console.log(`[HLTV][lookup] Normalized avatar URL`);
+      }
+    }
+
+    console.log(
+      `[HLTV][lookup] Final result: playerId=${playerId}, slug=${playerSlug}, avatarUrl=${
+        avatarUrl || "null"
+      }`
+    );
+
+    return res.json({
+      nickname,
+      playerId,
+      slug: playerSlug,
+      avatarUrl: avatarUrl || null,
+    });
+  } catch (e) {
+    console.log(`[HLTV][lookup] Error for "${nickname}":`, e.message);
+    return res.status(500).json({ error: "lookup failed" });
+  }
+});
+// POST variant: accept JSON body { url } to avoid encoded query in address bar
+app.post(
+  "/api/hltv/avatar/by-url",
+  express.json({ limit: "20kb" }),
+  async (req, res) => {
+    // Disabled by request
+    return res.status(410).json({ error: "HLTV avatar API disabled" });
+    try {
+      const inputUrlRaw = String(req.body?.url || "").trim();
+      if (!inputUrlRaw) return res.status(400).json({ error: "url required" });
+      const inputUrl = inputUrlRaw;
+
+      if (
+        /^https?:\/\/img-cdn\.hltv\.org\/playerbodyshot\/[^?\s]+/i.test(
+          inputUrl
+        )
+      ) {
+        return res.json({ avatarUrl: inputUrl });
+      }
+
+      const candidates = [];
+      const normalized = inputUrl.replace(/(\?|#).*$/, "");
+      candidates.push(normalized);
+      if (!normalized.endsWith("/")) candidates.push(normalized + "/");
+      const m = normalized.match(/\/player\/(\d+)\/([^\/\?\#]+)/i);
+      if (m) {
+        const pid = m[1];
+        candidates.push(`https://www.hltv.org/player/${pid}/_`);
+      }
+
+      const fetchOpts = {
+        headers: {
+          "User-Agent": "Mozilla/5.0",
+          Accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          Referer: "https://www.hltv.org/",
+          "Accept-Language": "en-US,en;q=0.9",
+        },
+      };
+
+      let html = null;
+      for (const u of candidates) {
+        try {
+          const r = await fetch(u, fetchOpts);
+          if (r.ok) {
+            html = await r.text();
+            break;
+          }
+        } catch {}
+      }
+      if (!html)
+        return res.status(404).json({ error: "player page not found" });
+      try {
+        const m1 = /img-cdn\.hltv\.org\/playerbodyshot\//i.test(html);
+        const m2 = /bodyshot-img/i.test(html);
+        const m3 = /property=(?:\"|')og:image(?:\"|')/i.test(html);
+        console.log(
+          `[HLTV] markers by-url POST: cdn=${m1} bodyshot-img=${m2} og=${m3} len=${html.length}`
+        );
+      } catch {}
+
+      let avatarUrl = null;
+      const cdnMatch = html.match(
+        /https?:\/\/img-cdn\.hltv\.org\/playerbodyshot\/[^^\s"'>]+/i
+      );
+      if (cdnMatch) {
+        avatarUrl = cdnMatch[0];
+      } else {
+        const tag = html.match(
+          /<img[^>]*class=\"[^\"]*bodyshot-img[^\"]*\"[^>]*>/i
+        );
+        if (tag) {
+          const src = tag[0].match(/src=\"([^\"]+)\"/i);
+          if (src) avatarUrl = src[1];
+          if (!avatarUrl) {
+            const srcset = tag[0].match(/srcset=\"([^\"]+)\"/i);
+            if (srcset) avatarUrl = srcset[1].split(" ")[0];
+          }
+        }
+      }
+      return res.json({ avatarUrl: avatarUrl || null });
+    } catch (e) {
+      return res.status(500).json({ error: "resolve failed" });
+    }
+  }
+);
+
+app.post(
+  "/api/hltv/avatar/download",
+  express.json({ limit: "10kb" }),
+  async (req, res) => {
+    try {
+      const url = String(req.body?.url || "").trim();
+      const nickname = String(req.body?.nickname || "").trim();
+      if (!url) return res.status(400).json({ error: "url required" });
+      const r = await fetch(url, { headers: { Accept: "*/*" } });
+      if (!r.ok) return res.status(400).json({ error: "download failed" });
+      const buf = Buffer.from(await r.arrayBuffer());
+      const uploadsDir = path.join(__dirname, "../public/uploads");
+      if (!fs.existsSync(uploadsDir))
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      const safeNick = (nickname || "player").replace(/[^a-z0-9_\-]/gi, "_");
+      const name = `avatar_hltv_${safeNick}_${Date.now()}.png`;
+      const filePath = path.join(uploadsDir, name);
+      fs.writeFileSync(filePath, buf);
+      return res.json({ avatarFile: name, avatarUrl: `/uploads/${name}` });
+    } catch (e) {
+      return res.status(500).json({ error: "download failed" });
+    }
+  }
+);
 
 // Настройка статических файлов для GSI-сервера
 gsiApp.use(express.static(path.join(__dirname, "../public")));
@@ -817,16 +2405,15 @@ db.all(`PRAGMA table_info(teams)`, (err, rows) => {
   if (!hasShortName) {
     db.run(`ALTER TABLE teams ADD COLUMN short_name TEXT`, (err) => {
       if (err) {
-        console.error("Ошибка при добавлении колонки short_name:", err);
+        //console.error("Ошибка при добавлении колонки short_name:", err);
       } else {
-        console.log("Колонка short_name успешно добавлена в таблицу teams");
+        //console.log("Колонка short_name успешно добавлена в таблицу teams");
       }
     });
   } else {
-    console.log("Колонка short_name уже существует в таблице teams");
+    //console.log("Колонка short_name уже существует в таблице teams");
   }
 });
-
 // В начале файла после создания базы данных
 db.serialize(() => {
   // Создание таблицы teams
@@ -915,10 +2502,10 @@ db.serialize(() => {
         [],
         (err) => {
           if (err) {
-            console.error("Ошибка при добавлении столбца format:", err);
+            //console.error("Ошибка при добавлении столбца format:", err);
             return;
           }
-          console.log("Столбец format успешно добавлен в таблицу matches");
+          //console.log("Столбец format успешно добавлен в таблицу matches");
         }
       );
     }
@@ -937,10 +2524,10 @@ db.serialize(() => {
     if (!hasCameraLinkColumn) {
       db.run("ALTER TABLE players ADD COLUMN cameraLink TEXT", [], (err) => {
         if (err) {
-          console.error("Ошибка при добавлении столбца cameraLink:", err);
+          //console.error("Ошибка при добавлении столбца cameraLink:", err);
           return;
         }
-        console.log("Столбец cameraLink успешно добавлен в таблицу players");
+        //console.log("Столбец cameraLink успешно добавлен в таблицу players");
       });
     }
 
@@ -949,7 +2536,7 @@ db.serialize(() => {
       Array.isArray(rows) && rows.some((row) => row.name === "created_at");
 
     if (!hasCreatedAtColumn) {
-      console.log("Добавляем колонку created_at в таблицу players...");
+      //console.log("Добавляем колонку created_at в таблицу players...");
       // Создаем новую таблицу с нужной структурой
       db.run(
         `
@@ -967,10 +2554,10 @@ db.serialize(() => {
       `,
         (err) => {
           if (err) {
-            console.error(
-              "Ошибка при создании новой таблицы players_new:",
-              err
-            );
+            // console.error(
+            //"Ошибка при создании новой таблицы players_new:",
+            //err
+            //);
             return;
           }
 
@@ -982,30 +2569,30 @@ db.serialize(() => {
           `,
             (err) => {
               if (err) {
-                console.error(
-                  "Ошибка при копировании данных в новую таблицу:",
-                  err
-                );
+                //console.error(
+                //"Ошибка при копировании данных в новую таблицу:",
+                // err
+                //);
                 return;
               }
 
               // Удаляем старую таблицу
               db.run("DROP TABLE players", (err) => {
                 if (err) {
-                  console.error("Ошибка при удалении старой таблицы:", err);
+                  //console.error("Ошибка при удалении старой таблицы:", err);
                   return;
                 }
 
                 // Переименовываем новую таблицу
                 db.run("ALTER TABLE players_new RENAME TO players", (err) => {
                   if (err) {
-                    console.error("Ошибка при переименовании таблицы:", err);
+                    //console.error("Ошибка при переименовании таблицы:", err);
                     return;
                   }
 
-                  console.log(
-                    "Таблица players успешно обновлена с колонкой created_at"
-                  );
+                  //console.log(
+                  //"Таблица players успешно обновлена с колонкой created_at"
+                  //);
                 });
               });
             }
@@ -1015,7 +2602,6 @@ db.serialize(() => {
     }
   });
 });
-
 // Настройка шаблонизатора
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "../public"));
@@ -1057,7 +2643,7 @@ db.serialize(() => {
   // Удаляем временную таблицу
   db.run("DROP TABLE IF EXISTS matches_temp");
 
-  console.log("Таблица matches успешно пересоздана со столбцом format");
+  //console.log("Таблица matches успешно пересоздана со столбцом format");
 });
 
 // Стандартные пути установки Steam
@@ -1128,7 +2714,7 @@ function findCS2Path() {
             }
           }
         } catch (err) {
-          console.error("Ошибка при чтении libraryfolders.vdf:", err);
+          //console.error("Ошибка при чтении libraryfolders.vdf:", err);
         }
       }
     }
@@ -1184,7 +2770,7 @@ function findDota2Path(overridePath) {
             }
           }
         } catch (err) {
-          console.error("Ошибка при чтении libraryfolders.vdf:", err);
+          //console.error("Ошибка при чтении libraryfolders.vdf:", err);
         }
       }
     }
@@ -1207,7 +2793,6 @@ function findDota2Path(overridePath) {
 
   return null;
 }
-
 // Функция для поиска CFG директории Dota 2
 function findDota2CfgPath(overridePath) {
   // Если пользователь передал путь прямо на cfg — принимаем его
@@ -1233,14 +2818,12 @@ function findDota2CfgPath(overridePath) {
   const cfgPath = path.join(dota2Path, "game", "dota", "cfg");
   return fs.existsSync(cfgPath) ? cfgPath : null;
 }
-
 // Функция для поиска папки gamestate_integration в CFG
 function findDota2GsiPath(overridePath) {
   const cfgPath = findDota2CfgPath(overridePath);
   if (!cfgPath) return null;
   return path.join(cfgPath, "gamestate_integration");
 }
-
 // Функция для проверки установки CFG файла Dota 2
 function checkDota2CfgInstallation(overridePath) {
   const cfgPath = findDota2CfgPath(overridePath);
@@ -1299,12 +2882,12 @@ function installDota2Cfg(overridePath) {
     // Создаем папку gamestate_integration, если её нет
     if (!fs.existsSync(gsiPath)) {
       fs.mkdirSync(gsiPath, { recursive: true });
-      console.log("Создана папка gamestate_integration:", gsiPath);
+      //console.log("Создана папка gamestate_integration:", gsiPath);
     }
 
     // Копируем CFG файл из project/cfg в Dota 2
     fs.copyFileSync(sourceCfgFile, targetCfgFile);
-    console.log("CFG файл скопирован:", sourceCfgFile, "->", targetCfgFile);
+    //console.log("CFG файл скопирован:", sourceCfgFile, "->", targetCfgFile);
 
     return {
       success: true,
@@ -1314,7 +2897,7 @@ function installDota2Cfg(overridePath) {
       targetFile: targetCfgFile,
     };
   } catch (error) {
-    console.error("Ошибка при установке CFG файла Dota 2:", error);
+    //console.error("Ошибка при установке CFG файла Dota 2:", error);
     return {
       success: false,
       error: `Ошибка при установке: ${error.message}`,
@@ -1345,7 +2928,7 @@ function removeDota2Cfg(overridePath) {
     if (fs.existsSync(cfgFile)) {
       fs.unlinkSync(cfgFile);
       removed.cfgFile = true;
-      console.log("Удален CFG файл:", cfgFile);
+      //console.log("Удален CFG файл:", cfgFile);
     }
 
     // Удаляем папку gamestate_integration, если она пустая
@@ -1354,7 +2937,7 @@ function removeDota2Cfg(overridePath) {
       if (files.length === 0) {
         fs.rmdirSync(gsiPath);
         removed.gsiFolder = true;
-        console.log("Удалена пустая папка gamestate_integration");
+        //console.log("Удалена пустая папка gamestate_integration");
       }
     }
 
@@ -1373,7 +2956,6 @@ function removeDota2Cfg(overridePath) {
     };
   }
 }
-
 // Возвращает все найденные корни игр CS:GO/CS2 во всех библиотеках Steam
 function findAllCS2Paths() {
   try {
@@ -1452,7 +3034,6 @@ function resolveCs2ConfigDirPath(userProvidedPath) {
   } catch {}
   return null;
 }
-
 // Проверка и установка конфигов CS2
 app.get("/api/check-cs2-configs", (req, res) => {
   res.setHeader("Cache-Control", "no-store");
@@ -1560,7 +3141,7 @@ app.get("/api/check-cs2-configs", (req, res) => {
       gsiInstalled: gsiInstalled,
       observerInstalled: observerInstalled,
       observer_offInstalled: observer_offInstalled,
-      observer2Installed: observer2Installed, // Add this line
+      observer2Installed: observer2Installed,
       observerHlaeKillInstalled: observerHlaeKillInstalled,
       observerToolsInstalled: observerToolsInstalled,
       shudColorInstalled: shudColorInstalled,
@@ -1581,7 +3162,6 @@ app.get("/api/check-cs2-configs", (req, res) => {
       .json({ success: false, message: "Ошибка при проверке конфигов" });
   }
 });
-
 // Установка конфигов CS2
 app.get("/api/install-cs2-configs", (req, res) => {
   try {
@@ -1770,7 +3350,6 @@ app.post("/api/matches", (req, res) => {
     }
   );
 });
-
 // Получение списка матчей
 app.get("/api/matches", (req, res) => {
   logMatchesApi(
@@ -2007,7 +3586,6 @@ app.post("/api/matches/:id/start", (req, res) => {
     }
   );
 });
-
 // Смена сторон в матче
 // Добавляем новые поля в таблицу match_maps для хранения оригинальных данных
 app.post("/api/matches/:id/swap", (req, res) => {
@@ -2302,7 +3880,6 @@ app.get("/api/matches/:id", (req, res) => {
     }
   );
 });
-
 // Обновление данных матча
 app.post("/api/matches/:id/update", async (req, res) => {
   const matchId = req.params.id;
@@ -2477,7 +4054,6 @@ app.post("/api/matches/:id/update", async (req, res) => {
     });
   }
 });
-
 // Обработчик обновления счета карты
 app.post("/api/matches/:matchId/map-score", async (req, res) => {
   const matchId = req.params.matchId;
@@ -2603,7 +4179,7 @@ app.post("/api/matches/:matchId/map-score", async (req, res) => {
       );
     });
 
-    // Обновляем GSI данные, если они существуют
+    // Обновляем GSI данные, если они есть
     if (global.gsiState && global.gsiState.map) {
       // Если карта в GSI соответствует обновляемой карте
       if (global.gsiState.map.name === mapToUpdate.map_name) {
@@ -2750,7 +4326,6 @@ app.post("/api/matches/:id/stop", (req, res) => {
     }
   );
 });
-
 // Обновляем маршрут получения списка матчей, чтобы включить только активные матчи
 app.get("/api/matches", (req, res) => {
   logMatchesApi(
@@ -3102,7 +4677,6 @@ app.delete("/api/teams/:id", async (req, res) => {
     res.status(500).json({ message: "Внутренняя ошибка сервера" });
   }
 });
-
 app.get("/api/teams/:id", (req, res) => {
   const teamId = req.params.id;
 
@@ -3128,7 +4702,6 @@ app.get("/api/teams/:id", (req, res) => {
     res.json(team);
   });
 });
-
 app.put("/api/teams/:id", upload.single("logo"), (req, res) => {
   const teamId = req.params.id;
   const { name, region, short_name } = req.body;
@@ -3280,7 +4853,6 @@ function scanHUDs() {
 
   return huds;
 }
-
 // Маршруты для HUD
 app.get("/api/huds", (req, res) => {
   res.json(scanHUDs());
@@ -3294,6 +4866,54 @@ app.get("/hud/:hudId", (req, res) => {
 app.get("/hud/:hudId/:file", (req, res) => {
   const { hudId, file } = req.params;
   res.sendFile(path.join(__dirname, `../public/huds/${hudId}/${file}`));
+});
+
+// Открыть папку HUD в системном проводнике
+app.post("/api/huds/:hudId/open-folder", (req, res) => {
+  try {
+    const hudId = String(req.params.hudId || "").trim();
+    if (!hudId) return res.status(400).json({ error: "hudId required" });
+    const hudDir = path.join(__dirname, "../public/huds", hudId);
+    if (!fs.existsSync(hudDir)) {
+      return res.status(404).json({ error: "HUD folder not found" });
+    }
+
+    const platform = process.platform;
+    if (platform === "win32") {
+      const child = child_process.spawn(
+        "cmd",
+        ["/c", "start", "", "/max", "explorer.exe", "/n,", hudDir],
+        {
+          detached: true,
+          stdio: "ignore",
+        }
+      );
+      try {
+        child.unref();
+      } catch {}
+    } else if (platform === "darwin") {
+      const child = child_process.spawn("open", [hudDir], {
+        detached: true,
+        stdio: "ignore",
+      });
+      try {
+        child.unref();
+      } catch {}
+    } else {
+      const child = child_process.spawn("xdg-open", [hudDir], {
+        detached: true,
+        stdio: "ignore",
+      });
+      try {
+        child.unref();
+      } catch {}
+    }
+
+    return res.json({ success: true });
+  } catch (e) {
+    console.error("Failed to open HUD folder:", e);
+    return res.status(500).json({ error: e?.message || "failed" });
+  }
 });
 
 // -----------------------------
@@ -3478,7 +5098,6 @@ app.post("/api/cs2/spectate", express.json({ limit: "100kb" }), (req, res) => {
     res.status(500).json({ error: "Ошибка spectate команды" });
   }
 });
-
 // Инициализация начального состояния игры
 const gameState = {
   map: {
@@ -3635,65 +5254,24 @@ function calculateADR(playerData, currentRound, mapData) {
   return adr;
 }
 
-function calculateHSPercent(playerData, currentRound, mapData) {
-  // Инициализируем структуру для хранения HS по раундам
-  if (!gameState.hsHistory) {
-    gameState.hsHistory = {};
+function calculateHSPercent(
+  playerData,
+  currentRound,
+  mapData,
+  fallbackSteamId
+) {
+  try {
+    if (mapData && mapData.phase === "warmup") return 0;
+    const steamid = playerData.steamid || fallbackSteamId || "";
+    const totalKills = Number(playerData.match_stats?.kills || 0);
+    if (!totalKills) return 0;
+    const totalHSRaw = steamid ? getTotalHeadshotsForSteam(steamid) : 0;
+    const totalHS = Math.min(Number(totalHSRaw || 0), totalKills);
+    const pct = Math.round((totalHS / totalKills) * 100);
+    return Number.isFinite(pct) ? pct : 0;
+  } catch (_) {
+    return 0;
   }
-
-  // Используем steamid, если доступен, иначе используем только имя игрока
-  let playerId = playerData.steamid;
-  if (!playerId) {
-    // Создаем уникальный ID только на основе имени (без команды)
-    playerId = playerData.name;
-  }
-
-  if (!gameState.hsHistory[playerId]) {
-    gameState.hsHistory[playerId] = [];
-  }
-
-  // Получаем текущие значения за раунд
-  const currentRoundKills = playerData.state?.round_kills || 0;
-  const currentRoundHS = playerData.state?.round_killhs || 0;
-
-  // Находим или создаем запись для текущего раунда
-  let roundEntry = gameState.hsHistory[playerId].find(
-    (entry) => entry.round === currentRound
-  );
-
-  if (!roundEntry) {
-    roundEntry = {
-      round: currentRound,
-      kills: currentRoundKills,
-      hs: currentRoundHS,
-    };
-    gameState.hsHistory[playerId].push(roundEntry);
-  } else {
-    // Обновляем значения для текущего раунда
-    roundEntry.kills = currentRoundKills;
-    roundEntry.hs = currentRoundHS;
-  }
-
-  // Рассчитываем HS% на основе всех раундов
-  const totalKills = gameState.hsHistory[playerId].reduce(
-    (sum, entry) => sum + entry.kills,
-    0
-  );
-  const totalHS = gameState.hsHistory[playerId].reduce(
-    (sum, entry) => sum + entry.hs,
-    0
-  );
-
-  // HS% = (HS / Kills) * 100
-  const hsPercent =
-    totalKills > 0 ? Math.round((totalHS / totalKills) * 100) : 0;
-
-  // Отладочная информация
-  if (totalKills > 0 || totalHS > 0) {
-    //console.log(`HS% для ${playerData.name}: ${hsPercent}% (kills: ${totalKills}, hs: ${totalHS})`);
-  }
-
-  return hsPercent;
 }
 
 // Функция очистки истории урона при смене карты
@@ -3713,6 +5291,8 @@ function cleanupHSHistory(newMapName) {
       `Очистка истории HS: ${gameState.lastMapName} -> ${newMapName}`
     );
     gameState.hsHistory = {};
+    // Также очищаем покомандное накопление HS по раундам
+    if (gameState.playerHsRounds) gameState.playerHsRounds = {};
     gameState.lastMapName = newMapName;
   }
 }
@@ -3798,7 +5378,6 @@ function addKillToKillfeed(kill) {
     console.error("Ошибка добавления в killfeed:", e);
   }
 }
-
 // Обработчик HLAE Game Events
 function handleHLAEGameEvent(eventName, fields, tick) {
   try {
@@ -3908,7 +5487,6 @@ function handleHLAEGameEvent(eventName, fields, tick) {
     console.error("[HLAE] Error handling game event:", error);
   }
 }
-
 // Отдельный поток: HLAE_killfeed (для событий из HLAE/NETCON)
 function addHLAEKillToFeed(kill) {
   try {
@@ -4127,9 +5705,7 @@ function addHLAEKillToFeed(kill) {
     console.error("Ошибка добавления в HLAE_killfeed:", e);
   }
 }
-
 global.addHLAEKillToFeed = addHLAEKillToFeed;
-
 // Делаем доступной для других модулей (например, HLAE websocket)
 global.addKillToKillfeed = addKillToKillfeed;
 
@@ -4579,7 +6155,6 @@ gsiApp.post("/gsi", async (req, res) => {
         }
       );
     });
-
     // Добавляем флаг matchup в gameState
     gameState.matchupis = !!match;
 
@@ -4836,7 +6411,6 @@ gsiApp.post("/gsi", async (req, res) => {
       }
       gameState.map = data.map;
     }*/
-
     // Обновление состояния игры
     if (data.map) {
       // Очищаем историю урона при смене карты
@@ -5196,9 +6770,11 @@ gsiApp.post("/gsi", async (req, res) => {
       }
 
       // Отправляем обновленные данные клиентам
+      try {
+        hs_onNewSnapshot(gameState);
+      } catch {}
       broadcastGsiData(gameState);
     }
-
     if (data.player) {
       // Логируем SteamID игрока
       //console.log('Обработка игрока:', data.player.steamid);
@@ -5255,7 +6831,8 @@ gsiApp.post("/gsi", async (req, res) => {
       const calculatedPlayerHSPercent = calculateHSPercent(
         data.player,
         currentRound,
-        data.map
+        data.map,
+        data.player.steamid
       );
       const playerADRValueRaw =
         data.map && data.map.phase === "warmup" ? 0 : calculatedPlayerADR;
@@ -5271,7 +6848,10 @@ gsiApp.post("/gsi", async (req, res) => {
       recordRoundHeadshots(
         data.player.steamid,
         currentRound,
-        playerState.round_killhs,
+        // Предпочитаем реальное число HS в раунде; fallback на round_killhs при отсутствии
+        (typeof playerState.round_hs === "number"
+          ? playerState.round_hs
+          : playerState.round_killhs) || 0,
         data.map
       );
 
@@ -5294,10 +6874,16 @@ gsiApp.post("/gsi", async (req, res) => {
           round_hs: playerState.round_hs,
           adr: playerADRValue,
           //hs: playerHSValue,
-          kill_hs:
-            data.map?.phase === "warmup"
-              ? 0
-              : getTotalHeadshotsForSteam(data.player.steamid),
+          kill_hs: (function () {
+            if (data.map?.phase === "warmup") return 0;
+            const totalHs = getTotalHeadshotsForSteam(data.player.steamid);
+            const totalKills = Number(
+              playerState?.match_stats?.kills ||
+                data.player?.match_stats?.kills ||
+                0
+            );
+            return Math.min(totalHs, totalKills);
+          })(),
         },
         slot: data.player.observer_slot,
         spectarget: gameState.player.steam64,
@@ -5324,7 +6910,6 @@ gsiApp.post("/gsi", async (req, res) => {
       // Логируем итоговый аватар
       //console.log('Итоговый аватар для', data.player.steamid, ':', gameState.player.avatar || 'не установлен');
     }
-
     if (data.allplayers) {
       gameState.allplayers = {};
 
@@ -5351,11 +6936,22 @@ gsiApp.post("/gsi", async (req, res) => {
             gameState.hsHistory[playerId] = [];
           });
         }
+        // Также сбрасываем накопители HS по раундам
+        if (gameState.playerHsRounds) {
+          gameState.playerHsRounds = {};
+        }
       }
 
       const currentRound = data.map?.round || 0;
 
       for (const [steamId, playerData] of Object.entries(data.allplayers)) {
+        // Серверная фильтрация тренеров по маске имени (как в HUD)
+        try {
+          const nLower = String(playerData?.name || "").toLowerCase();
+          if (nLower.includes("coach|") || nLower.includes("тренер|")) {
+            continue; // пропускаем тренеров
+          }
+        } catch {}
         // Используем steamid, если доступен, иначе используем только имя игрока
         let playerId = steamId;
         if (!playerId || playerId === "undefined") {
@@ -5379,7 +6975,8 @@ gsiApp.post("/gsi", async (req, res) => {
         const calculatedHSPercent = calculateHSPercent(
           playerData,
           currentRound,
-          data.map
+          data.map,
+          steamId
         );
         const adrValueRaw =
           data.map && data.map.phase === "warmup" ? 0 : calculatedADR;
@@ -5391,7 +6988,9 @@ gsiApp.post("/gsi", async (req, res) => {
         recordRoundHeadshots(
           steamId,
           currentRound,
-          playerData.state?.round_killhs || 0,
+          (typeof playerData.state?.round_hs === "number"
+            ? playerData.state.round_hs
+            : playerData.state?.round_killhs) || 0,
           data.map
         );
 
@@ -5418,10 +7017,12 @@ gsiApp.post("/gsi", async (req, res) => {
             ...playerData.state,
             adr: adrValue,
             hs: hsValue,
-            kill_hs:
-              data.map?.phase === "warmup"
-                ? 0
-                : getTotalHeadshotsForSteam(steamId),
+            kill_hs: (function () {
+              if (data.map?.phase === "warmup") return 0;
+              const totalHs = getTotalHeadshotsForSteam(steamId);
+              const totalKills = Number(playerData?.match_stats?.kills || 0);
+              return Math.min(totalHs, totalKills);
+            })(),
           },
           cameraLink: cameraLinks[steamId] || "", // <-- добавляем ссылку камеры
           steamid: playerData.steamid || steamId, // Сохраняем оригинальный steamid
@@ -5602,7 +7203,6 @@ gsiApp.post("/gsi", async (req, res) => {
     if (data.provider) {
       gameState.provider = data.provider;
     }
-
     if (data.round) {
       // Сбрасываем MVP данные при окончании фризтайма (переход в live)
       if (
@@ -5634,6 +7234,9 @@ gsiApp.post("/gsi", async (req, res) => {
     detectAndEmitKillfeed(data);
 
     // Отправка обновленных данных клиентам
+    try {
+      hs_onNewSnapshot(gameState);
+    } catch {}
     broadcastGsiData(gameState);
     //  console.log('9. Данные отправлены клиентам');
     res.sendStatus(200);
@@ -5768,7 +7371,6 @@ io.on("connection", (socket) => {
     //console.log('Клиент отключился');
   });
 });
-
 // Проверяем, что GSI сервер запущен на правильном порту
 // Запускаем основной сервер
 
@@ -6106,7 +7708,6 @@ app.get("/api/remove-cs2-configs", (req, res) => {
       .json({ success: false, message: "Ошибка при удалении конфигов" });
   }
 });
-
 // Генерация CFG с биндами на игроков по in-game никам (name_ingame)
 // Клавиши: 1..9, 0, -, =  → по observer_slot: 0..8, 9, 10, 11
 app.post(
@@ -6348,12 +7949,12 @@ db.run(
   (err) => {
     if (err) {
       // Игнорируем ошибку, если колонка уже существует
-      console.log(
-        "Информация: колонка map_type уже существует или произошла другая ошибка:",
-        err.message
-      );
+      //console.log(
+      //"Информация: колонка map_type уже существует или произошла другая ошибка:",
+      //err.message
+      //);
     } else {
-      console.log("Колонка map_type успешно добавлена в таблицу match_maps");
+      //console.log("Колонка map_type успешно добавлена в таблицу match_maps");
     }
   }
 );
@@ -6362,31 +7963,30 @@ db.run(
 db.run("ALTER TABLE match_maps ADD COLUMN original_winner_team TEXT", (err) => {
   if (err) {
     // Игнорируем ошибку, если колонка уже существует
-    console.log(
-      "Информация: колонка original_winner_team уже существует или произошла другая ошибка:",
-      err.message
-    );
+    //console.log(
+    //"Информация: колонка original_winner_team уже существует или произошла другая ошибка:",
+    //err.message
+    //);
   } else {
-    console.log(
-      "Колонка original_winner_team успешно добавлена в таблицу match_maps"
-    );
+    //console.log(
+    //"Колонка original_winner_team успешно добавлена в таблицу match_maps"
+    //);
   }
 });
 
 db.run("ALTER TABLE match_maps ADD COLUMN original_winner_logo TEXT", (err) => {
   if (err) {
     // Игнорируем ошибку, если колонка уже существует
-    console.log(
-      "Информация: колонка original_winner_logo уже существует или произошла другая ошибка:",
-      err.message
-    );
+    //console.log(
+    //"Информация: колонка original_winner_logo уже существует или произошла другая ошибка:",
+    //err.message
+    //);
   } else {
-    console.log(
-      "Колонка original_winner_logo успешно добавлена в таблицу match_maps"
-    );
+    //console.log(
+    //"Колонка original_winner_logo успешно добавлена в таблицу match_maps"
+    //);
   }
 });
-
 // Диагностический API-эндпоинт для проверки данных о картах матча
 app.get("/api/matches/:id/maps-debug", async (req, res) => {
   try {
@@ -6874,7 +8474,6 @@ function findBombSite(mapName, position) {
   if (!fn) return null;
   return fn({ x, y, z });
 }
-
 // =========================
 // League of Legends GSI pull
 // =========================
@@ -6995,7 +8594,6 @@ setInterval(pollLeagueOfLegendsAndBroadcast, 500);
 
   console.log("HTTPS GSI эндпоинт настроен на /gsi-https");
 }
-
 // После строки с console.log('HTTPS сервер запущен на https://${serverIP}:${HTTPS_PORT}');
 // добавьте:
 
@@ -7174,11 +8772,9 @@ app.get("/steam-frame", (req, res) => {
 
   res.send(html);
 });
-
 // В начале server.js после импортов
 const packageInfo = require("../package.json");
 const currentVersion = packageInfo.version;
-
 // Функция для сравнения версий (семантическое версионирование)
 function compareVersions(v1, v2) {
   const v1parts = v1.split(".").map(Number);
@@ -7525,15 +9121,146 @@ if (!gameState.playerHsRounds) {
   gameState.playerHsRounds = {}; // { [steamid]: { [roundNumber]: number } }
 }
 
-function recordRoundHeadshots(steamid, roundNumber, roundKillHs, mapData) {
+// --- HS Tracker (module-like) ---
+if (!gameState.hsTracker) {
+  gameState.hsTracker = {
+    lastMap: null,
+    rounds: [], // [{ round: number, players: [{ steamid, hs }] }]
+  };
+}
+
+function hs_onNewSnapshot(raw) {
+  try {
+    const players = Object.entries(raw.allplayers || {}).map(([, p]) => p);
+    if (!players.length || !raw.map) return;
+
+    // Сброс при смене карты
+    const mapName = raw.map?.name || null;
+    if (
+      gameState.hsTracker.lastMap &&
+      gameState.hsTracker.lastMap !== mapName
+    ) {
+      gameState.hsTracker.rounds = [];
+    }
+    gameState.hsTracker.lastMap = mapName;
+
+    // Вычисляем "текущий" раунд для фиксации значения (как в ADR-примере)
+    let currentRoundForHS = (raw.map.round || 0) + 1;
+    if (
+      raw.round &&
+      (raw.round.phase === "over" || raw.map?.phase === "gameover")
+    ) {
+      currentRoundForHS = raw.map.round || 0;
+    }
+
+    // Сброс при фризтайме старта матча / разминке
+    if (
+      ((raw.map.round || 0) === 0 &&
+        raw.phase_countdowns?.phase === "freezetime") ||
+      raw.phase_countdowns?.phase === "warmup"
+    ) {
+      gameState.hsTracker.rounds = [];
+    }
+
+    // Получаем запись раунда
+    let roundEntry = gameState.hsTracker.rounds.find(
+      (r) => r.round === currentRoundForHS
+    );
+    if (!roundEntry) {
+      roundEntry = { round: currentRoundForHS, players: [] };
+      gameState.hsTracker.rounds.push(roundEntry);
+    }
+
+    // Обновляем per-player HS значениями за раунд (берём round_hs, fallback round_killhs)
+    roundEntry.players = players.map((p) => ({
+      steamid: p.steamid,
+      hs: Number(
+        typeof p.state?.round_hs === "number"
+          ? p.state.round_hs
+          : p.state?.round_killhs || 0
+      ),
+    }));
+
+    // Проставляем в текущем снапшоте суммарный kill_hs и HS%
+    for (const p of players) {
+      const sid = p.steamid;
+      // Берём все завершённые раунды до currentRoundForHS
+      const doneRounds = gameState.hsTracker.rounds.filter(
+        (r) => r.round < currentRoundForHS
+      );
+      const hsSum = doneRounds.reduce((sum, r) => {
+        const found = r.players.find((x) => x.steamid === sid);
+        return sum + (found ? Number(found.hs || 0) : 0);
+      }, 0);
+
+      // Итог за уже завершённые раунды + текущее промежуточное
+      const currentFound = roundEntry.players.find((x) => x.steamid === sid);
+      const totalHs = hsSum + (currentFound ? Number(currentFound.hs || 0) : 0);
+      const totalKills = Number(p.match_stats?.kills || 0);
+      const cappedHs = Math.min(totalHs, totalKills);
+
+      // Пишем прямо в snapshot, чтобы UI получил корректные цифры
+      if (!p.state) p.state = {};
+      p.state.kill_hs = cappedHs;
+      p.state.hs =
+        totalKills > 0 ? Math.floor((cappedHs / totalKills) * 100) : 0;
+    }
+  } catch {}
+}
+
+// Delta-based accumulators to avoid duplicates
+if (!gameState.playerHsTotalsDelta) {
+  gameState.playerHsTotalsDelta = {}; // { [steamid]: number }
+}
+if (!gameState.playerPrevRoundHsVal) {
+  gameState.playerPrevRoundHsVal = {}; // { [steamid]: number }
+}
+if (!gameState.playerPrevRoundNum) {
+  gameState.playerPrevRoundNum = {}; // { [steamid]: number }
+}
+function recordRoundHeadshots(steamid, roundNumber, roundHsOrKillHs, mapData) {
   if (!steamid) return;
   if (!mapData || mapData.phase === "warmup") return;
   const round = Number(roundNumber || 0);
-  const hs = Number(roundKillHs || 0);
+  // Если по какой-то причине раунд уменьшился (новая демка/матч) — сбрасываем накопитель
+  if (
+    gameState.playerHsRounds &&
+    gameState.playerHsRounds.__lastRound != null
+  ) {
+    const last = Number(gameState.playerHsRounds.__lastRound);
+    if (Number.isFinite(last) && round < last) {
+      gameState.playerHsRounds = {};
+    }
+  }
+  if (gameState.playerHsRounds) gameState.playerHsRounds.__lastRound = round;
+  const hs = Number(roundHsOrKillHs || 0);
   if (!gameState.playerHsRounds[steamid])
     gameState.playerHsRounds[steamid] = {};
-  // Overwrite current round value with latest snapshot (no accumulation here)
-  gameState.playerHsRounds[steamid][round] = hs;
+  const prev = Number(gameState.playerHsRounds[steamid][round] || 0);
+  // На смене раунда GSI может кратковременно прислать 0 для прошлого раунда.
+  // Не перезатираем уже зафиксированное значение нулём в фазах intermission/freezetime.
+  if (
+    (mapData.phase === "intermission" || mapData.phase === "freezetime") &&
+    hs === 0 &&
+    prev > 0
+  ) {
+    return;
+  }
+  // Фиксируем максимум за раунд (во время раунда значение может расти).
+  gameState.playerHsRounds[steamid][round] = Math.max(prev, hs);
+
+  // Обновляем дельта-накопитель (устраняет дубли csgsi)
+  const prevRound = Number(gameState.playerPrevRoundNum[steamid] ?? round);
+  const prevVal = Number(gameState.playerPrevRoundHsVal[steamid] ?? 0);
+  // Если начался новый раунд (round > prevRound), сбрасываем базу сравнения
+  const base = round > prevRound ? 0 : prevVal;
+  const delta = Math.max(0, hs - base);
+  if (delta > 0) {
+    gameState.playerHsTotalsDelta[steamid] =
+      Number(gameState.playerHsTotalsDelta[steamid] || 0) + delta;
+  }
+  gameState.playerPrevRoundNum[steamid] = round;
+  gameState.playerPrevRoundHsVal[steamid] = hs;
 }
 
 function getTotalHeadshotsForSteam(steamid) {
@@ -7545,7 +9272,6 @@ function getTotalHeadshotsForSteam(steamid) {
   }
   return total;
 }
-
 // Helper: find Steam executable on Windows
 function findSteamExePath() {
   try {
@@ -7607,7 +9333,6 @@ app.post("/api/launch-cs2-exec", (req, res) => {
     return res.json({ success: true });
   } catch (e) {
     return res.status(500).json({ error: "Не удалось запустить CS2" });
-    ``;
   }
 });
 
@@ -7811,7 +9536,6 @@ if (!gameState.prevInSmoke) {
 if (!gameState.lastSmokeEndTs) {
   gameState.lastSmokeEndTs = {}; // { [steamid]: number (epoch ms) }
 }
-
 function detectAndEmitKillfeed(data) {
   try {
     if (!data || !data.allplayers) return;
@@ -7834,9 +9558,9 @@ function detectAndEmitKillfeed(data) {
         gameState.hlae_status = gameState.hlae_status || {};
         gameState.hlae_status.killfeed_on = false; // сбросим флаг до новых событий HLAE
       } catch {}
-      console.log(
-        "[KILLFEED] Очищен при freezetime (killfeed + HLAE_killfeed)"
-      );
+      //console.log(
+      //"[KILLFEED] Очищен при freezetime (killfeed + HLAE_killfeed)"
+      //);
 
       // Отправляем событие очистки killfeed всем клиентам
       broadcastToAllClients("killfeed", { type: "clear" });
@@ -7844,7 +9568,7 @@ function detectAndEmitKillfeed(data) {
       broadcastToAllClients("hlae_killfeed", { type: "clear" });
     }
 
-    // Инициализируем список отложенных смертей, если его нет
+    // Инициализируем списки отложенных смертей, если его нет
     if (!gameState.pendingDeaths) {
       gameState.pendingDeaths = [];
     }
@@ -8043,11 +9767,11 @@ function detectAndEmitKillfeed(data) {
           // Отмечаем как обработанное
           gameState.processedDisconnects.add(steamId);
 
-          console.log(
-            `[DISCONNECT] Player disconnected: ${
-              player?.name || steamId
-            } (${steamId})`
-          );
+          //console.log(
+          //`[DISCONNECT] Player disconnected: ${
+          //  player?.name || steamId
+          //} (${steamId})`
+          //);
         }
       } else if (
         curHealth > 0 &&
@@ -8056,11 +9780,11 @@ function detectAndEmitKillfeed(data) {
       ) {
         // Игрок вернулся - убираем из обработанных отключений
         gameState.processedDisconnects.delete(steamId);
-        console.log(
-          `[DISCONNECT] Player reconnected: ${
-            player?.name || steamId
-          } (${steamId})`
-        );
+        //console.log(
+        //`[DISCONNECT] Player reconnected: ${
+        //  player?.name || steamId
+        //} (${steamId})`
+        //);
       }
 
       // Детекция киллера: сперва по round_kills, при отсутствии — по match_stats.kills
@@ -8073,7 +9797,6 @@ function detectAndEmitKillfeed(data) {
     }
     // Обновляем предыдущие значения in-smoke
     gameState.prevInSmoke = inSmokeNow;
-
     // 2) Пытаемся смэтчить жертву с киллером (противоположная команда, был рост round_kills)
     for (const vic of victims) {
       let matched = null;
@@ -8568,7 +10291,6 @@ function detectAndEmitKillfeed(data) {
     console.error("detectAndEmitKillfeed error:", e);
   }
 }
-
 // Функция для обработки отложенных подтверждений смертей
 function processPendingDeathConfirmations(data) {
   try {
@@ -8862,7 +10584,6 @@ app.get("/api/dota2-cfg-remove", (req, res) => {
     });
   }
 });
-
 // API endpoint для получения информации о Dota 2
 app.get("/api/dota2-info", (req, res) => {
   try {
