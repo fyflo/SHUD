@@ -1,3 +1,35 @@
+// Глобальный хелпер для кнопки копирования ссылки HUD (используется в onclick="copyHUDUrl(...)"
+if (typeof window !== "undefined" && !window.copyHUDUrl) {
+  function copyHUDUrl(hudId) {
+    try {
+      const base = window && window.location ? window.location.origin : "";
+      const url = `${base}/hud/${hudId}`;
+      const tempInput = document.createElement("input");
+      tempInput.style.position = "absolute";
+      tempInput.style.left = "-9999px";
+      tempInput.value = url;
+      document.body.appendChild(tempInput);
+      try {
+        tempInput.select();
+        tempInput.setSelectionRange(0, 99999);
+        const ok = document.execCommand("copy");
+        if (ok) {
+          alert("Ссылка скопирована в буфер обмена!");
+        } else {
+          throw new Error("execCommand copy returned false");
+        }
+      } catch (err) {
+        console.error("Ошибка при копировании:", err);
+        prompt("Пожалуйста, скопируйте ссылку вручную (Ctrl+C):", url);
+      } finally {
+        document.body.removeChild(tempInput);
+      }
+    } catch (e) {
+      console.error("copyHUDUrl failed:", e);
+    }
+  }
+  window.copyHUDUrl = copyHUDUrl;
+}
 // Глобальный буфер для GSI данных
 let gsiDataBuffer = null;
 // Глобальные переменные для информации о сервере
@@ -52,6 +84,185 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadInitialData();
   initFormHandlers();
   initFaceitImport();
+
+  // Метрики PPS/FPS в панели
+  try {
+    const ppsEl = document.getElementById("metrics-pps");
+    const fpsEl = document.getElementById("metrics-fps");
+    const radarPlayersEl = document.getElementById("metrics-radar-players");
+    const radarGrenadesEl = document.getElementById("metrics-radar-grenades");
+    const radarUpdatesEl = document.getElementById("metrics-radar-updates");
+    const cpuEl = document.getElementById("metrics-cpu");
+    const rssEl = document.getElementById("metrics-rss");
+    const heapEl = document.getElementById("metrics-heap");
+    if (ppsEl || fpsEl) {
+      const setPpsColor = (v) => {
+        const n = Number(v);
+        if (!Number.isFinite(n)) return;
+        if (n <= 30) {
+          ppsEl && (ppsEl.style.color = "#2ecc71"); // зелёный
+        } else if (n <= 50) {
+          ppsEl && (ppsEl.style.color = "#ffd600"); // жёлтый
+        } else {
+          ppsEl && (ppsEl.style.color = "#ff5252"); // красный
+        }
+      };
+      const setFpsColor = (v) => {
+        const n = Number(v);
+        if (!Number.isFinite(n)) return;
+        if (n <= 15) {
+          fpsEl && (fpsEl.style.color = "#ff5252"); // красный
+        } else if (n <= 30) {
+          fpsEl && (fpsEl.style.color = "#ffd600"); // жёлтый
+        } else {
+          fpsEl && (fpsEl.style.color = "#2ecc71"); // зелёный
+        }
+      };
+      const setCpuColor = (percent) => {
+        const n = Number(percent);
+        if (!Number.isFinite(n)) return;
+        if (n <= 40) {
+          cpuEl && (cpuEl.style.color = "#2ecc71");
+        } else if (n <= 75) {
+          cpuEl && (cpuEl.style.color = "#ffd600");
+        } else {
+          cpuEl && (cpuEl.style.color = "#ff5252");
+        }
+      };
+
+      // 1) Периодический пуллинг PPS с сервера
+      const pullPps = async () => {
+        try {
+          const r = await fetch("/api/metrics");
+          if (r.ok) {
+            const j = await r.json().catch(() => ({}));
+            if (ppsEl && typeof j.pps_current !== "undefined") {
+              ppsEl.textContent = String(j.pps_current);
+              setPpsColor(j.pps_current);
+            }
+            if (fpsEl && typeof j.fps_current !== "undefined") {
+              // Если данных не было более 2 секунд — считаем источник неактивным
+              const fresh =
+                typeof j.fps_last_at === "number" &&
+                Date.now() - j.fps_last_at <= 2000;
+              if (fresh) {
+                fpsEl.textContent = String(j.fps_current);
+                setFpsColor(j.fps_current);
+              } else {
+                fpsEl.textContent = "—";
+                fpsEl.style.color = "#ccc";
+              }
+            }
+            if (j && j.radar) {
+              const fresh =
+                typeof j.radar.lastAt === "number" &&
+                Date.now() - j.radar.lastAt <= 2000;
+              if (!fresh) {
+                if (radarPlayersEl) {
+                  radarPlayersEl.textContent = "—";
+                  radarPlayersEl.style.color = "#ccc";
+                }
+                if (radarGrenadesEl) {
+                  radarGrenadesEl.textContent = "—";
+                  radarGrenadesEl.style.color = "#ccc";
+                }
+                if (radarUpdatesEl) {
+                  radarUpdatesEl.textContent = "—";
+                  radarUpdatesEl.style.color = "#ccc";
+                }
+              } else {
+                if (radarPlayersEl) {
+                  if (typeof j.radar.players_per_sec !== "undefined") {
+                    radarPlayersEl.textContent = String(
+                      j.radar.players_per_sec
+                    );
+                  } else {
+                    radarPlayersEl.textContent = "—";
+                    radarPlayersEl.style.color = "#ccc";
+                  }
+                }
+                if (radarGrenadesEl) {
+                  if (typeof j.radar.grenades_per_sec !== "undefined") {
+                    radarGrenadesEl.textContent = String(
+                      j.radar.grenades_per_sec
+                    );
+                  } else {
+                    radarGrenadesEl.textContent = "—";
+                    radarGrenadesEl.style.color = "#ccc";
+                  }
+                }
+                if (radarUpdatesEl) {
+                  if (typeof j.radar.radar_updates_per_sec !== "undefined") {
+                    radarUpdatesEl.textContent = String(
+                      j.radar.radar_updates_per_sec
+                    );
+                  } else {
+                    radarUpdatesEl.textContent = "—";
+                    radarUpdatesEl.style.color = "#ccc";
+                  }
+                }
+              }
+            }
+            if (j && j.cpu) {
+              if (cpuEl && typeof j.cpu.percent !== "undefined") {
+                cpuEl.textContent = `${j.cpu.percent}%`;
+                setCpuColor(j.cpu.percent);
+              }
+              if (rssEl && typeof j.cpu.rssMB !== "undefined") {
+                rssEl.textContent = `${j.cpu.rssMB}MB`;
+              }
+              if (heapEl && typeof j.cpu.heapMB !== "undefined") {
+                heapEl.textContent = `${j.cpu.heapMB}MB`;
+              }
+            }
+          }
+        } catch (_) {}
+        setTimeout(pullPps, 1000);
+      };
+      pullPps();
+
+      // 2) Подписка на Socket.IO метрики, если доступно
+      if (window.io) {
+        const socket = window.__metricsSocket || io();
+        window.__metricsSocket = socket;
+        socket.on("metrics", (m) => {
+          try {
+            if (m?.type === "pps" && ppsEl) {
+              ppsEl.textContent = String(m.value);
+              setPpsColor(m.value);
+            }
+            if (m?.type === "fps" && fpsEl) {
+              fpsEl.textContent = String(m.value);
+              setFpsColor(m.value);
+            }
+            if (m?.type === "cpu") {
+              if (cpuEl && typeof m.percent !== "undefined") {
+                cpuEl.textContent = `${m.percent}%`;
+                setCpuColor(m.percent);
+              }
+              if (rssEl && typeof m.rssMB !== "undefined") {
+                rssEl.textContent = `${m.rssMB}MB`;
+              }
+              if (heapEl && typeof m.heapMB !== "undefined") {
+                heapEl.textContent = `${m.heapMB}MB`;
+              }
+            }
+            if (m?.type === "radar" && m?.name) {
+              if (m.name === "players_per_sec" && radarPlayersEl) {
+                radarPlayersEl.textContent = String(m.value);
+              }
+              if (m.name === "grenades_per_sec" && radarGrenadesEl) {
+                radarGrenadesEl.textContent = String(m.value);
+              }
+              if (m.name === "radar_updates_per_sec" && radarUpdatesEl) {
+                radarUpdatesEl.textContent = String(m.value);
+              }
+            }
+          } catch (_) {}
+        });
+      }
+    }
+  } catch (_) {}
 });
 
 // Инициализация навигации
@@ -4738,6 +4949,8 @@ mirv_colors teamid t ${tRgb.r} ${tRgb.g} ${tRgb.b} ${teamidAlpha}`;
 }
 // ... existing code ...
 // Обновляем функцию updateGameInfo для использования данных из текущего матча
+// Кэш последнего HTML скорборда, чтобы избежать лишних обновлений
+let lastTableHTML = "";
 async function updateGameInfo() {
   const scoreboardSection = document.getElementById("scoreboard-section");
   if (!scoreboardSection?.classList.contains("active") || !gsiDataBuffer) {
@@ -4823,7 +5036,12 @@ async function updateGameInfo() {
     );
     if (!statsTable) return;
 
-    if (!pauseUpdates) {
+    const paused =
+      typeof window !== "undefined" && typeof window.pauseUpdates === "boolean"
+        ? window.pauseUpdates
+        : false;
+
+    if (!paused) {
       // Сортируем игроков по командам - сначала CT, потом T
       let ctPlayers = [];
       let tPlayers = [];
