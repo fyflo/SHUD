@@ -56,15 +56,5 @@ The app supports HUDs from LHM and OpenHUD
 
 [Download in releases](https://github.com/fyflo/SHUD/releases)
 
-<img width="1281" height="492" alt="image" src="https://github.com/user-attachments/assets/83efb5e4-84e2-4bb8-b535-ca4fb3127189" />
-<img width="1238" height="561" alt="image" src="https://github.com/user-attachments/assets/9173839d-d90c-4efb-b7a6-19e4f225becd" />
-<img width="1236" height="607" alt="image" src="https://github.com/user-attachments/assets/918c229d-0935-4116-9ba8-414ff0f8706e" />
-<img width="1244" height="591" alt="image" src="https://github.com/user-attachments/assets/1d5c631d-136f-48c9-a380-c8394f23c031" />
-<img width="1092" height="178" alt="image" src="https://github.com/user-attachments/assets/31f3a9eb-72e2-406d-bf46-b3f61c11bdab" />
-<img width="1067" height="321" alt="image" src="https://github.com/user-attachments/assets/a5c57817-6cc4-4139-8717-3ae8ffcd16c3" />
-<img width="1079" height="548" alt="image" src="https://github.com/user-attachments/assets/7081ad62-3aa5-429b-bdf4-d00549010ae7" />
-<img width="1063" height="381" alt="image" src="https://github.com/user-attachments/assets/f32729ab-3292-44aa-97b3-5180d2c7a1c7" />
-<img width="881" height="321" alt="image" src="https://github.com/user-attachments/assets/a119cca5-42f7-4bfc-8b9a-df6e797132ef" />
-<img width="983" height="397" alt="image" src="https://github.com/user-attachments/assets/dcdcfee9-4211-450c-ac54-43af853fbf50" />
-<img width="402" height="280" alt="image" src="https://github.com/user-attachments/assets/2b2f1713-b4ad-4c02-a976-93a19f2c63fb" />
-<img width="1077" height="386" alt="image" src="https://github.com/user-attachments/assets/8fcce8a4-73f9-4580-a17d-fedf6213ed72" />
+<img width="1250" height="672" alt="image" src="https://github.com/user-attachments/assets/7dc674e1-f172-4a6e-beec-0120e3a6350f" />
+
