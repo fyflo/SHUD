@@ -1,6 +1,6 @@
 {
   "name": "SHUD",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "private": true,
   "main": "src/main/main.js",
   "type": "module",
@@ -26,6 +26,7 @@
     "electron-updater": "^6.6.2",
     "express": "^4.21.2",
     "extract-zip": "^2.0.1",
+    "hltv": "^3.5.0",
     "i18next": "^25.6.0",
     "ip": "^2.0.1",
     "ip-address": "^10.0.1",
@@ -40,6 +41,8 @@
     "public-ip": "^8.0.0",
     "pug": "^3.0.3",
     "puppeteer": "^24.26.1",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "react-color": "^2.19.3",
     "react-color-palette": "^7.3.1",
     "react-i18next": "^16.2.0",
@@ -54,7 +57,7 @@
   },
   "devDependencies": {
     "@electron/rebuild": "^4.0.2",
-    "electron": "^39.2.7",
+    "electron": "^40.8.0",
     "electron-builder": "^24.13.3",
     "electron-rebuild": "^3.2.9"
   },
