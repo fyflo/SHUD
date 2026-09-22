@@ -1,11 +1,11 @@
 {
   "name": "SHUD",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "private": true,
   "main": "src/main/main.js",
   "type": "module",
   "description": "SHUD app",
-  "author": "fyflo",
+  "author": "fyflo & perogello",
   "engines": {
     "node": ">=18.0.0"
   },
@@ -26,7 +26,7 @@
     "@nut-tree-fork/nut-js": "^4.2.6",
     "active-win": "^8.2.1",
     "cors": "^2.8.5",
-    "csgogsi": "^5.1.0",
+    "csgogsi": "^6.0.1",
     "csgogsi-generator": "^1.2.0",
     "electron-updater": "^6.6.2",
     "express": "^4.21.2",
@@ -51,7 +51,8 @@
     "react-i18next": "^16.2.0",
     "selfsigned": "^5.5.0",
     "sharp": "^0.34.4",
-    "socket.io": "^4.7.2"
+    "socket.io": "^4.7.2",
+    "steam-game-path": "^4.0.2"
   },
   "optionalDependencies": {
     "@josephuspaye/list-open-windows": "^0.1.2",
