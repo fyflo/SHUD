@@ -1,6 +1,6 @@
 {
   "name": "SHUD",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "private": true,
   "main": "src/main/main.js",
   "type": "module",
