@@ -69,7 +69,6 @@
 | **Dota 2** | GSI + Captain's Draft Pool |
 | **League of Legends** | Live Client Data API |
 | **Deadlock** | GSI-интеграция |
-| **Valorant** | OCR Capture Mode |
 
 Совместимо с открытыми HUD-экосистемами от **LHM** и **OpenHUD** ([cs2-react-hud](https://github.com/lexogrine/cs2-react-hud), [OpenHud-React-Hud](https://github.com/JohnTimmermann/OpenHud-React-Hud), [dota2-react-hud](https://github.com/lexogrine/dota2-react-hud), [league_of_legends_react_hud](https://github.com/lexogrine/league_of_legends_react_hud)).
 
