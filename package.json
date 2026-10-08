@@ -1,11 +1,11 @@
 {
   "name": "SHUD",
-  "version": "2.3.8",
+  "version": "2.4.0",
   "private": true,
   "main": "src/main/main.js",
   "type": "module",
   "description": "SHUD app",
-  "author": "fyflo & perogello",
+  "author": "fyflo & perogello & EASEND",
   "engines": {
     "node": ">=18.0.0"
   },
