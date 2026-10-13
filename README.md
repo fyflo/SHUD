@@ -46,8 +46,8 @@
   - Автоматическое открытие сетевых портов через Windows Firewall и UPnP в один клик.
 
 - **Матчи, турниры и быстрый импорт**:
-  - Конфигуратор серий (BO1, BO3, BO5) с интерактивным вето карт, шаговым счетчиком и быстрой сменой сторон.
-  - Мгновенный импорт составов и лобби из **FACEIT** и **FastCup**, либо добавление игроков в базу «на лету» прямо из текущей сессии.
+  - Конфигуратор серий (BO1, BO2, BO3, BO5, BO7) с интерактивным вето карт, шаговым счетчиком и быстрой сменой сторон.
+  - Мгновенный импорт составов и лобби из **FACEIT**, **FastCup** и **NEVA**, либо добавление игроков в базу «на лету» прямо из текущей сессии.
   - База данных игроков со SteamID64, аватарами, флагами стран и фильтрацией символов.
 
 - **Аналитика и экспорт статистики**:
@@ -100,8 +100,8 @@ Powered by **Tauri v2 (Rust)** alongside a bundled Node.js sidecar service, the 
   - One-click network setup: automated Windows Firewall rule configuration and router UPnP port mapping.
 
 - **Match Operations & Roster Ingestion**:
-  - BO1 / BO3 / BO5 match orchestrator with interactive map veto, stepper scoring, and dynamic half-time swapping.
-  - Native match and roster import from **FACEIT** and **FastCup**, plus automated "live-to-database" capture.
+  - BO1 / BO2 / BO3 / BO5 / BO7 match orchestrator with interactive map veto, stepper scoring, and dynamic half-time swapping.
+  - Native match and roster import from **FACEIT**, **FastCup** and **NEVA**, plus automated "live-to-database" capture.
   - Local database registry for teams, players, SteamID64 mapping, and custom assets.
 
 - **Automated Stats & Asset Generation**:
