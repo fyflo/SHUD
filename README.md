@@ -123,7 +123,6 @@ Powered by **Tauri v2 (Rust)** alongside a bundled Node.js sidecar service, the 
 | **Dota 2** | Native GSI + Captain's Draft Engine |
 | **League of Legends** | Live Client Data API |
 | **Deadlock** | GSI Integration |
-| **Valorant** | OCR Capture Mode |
 
 Fully compatible with **LHM** and **OpenHUD** frameworks ([cs2-react-hud](https://github.com/lexogrine/cs2-react-hud), [OpenHud-React-Hud](https://github.com/JohnTimmermann/OpenHud-React-Hud), [dota2-react-hud](https://github.com/lexogrine/dota2-react-hud), [league_of_legends_react_hud](https://github.com/lexogrine/league_of_legends_react_hud)).
 
